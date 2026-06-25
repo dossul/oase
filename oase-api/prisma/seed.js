@@ -76,6 +76,11 @@ const INSTITUTION_IDS = {
   dgbf: 'inst-003',
 };
 
+const INSTITUTIONS = [
+  { id: INSTITUTION_IDS.upf, code: 'UPF', nom: 'Unité de Politique Fiscale', typeCode: 'ministere', estActive: true },
+  { id: INSTITUTION_IDS.dgbf, code: 'DGBF', nom: 'Direction Générale du Budget et des Finances', typeCode: 'ministere', estActive: true },
+];
+
 const USERS = [
   { id: UUIDS.admin, nom: 'Sy', prenom: 'Admin', email: 'admin@oase.ci', passwordHash: '$2b$10$hash', role: 'admin', institutionId: INSTITUTION_IDS.upf, statutCode: 'actif' },
   { id: UUIDS.agentCI, nom: 'Kouassi', prenom: 'Marie', email: 'agent.ci@oase.ci', passwordHash: '$2b$10$hash', role: 'agent_ci', institutionId: INSTITUTION_IDS.upf, statutCode: 'actif' },
@@ -215,7 +220,26 @@ async function main() {
     }
     console.log(`✅ Rôles: ${ROLES.length}`);
 
-    // 2. Utilisateurs
+    // 2. Types d'institution
+    await connection.execute(
+      `INSERT INTO ref_types_institution (code, libelle, description, est_actif, created_at)
+       VALUES (?, ?, ?, true, NOW())
+       ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
+      ['ministere', 'Ministère', 'Ministère ou institution gouvernementale']
+    );
+
+    // 3. Institutions
+    for (const inst of INSTITUTIONS) {
+      await connection.execute(
+        `INSERT INTO institutions (id, code, nom, type_code, est_active, created_at)
+         VALUES (?, ?, ?, ?, ?, NOW())
+         ON DUPLICATE KEY UPDATE code = VALUES(code), nom = VALUES(nom), type_code = VALUES(type_code), est_active = VALUES(est_active)`,
+        [inst.id, inst.code, inst.nom, inst.typeCode, inst.estActive]
+      );
+    }
+    console.log(`✅ Institutions: ${INSTITUTIONS.length}`);
+
+    // 3. Utilisateurs
     for (const user of USERS) {
       const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 12);
       await connection.execute(
