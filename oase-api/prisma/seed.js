@@ -236,6 +236,35 @@ async function main() {
       ['actif', 'Actif', 'Utilisateur actif']
     );
 
+    // 2c. Référentiels pour les bases juridiques
+    const refModes = [
+      ['manuel', 'Manuel', 'Instruction manuelle'],
+      ['semi_automatique', 'Semi-automatique', 'Instruction semi-automatique'],
+      ['automatique', 'Automatique', 'Instruction automatique'],
+    ];
+    for (const m of refModes) {
+      await connection.execute(
+        `INSERT INTO ref_modes_instruction (code, libelle, description, est_actif, created_at)
+         VALUES (?, ?, ?, true, NOW())
+         ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
+        m
+      );
+    }
+
+    const refOrganes = [
+      ['CI', 'Cellule Impact', 'Cellule Impact'],
+      ['CDDI', 'CDDI', 'Comité de Dépôt et de Développement des Investissements'],
+      ['UPF', 'UPF', 'Unité de Politique Fiscale'],
+    ];
+    for (const o of refOrganes) {
+      await connection.execute(
+        `INSERT INTO ref_organes_gestion (code, libelle, description, est_actif, created_at)
+         VALUES (?, ?, ?, true, NOW())
+         ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
+        o
+      );
+    }
+
     // 3. Institutions
     for (const inst of INSTITUTIONS) {
       await connection.execute(
