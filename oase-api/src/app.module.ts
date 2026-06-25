@@ -17,6 +17,7 @@ import { DemandesModule } from './demandes/demandes.module';
 import { PiecesJointesModule } from './pieces-jointes/pieces-jointes.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { ReglesBlocageModule } from './regles-blocage/regles-blocage.module';
+import { DecisionsModule } from './decisions/decisions.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { ReglesBlocageModule } from './regles-blocage/regles-blocage.module';
     PiecesJointesModule,
     WorkflowModule,
     ReglesBlocageModule,
+    DecisionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
