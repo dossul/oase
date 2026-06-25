@@ -13,6 +13,7 @@ import { ConnecteursModule } from './connecteurs/connecteurs.module';
 import { CommonModule } from './common/common.module';
 import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 import { BeneficiairesModule } from './beneficiaires/beneficiaires.module';
+import { DemandesModule } from './demandes/demandes.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { BeneficiairesModule } from './beneficiaires/beneficiaires.module';
     ConnecteursModule,
     UtilisateursModule,
     BeneficiairesModule,
+    DemandesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
