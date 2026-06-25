@@ -34,7 +34,10 @@ describe('ReglesBlocageService', () => {
     mockPrisma.demande.findUnique.mockResolvedValue({
       id: 'd-1',
       beneficiaires: { nif: 'NIF001' },
-      piecesJointes: [{ rangCode: 'premier', estValide: true }, { rangCode: 'second', estValide: true }],
+      piecesJointes: [
+        { rangCode: 'premier', estValide: true },
+        { rangCode: 'second', estValide: true },
+      ],
       anomalies: [],
       quotaConsomme: BigInt(0),
       quotaTotal: BigInt(1000000),

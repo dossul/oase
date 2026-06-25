@@ -45,7 +45,17 @@ describe('WorkflowService', () => {
     jest.clearAllMocks();
   });
 
-  const user = (role: Role) => ({ id: 'u-1', email: 'test@oase.tg', nom: 'T', prenom: 'U', role, institutionId: 'i-1', institution: 'OTR', mfaActive: true } as any);
+  const user = (role: Role) =>
+    ({
+      id: 'u-1',
+      email: 'test@oase.tg',
+      nom: 'T',
+      prenom: 'U',
+      role,
+      institutionId: 'i-1',
+      institution: 'OTR',
+      mfaActive: true,
+    }) as any;
 
   it('devrait creer un template de workflow', async () => {
     mockPrisma.workflowTemplate.findUnique.mockResolvedValue(null);
@@ -65,7 +75,9 @@ describe('WorkflowService', () => {
   it('devrait demarrer une instance de workflow', async () => {
     mockPrisma.workflowTemplate.findUnique.mockResolvedValue({
       id: 'wt-1',
-      workflowTemplateEtapes: [{ id: 'e-1', nomEtape: 'Validation', ordre: 1, acteurRole: 'agent_ci', delaiCibleJours: 5 }],
+      workflowTemplateEtapes: [
+        { id: 'e-1', nomEtape: 'Validation', ordre: 1, acteurRole: 'agent_ci', delaiCibleJours: 5 },
+      ],
     });
     mockPrisma.demande.findUnique.mockResolvedValue({ id: 'd-1' });
     mockPrisma.demandeWorkflowInstance.create.mockResolvedValue({ id: 'wi-1', demandeId: 'd-1' });

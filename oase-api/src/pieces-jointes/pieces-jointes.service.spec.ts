@@ -28,19 +28,34 @@ describe('PiecesJointesService', () => {
     jest.clearAllMocks();
   });
 
-  const user = (role: Role) => ({ id: 'u-1', email: 'test@oase.tg', nom: 'T', prenom: 'U', role, institutionId: 'i-1', institution: 'OTR', mfaActive: true } as any);
+  const user = (role: Role) =>
+    ({
+      id: 'u-1',
+      email: 'test@oase.tg',
+      nom: 'T',
+      prenom: 'U',
+      role,
+      institutionId: 'i-1',
+      institution: 'OTR',
+      mfaActive: true,
+    }) as any;
 
   it('devrait rejeter un type MIME non autorise', async () => {
     mockPrisma.demande.findUnique.mockResolvedValue({ id: 'd-1' });
     await expect(
-      service.upload(user(Role.BENEFICIAIRE), 'd-1', {
-        fieldname: 'file',
-        originalname: 'test.exe',
-        encoding: '7bit',
-        mimetype: 'application/x-msdownload',
-        size: 1000,
-        buffer: Buffer.from('test'),
-      }, { rangCode: 'premier' } as any),
+      service.upload(
+        user(Role.BENEFICIAIRE),
+        'd-1',
+        {
+          fieldname: 'file',
+          originalname: 'test.exe',
+          encoding: '7bit',
+          mimetype: 'application/x-msdownload',
+          size: 1000,
+          buffer: Buffer.from('test'),
+        },
+        { rangCode: 'premier' } as any,
+      ),
     ).rejects.toThrow(BadRequestException);
   });
 
@@ -58,14 +73,19 @@ describe('PiecesJointesService', () => {
       createdAt: new Date(),
     }));
 
-    const result = await service.upload(user(Role.BENEFICIAIRE), 'd-1', {
-      fieldname: 'file',
-      originalname: 'test.pdf',
-      encoding: '7bit',
-      mimetype: 'application/pdf',
-      size: 1000,
-      buffer: Buffer.from('test'),
-    }, { rangCode: 'premier' } as any);
+    const result = await service.upload(
+      user(Role.BENEFICIAIRE),
+      'd-1',
+      {
+        fieldname: 'file',
+        originalname: 'test.pdf',
+        encoding: '7bit',
+        mimetype: 'application/pdf',
+        size: 1000,
+        buffer: Buffer.from('test'),
+      },
+      { rangCode: 'premier' } as any,
+    );
 
     expect(result.hashSha256).toHaveLength(64);
     expect(result.nomFichier).toBe('test.pdf');
