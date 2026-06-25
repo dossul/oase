@@ -12,6 +12,7 @@ import { AuditModule } from './audit/audit.module';
 import { ConnecteursModule } from './connecteurs/connecteurs.module';
 import { CommonModule } from './common/common.module';
 import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
+import { BeneficiairesModule } from './beneficiaires/beneficiaires.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
     AuthModule,
     ConnecteursModule,
     UtilisateursModule,
+    BeneficiairesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
