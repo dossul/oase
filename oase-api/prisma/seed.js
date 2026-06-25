@@ -254,6 +254,7 @@ async function main() {
     const refOrganes = [
       ['CI', 'Cellule Impact', 'Cellule Impact'],
       ['CDDI', 'CDDI', 'Comité de Dépôt et de Développement des Investissements'],
+      ['CDDI_CI', 'CDDI + CI', 'Comité de Dépôt et de Développement des Investissements et Cellule Impact'],
       ['UPF', 'UPF', 'Unité de Politique Fiscale'],
     ];
     for (const o of refOrganes) {
@@ -262,6 +263,78 @@ async function main() {
          VALUES (?, ?, ?, true, NOW())
          ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
         o
+      );
+    }
+
+    const refNatures = [
+      ['Exoneration', 'Exonération', 'Exonération fiscale'],
+      ['Reduction_impot', 'Réduction d\'impôt', 'Réduction d\'impôt'],
+      ['Taux_reduit', 'Taux réduit', 'Taux réduit d\'imposition'],
+      ['Credit_impot', 'Crédit d\'impôt', 'Crédit d\'impôt'],
+    ];
+    for (const n of refNatures) {
+      await connection.execute(
+        `INSERT INTO ref_natures_mesure (code, libelle, description, est_actif, created_at)
+         VALUES (?, ?, ?, true, NOW())
+         ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
+        n
+      );
+    }
+
+    const refPortees = [
+      ['Permanente', 'Permanente', 'Mesure permanente'],
+      ['Temporaire_Determinee', 'Temporaire déterminée', 'Durée limitée fixe'],
+      ['Temporaire_Phase', 'Temporaire phase', 'Durée liée à une phase'],
+    ];
+    for (const p of refPortees) {
+      await connection.execute(
+        `INSERT INTO ref_portees_categorie (code, libelle, description, est_actif, created_at)
+         VALUES (?, ?, ?, true, NOW())
+         ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
+        p
+      );
+    }
+
+    const refStatutsDemande = [
+      ['brouillon', 'Brouillon', 'Demande en cours de rédaction'],
+      ['soumis', 'Soumis', 'Demande soumise'],
+      ['en_instruction', 'En instruction', 'Demande en instruction'],
+      ['approuve', 'Approuvé', 'Demande approuvée'],
+    ];
+    for (const s of refStatutsDemande) {
+      await connection.execute(
+        `INSERT INTO ref_statuts_demande (code, libelle, description, est_actif, created_at)
+         VALUES (?, ?, ?, true, NOW())
+         ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
+        s
+      );
+    }
+
+    const refTypesBeneficiaire = [
+      ['entreprise_privee', 'Entreprise privée', 'Entreprise du secteur privé'],
+      ['ong', 'ONG', 'Organisation non gouvernementale'],
+      ['administration', 'Administration', 'Administration publique'],
+    ];
+    for (const t of refTypesBeneficiaire) {
+      await connection.execute(
+        `INSERT INTO ref_types_beneficiaire (code, libelle, description, est_actif, created_at)
+         VALUES (?, ?, ?, true, NOW())
+         ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
+        t
+      );
+    }
+
+    const refStatutsFiscal = [
+      ['conforme', 'Conforme', 'Situation fiscale conforme'],
+      ['dette_active', 'Dette active', 'Dette fiscale active'],
+      ['inconnu', 'Inconnu', 'Situation fiscale inconnue'],
+    ];
+    for (const s of refStatutsFiscal) {
+      await connection.execute(
+        `INSERT INTO ref_statuts_fiscal (code, libelle, description, est_actif, created_at)
+         VALUES (?, ?, ?, true, NOW())
+         ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
+        s
       );
     }
 
