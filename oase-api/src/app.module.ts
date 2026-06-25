@@ -21,6 +21,7 @@ import { DecisionsModule } from './decisions/decisions.module';
 import { AttestationsModule } from './attestations/attestations.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { BasesJuridiquesModule } from './bases-juridiques/bases-juridiques.module';
+import { QuotasModule } from './quotas/quotas.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { BasesJuridiquesModule } from './bases-juridiques/bases-juridiques.modul
     AttestationsModule,
     NotificationsModule,
     BasesJuridiquesModule,
+    QuotasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
