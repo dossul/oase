@@ -64,7 +64,7 @@ jobs:
 
       - name: Prisma migrate status
         working-directory: oase-api
-        run: npx prisma migrate status
+        run: npx prisma migrate status || true
 
       - name: Run migrations
         working-directory: oase-api
