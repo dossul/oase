@@ -12,7 +12,13 @@ const { execSync } = require('child_process');
 const path = require('path');
 
 const TEST_DB = 'oase_test';
-const DATABASE_URL = `mysql://root:@localhost:3306/${TEST_DB}`;
+const DATABASE_URL = process.env.DATABASE_URL || `mysql://root:@localhost:3306/${TEST_DB}`;
+
+const dbUrl = new URL(DATABASE_URL);
+const dbHost = dbUrl.hostname || 'localhost';
+const dbPort = dbUrl.port || 3306;
+const dbUser = dbUrl.username || 'root';
+const dbPassword = dbUrl.password || '';
 
 function run(cmd) {
   console.log(`\n$ ${cmd}`);
@@ -25,7 +31,7 @@ function run(cmd) {
 
 async function main() {
   // 1. Créer la base temporaire
-  const c = await mysql.createConnection({ host: 'localhost', user: 'root', password: '' });
+  const c = await mysql.createConnection({ host: dbHost, port: dbPort, user: dbUser, password: dbPassword });
   await c.execute(`DROP DATABASE IF EXISTS ${TEST_DB}`);
   await c.execute(`CREATE DATABASE ${TEST_DB} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
   console.log(`✅ Base ${TEST_DB} créée`);
@@ -37,7 +43,7 @@ async function main() {
   run('npx prisma db seed');
 
   // 4. Vérifier les compteurs
-  const c2 = await mysql.createConnection({ host: 'localhost', user: 'root', password: '', database: TEST_DB });
+  const c2 = await mysql.createConnection({ host: dbHost, port: dbPort, user: dbUser, password: dbPassword, database: TEST_DB });
   const checks = [
     ["SELECT COUNT(*) AS nb FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE'", [TEST_DB], 86, 'tables'],
     ['SELECT COUNT(*) AS nb FROM demandes', [], 5, 'demandes'],
