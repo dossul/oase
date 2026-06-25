@@ -34,10 +34,27 @@ describe('DecisionsService', () => {
     jest.clearAllMocks();
   });
 
-  const user = (role: Role) => ({ id: 'u-1', email: 'test@oase.tg', nom: 'T', prenom: 'U', role, institutionId: 'i-1', institution: 'OTR', mfaActive: true } as any);
+  const user = (role: Role) =>
+    ({
+      id: 'u-1',
+      email: 'test@oase.tg',
+      nom: 'T',
+      prenom: 'U',
+      role,
+      institutionId: 'i-1',
+      institution: 'OTR',
+      mfaActive: true,
+    }) as any;
 
   it('devrait approuver une demande avec PIN', async () => {
-    mockPrisma.demande.findUnique.mockResolvedValue({ id: 'd-1', statutCode: 'en_instruction', reference: 'D-1', beneficiaireId: 'b-1', beneficiaires: { id: 'b-1' }, montantFcfa: BigInt(1000) });
+    mockPrisma.demande.findUnique.mockResolvedValue({
+      id: 'd-1',
+      statutCode: 'en_instruction',
+      reference: 'D-1',
+      beneficiaireId: 'b-1',
+      beneficiaires: { id: 'b-1' },
+      montantFcfa: BigInt(1000),
+    });
     mockRegles.estBloque.mockResolvedValue({ bloque: false, blocages: [] });
     mockAuth.verifyPin.mockResolvedValue(true);
     mockPrisma.decision.create.mockResolvedValue({ id: 'dec-1', demandeId: 'd-1', typeCode: 'approbation' });
@@ -49,7 +66,14 @@ describe('DecisionsService', () => {
   });
 
   it('devrait rejeter une demande avec PIN', async () => {
-    mockPrisma.demande.findUnique.mockResolvedValue({ id: 'd-1', statutCode: 'en_instruction', reference: 'D-1', beneficiaireId: 'b-1', beneficiaires: { id: 'b-1' }, montantFcfa: BigInt(1000) });
+    mockPrisma.demande.findUnique.mockResolvedValue({
+      id: 'd-1',
+      statutCode: 'en_instruction',
+      reference: 'D-1',
+      beneficiaireId: 'b-1',
+      beneficiaires: { id: 'b-1' },
+      montantFcfa: BigInt(1000),
+    });
     mockAuth.verifyPin.mockResolvedValue(true);
     mockPrisma.decision.create.mockResolvedValue({ id: 'dec-1', demandeId: 'd-1', typeCode: 'rejet' });
     mockPrisma.acte.create.mockResolvedValue({ id: 'a-1', reference: 'ACTE-1' });

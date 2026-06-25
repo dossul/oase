@@ -22,7 +22,10 @@ const mockPrisma = {
 } as any;
 
 const mockAudit = { createEntry: jest.fn() } as any;
-const mockScope = { buildWhereClause: jest.fn().mockResolvedValue({}), isAllowed: jest.fn().mockResolvedValue(true) } as any;
+const mockScope = {
+  buildWhereClause: jest.fn().mockResolvedValue({}),
+  isAllowed: jest.fn().mockResolvedValue(true),
+} as any;
 
 describe('DemandesService', () => {
   let service: DemandesService;
@@ -42,7 +45,17 @@ describe('DemandesService', () => {
     jest.clearAllMocks();
   });
 
-  const user = (role: Role) => ({ id: 'u-1', email: 'test@oase.tg', nom: 'T', prenom: 'U', role, institutionId: 'i-1', institution: 'OTR', mfaActive: true } as any);
+  const user = (role: Role) =>
+    ({
+      id: 'u-1',
+      email: 'test@oase.tg',
+      nom: 'T',
+      prenom: 'U',
+      role,
+      institutionId: 'i-1',
+      institution: 'OTR',
+      mfaActive: true,
+    }) as any;
 
   it('devrait creer une demande en brouillon', async () => {
     mockPrisma.beneficiaire.findFirst.mockResolvedValue({ id: 'b-1', userId: 'u-1' });

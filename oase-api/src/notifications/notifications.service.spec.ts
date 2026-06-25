@@ -21,7 +21,17 @@ describe('NotificationsService', () => {
     jest.clearAllMocks();
   });
 
-  const user = (role: Role) => ({ id: 'u-1', email: 'test@oase.tg', nom: 'T', prenom: 'U', role, institutionId: 'i-1', institution: 'OTR', mfaActive: true } as any);
+  const user = (role: Role) =>
+    ({
+      id: 'u-1',
+      email: 'test@oase.tg',
+      nom: 'T',
+      prenom: 'U',
+      role,
+      institutionId: 'i-1',
+      institution: 'OTR',
+      mfaActive: true,
+    }) as any;
 
   it('devrait envoyer une notification in-app', async () => {
     mockPrisma.notification.create.mockResolvedValue({ id: 'n-1' });
