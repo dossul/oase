@@ -56,9 +56,22 @@ jobs:
         working-directory: oase-api
         run: npx prisma validate
 
+      - name: Wait for MySQL
+        run: sleep 15
+
+      - name: MySQL diagnostic
+        run: mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES; USE oase_test; SHOW TABLES;"
+
+      - name: Prisma migrate status
+        working-directory: oase-api
+        run: npx prisma migrate status
+
       - name: Run migrations
         working-directory: oase-api
         run: npx prisma migrate deploy
+
+      - name: MySQL post-migration diagnostic
+        run: mysql -h 127.0.0.1 -P 3306 -u root -proot -e "USE oase_test; SHOW TABLES;"
 
       - name: Seed test data
         working-directory: oase-api
