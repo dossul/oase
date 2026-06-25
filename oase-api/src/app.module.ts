@@ -16,6 +16,7 @@ import { BeneficiairesModule } from './beneficiaires/beneficiaires.module';
 import { DemandesModule } from './demandes/demandes.module';
 import { PiecesJointesModule } from './pieces-jointes/pieces-jointes.module';
 import { WorkflowModule } from './workflow/workflow.module';
+import { ReglesBlocageModule } from './regles-blocage/regles-blocage.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { WorkflowModule } from './workflow/workflow.module';
     DemandesModule,
     PiecesJointesModule,
     WorkflowModule,
+    ReglesBlocageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
