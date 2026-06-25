@@ -15,6 +15,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 import { BeneficiairesModule } from './beneficiaires/beneficiaires.module';
 import { DemandesModule } from './demandes/demandes.module';
 import { PiecesJointesModule } from './pieces-jointes/pieces-jointes.module';
+import { WorkflowModule } from './workflow/workflow.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { PiecesJointesModule } from './pieces-jointes/pieces-jointes.module';
     BeneficiairesModule,
     DemandesModule,
     PiecesJointesModule,
+    WorkflowModule,
   ],
   controllers: [AppController],
   providers: [AppService],
