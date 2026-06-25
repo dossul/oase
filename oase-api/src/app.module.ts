@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { AuditModule } from './audit/audit.module';
 import { ConnecteursModule } from './connecteurs/connecteurs.module';
 import { CommonModule } from './common/common.module';
+import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { CommonModule } from './common/common.module';
     AuditModule,
     AuthModule,
     ConnecteursModule,
+    UtilisateursModule,
   ],
   controllers: [AppController],
   providers: [AppService],
