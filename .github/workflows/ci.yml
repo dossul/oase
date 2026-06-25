@@ -89,9 +89,21 @@ jobs:
         working-directory: oase-api
         run: npm test
 
-      - name: E2E tests
+      - name: E2E tests (Jest)
         working-directory: oase-api
         run: npm run test:e2e
+
+      - name: Install Playwright browsers
+        working-directory: oase-api
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests (Playwright)
+        working-directory: oase-api
+        run: |
+          npm run start:dev > playwright-server.log 2>&1 &
+          sleep 15
+          npx playwright test
+          pkill -f "nest start"
 
       - name: Integrity test
         working-directory: oase-api
