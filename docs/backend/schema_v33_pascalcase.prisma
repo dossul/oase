@@ -1,0 +1,1676 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model AccordSiege {
+  id                     String                 @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  institution            String                 @db.VarChar(200)
+  typeInstitutionCode  String @map("type_institution_code")                 @db.VarChar(50)
+  texteFondateur        String? @map("texte_fondateur")                @db.Text
+  dateSignature         DateTime? @map("date_signature")              @db.Date
+  estActif              Boolean @map("est_actif")                @default(true)
+  createdAt             DateTime @map("created_at")               @default(now())
+  refTypesAccordSiege RefTypeAccordSiege @relation(fields: [typeInstitutionCode], references: [code], onUpdate: NoAction, map: "accords_siege_ibfk_1")
+  beneficiaires          Beneficiaire[]
+  conventions            Convention[]
+
+  @@index([typeInstitutionCode], map: "idx_type_institution_code")
+  @@map("accords_siege")
+}
+
+model Acte {
+  id                String         @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demandeId        String @map("demande_id")         @db.Char(36)
+  decisionId       String? @map("decision_id")        @db.Char(36)
+  typeCode         String @map("type_code")         @db.VarChar(50)
+  reference         String         @unique(map: "reference") @db.VarChar(50)
+  beneficiaireId   String @map("beneficiaire_id")         @db.Char(36)
+  montantFcfa      BigInt? @map("montant_fcfa")
+  dateEffet        DateTime @map("date_effet")       @db.Date
+  documentUrl      String @map("document_url")         @db.VarChar(500)
+  hashDocument     String @map("hash_document")         @db.Char(64)
+  qrCodeHash      String @map("qr_code_hash")         @db.Char(64)
+  qrCodeImageUrl String? @map("qr_code_image_url")        @db.VarChar(500)
+  estRevoke        Boolean @map("est_revoke")        @default(false)
+  dateRevocation   DateTime? @map("date_revocation")
+  motifRevocation  String? @map("motif_revocation")        @db.Text
+  createdAt        DateTime @map("created_at")       @default(now())
+  demandes          Demande       @relation(fields: [demandeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "actes_ibfk_1")
+  decisions         Decision?     @relation(fields: [decisionId], references: [id], onUpdate: NoAction, map: "actes_ibfk_2")
+  refTypesActe    RefTypeActe @relation(fields: [typeCode], references: [code], onUpdate: NoAction, map: "actes_ibfk_3")
+  beneficiaires     Beneficiaire  @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "actes_ibfk_4")
+
+  @@index([demandeId, typeCode], map: "idx_actes_demande_type")
+  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([decisionId], map: "idx_decision_id")
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([qrCodeHash], map: "idx_qr_code_hash")
+  @@index([reference], map: "idx_reference")
+  @@index([typeCode], map: "idx_type_code")
+  @@map("actes")
+}
+
+model AgrementBeneficiaire {
+  id              String        @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  agrementId     String @map("agrement_id")        @db.Char(36)
+  beneficiaireId String @map("beneficiaire_id")        @db.Char(36)
+  role            String?       @db.VarChar(50)
+  createdAt      DateTime @map("created_at")      @default(now())
+  agrements       Agrement     @relation(fields: [agrementId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_beneficiaires_ibfk_1")
+  beneficiaires   Beneficiaire @relation(fields: [beneficiaireId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_beneficiaires_ibfk_2")
+
+  @@unique([agrementId, beneficiaireId], map: "uk_agrement_beneficiaire")
+  @@index([agrementId], map: "idx_agrement_id")
+  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@map("agrement_beneficiaires")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Agrement {
+  id                        String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  reference                 String                   @unique(map: "reference") @db.VarChar(30)
+  beneficiaireId           String @map("beneficiaire_id")                   @db.Char(36)
+  typeAgrementCode        String @map("type_agrement_code")                   @db.VarChar(50)
+  baseJuridiqueVersionId String? @map("base_juridique_version_id")                  @db.Char(36)
+  regimeCode               String? @map("regime_code")                  @db.VarChar(50)
+  statutCode               String @map("statut_code")                   @default("active") @db.VarChar(50)
+  dateDebut                DateTime @map("date_debut")                 @db.Date
+  dateFin                  DateTime @map("date_fin")                 @db.Date
+  montantEstime            BigInt? @map("montant_estime")
+  objet                     String?                  @db.Text
+  documentUrl              String? @map("document_url")                  @db.VarChar(500)
+  hashDocument             String? @map("hash_document")                  @db.Char(64)
+  createdAt                DateTime @map("created_at")                 @default(now())
+  updatedAt                DateTime @map("updated_at")                 @default(now())
+  agrementBeneficiaires    AgrementBeneficiaire[]
+  beneficiaires             Beneficiaire            @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "agrements_ibfk_1")
+  refTypesAgrement        RefTypeAgrement       @relation(fields: [typeAgrementCode], references: [code], onUpdate: NoAction, map: "agrements_ibfk_2")
+  baseJuridiqueVersions   BaseJuridiqueVersion? @relation(fields: [baseJuridiqueVersionId], references: [id], onUpdate: NoAction, map: "agrements_ibfk_3")
+  refRegimesConvention    RefRegimeConvention?  @relation(fields: [regimeCode], references: [code], onUpdate: NoAction, map: "agrements_ibfk_4")
+  refStatutsConvention    RefStatutConvention   @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "agrements_ibfk_5")
+
+  @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
+  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([statutCode], map: "idx_statut_code")
+  @@index([typeAgrementCode], map: "idx_type_agrement_code")
+  @@index([regimeCode], map: "regime_code")
+  @@map("agrements")
+}
+
+model Anomalie {
+  id                        String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  categorieCode            String @map("categorie_code")                   @db.VarChar(50)
+  graviteCode              String @map("gravite_code")                   @db.VarChar(50)
+  description               String                   @db.Text
+  demandeId                String? @map("demande_id")                  @db.Char(36)
+  baseJuridiqueVersionId String? @map("base_juridique_version_id")                  @db.Char(36)
+  conventionId             String? @map("convention_id")                  @db.Char(36)
+  dateDetection            DateTime @map("date_detection")                 @default(now())
+  statutCode               String @map("statut_code")                   @default("nouvelle") @db.VarChar(50)
+  detecteeParCode         String @map("detectee_par_code")                   @db.VarChar(50)
+  utilisateurId            String? @map("utilisateur_id")                  @db.Char(36)
+  regleId                  String? @map("regle_id")                  @db.VarChar(100)
+  commentaire               String?                  @db.Text
+  dateResolution           DateTime? @map("date_resolution")
+  createdAt                DateTime @map("created_at")                 @default(now())
+  updatedAt                DateTime @map("updated_at")                 @default(now())
+  demandes                  Demande?                @relation(fields: [demandeId], references: [id], onUpdate: NoAction, map: "anomalies_ibfk_1")
+  baseJuridiqueVersions   BaseJuridiqueVersion? @relation(fields: [baseJuridiqueVersionId], references: [id], onUpdate: NoAction, map: "anomalies_ibfk_2")
+  conventions               Convention?             @relation(fields: [conventionId], references: [id], onUpdate: NoAction, map: "anomalies_ibfk_3")
+  utilisateurs              Utilisateur?            @relation(fields: [utilisateurId], references: [id], onUpdate: NoAction, map: "anomalies_ibfk_4")
+  refCategoriesAnomalie   RefCategorieAnomalie  @relation(fields: [categorieCode], references: [code], onUpdate: NoAction, map: "anomalies_ibfk_5")
+  refGravitesAnomalie     RefGraviteAnomalie    @relation(fields: [graviteCode], references: [code], onUpdate: NoAction, map: "anomalies_ibfk_6")
+  refStatutsAnomalie      RefStatutAnomalie     @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "anomalies_ibfk_7")
+  refSourcesDetection     RefSourceDetection    @relation(fields: [detecteeParCode], references: [code], onUpdate: NoAction, map: "anomalies_ibfk_8")
+  reglesAnomalie           RegleAnomalie?         @relation(fields: [regleId], references: [code], onUpdate: NoAction, map: "fk_anomalies_regle")
+
+  @@index([regleId], map: "fk_anomalies_regle")
+  @@index([demandeId, graviteCode], map: "idx_anomalies_demande_gravite")
+  @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
+  @@index([categorieCode], map: "idx_categorie_code")
+  @@index([conventionId], map: "idx_convention_id")
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([detecteeParCode], map: "idx_detectee_par_code")
+  @@index([graviteCode, statutCode], map: "idx_gravite_code_statut_code")
+  @@index([statutCode], map: "statut_code")
+  @@index([utilisateurId], map: "utilisateur_id")
+  @@map("anomalies")
+}
+
+model Archivage {
+  id                    String                @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  typeEntite           String @map("type_entite")                @db.VarChar(50)
+  entiteId             String @map("entite_id")                @db.Char(36)
+  demandeId            String? @map("demande_id")               @db.Char(36)
+  statutCode           String @map("statut_code")                @default("en_attente") @db.VarChar(50)
+  cheminArchive        String? @map("chemin_archive")               @db.VarChar(500)
+  hashArchive          String? @map("hash_archive")               @db.Char(64)
+  declenchePar         String @map("declenche_par")                @default("systeme") @db.VarChar(50)
+  dateArchivage        DateTime? @map("date_archivage")
+  createdAt            DateTime @map("created_at")              @default(now())
+  demandes              Demande?             @relation(fields: [demandeId], references: [id], onUpdate: NoAction, map: "archivages_ibfk_1")
+  refStatutsArchivage RefStatutArchivage @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "archivages_ibfk_2")
+
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([statutCode], map: "idx_statut_code")
+  @@index([typeEntite, entiteId], map: "idx_type_entite_entite_id")
+  @@map("archivages")
+}
+
+model AuditLog {
+  id               String        @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  horodatage       DateTime      @default(now())
+  utilisateurId   String? @map("utilisateur_id")       @db.Char(36)
+  roleAuMoment   String? @map("role_au_moment")       @db.VarChar(50)
+  institution      String?       @db.VarChar(100)
+  action           String        @db.VarChar(100)
+  entite           String        @db.VarChar(50)
+  entiteId        String @map("entite_id")        @db.Char(36)
+  demandeId       String? @map("demande_id")       @db.Char(36)
+  ancienneValeur  Json? @map("ancienne_valeur")
+  nouvelleValeur  Json? @map("nouvelle_valeur")
+  ip               String?       @db.VarChar(45)
+  userAgent       String? @map("user_agent")       @db.Text
+  hashPrecedent   String? @map("hash_precedent")       @db.Char(64)
+  empreinteSha256 String @map("empreinte_sha256")        @db.Char(64)
+  createdAt       DateTime @map("created_at")      @default(now())
+  utilisateurs     Utilisateur? @relation(fields: [utilisateurId], references: [id], onUpdate: NoAction, map: "audit_logs_ibfk_1")
+  demandes         Demande?     @relation(fields: [demandeId], references: [id], onUpdate: NoAction, map: "audit_logs_ibfk_2")
+
+  @@index([action], map: "idx_action")
+  @@index([action, entite], map: "idx_audit_logs_action_entite")
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([entite, entiteId], map: "idx_entite_entite_id")
+  @@index([horodatage], map: "idx_horodatage")
+  @@index([utilisateurId], map: "idx_utilisateur_id")
+  @@map("audit_logs")
+}
+
+model BaseJuridiqueDocument {
+  id                        String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  baseJuridiqueVersionId String @map("base_juridique_version_id")                  @db.Char(36)
+  typeDocument             String @map("type_document")                  @db.VarChar(50)
+  referenceDocument        String? @map("reference_document")                 @db.VarChar(200)
+  dateDocument             DateTime? @map("date_document")               @db.Date
+  nomFichier               String @map("nom_fichier")                  @db.VarChar(300)
+  typeMime                 String @map("type_mime")                  @default("application/pdf") @db.VarChar(100)
+  tailleOctets             BigInt? @map("taille_octets")
+  urlStockage              String @map("url_stockage")                  @db.VarChar(500)
+  hashSha256               String @map("hash_sha256")                  @db.Char(64)
+  estTexteFondateur       Boolean @map("est_texte_fondateur")                 @default(false)
+  estPublic                Boolean @map("est_public")                 @default(true)
+  uploadedById            String? @map("uploaded_by_id")                 @db.Char(36)
+  createdAt                DateTime @map("created_at")                @default(now())
+  updatedAt                DateTime @map("updated_at")                @default(now())
+  baseJuridiqueVersions   BaseJuridiqueVersion @relation(fields: [baseJuridiqueVersionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "base_juridique_documents_ibfk_1")
+  utilisateurs              Utilisateur?           @relation(fields: [uploadedById], references: [id], onUpdate: NoAction, map: "base_juridique_documents_ibfk_2")
+
+  @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
+  @@index([dateDocument], map: "idx_date_document")
+  @@index([estPublic], map: "idx_est_public")
+  @@index([estTexteFondateur], map: "idx_est_texte_fondateur")
+  @@index([typeDocument], map: "idx_type_document")
+  @@index([uploadedById], map: "uploaded_by_id")
+  @@map("base_juridique_documents")
+}
+
+model BaseJuridiqueVersion {
+  id                         String                     @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  baseJuridiqueId          String @map("base_juridique_id")                     @db.Char(36)
+  version                    Int                        @default(1)
+  libelle                    String                     @db.Text
+  impotConcerne             String @map("impot_concerne")                     @db.VarChar(100)
+  natureMesureCode         String @map("nature_mesure_code")                     @db.VarChar(50)
+  typeTexte1               String? @map("type_texte_1")                    @db.VarChar(100)
+  typeTexte2               String? @map("type_texte_2")                    @db.VarChar(50)
+  supportJuridiqueBase     String? @map("support_juridique_base")                    @db.Text
+  supportJuridiqueComplem  String? @map("support_juridique_complem")                    @db.Text
+  article                    String?                    @db.VarChar(200)
+  articleCgi2025           String? @map("article_cgi_2025")                    @db.VarChar(100)
+  porteeCategorieCode      String @map("portee_categorie_code")                     @default("Permanente") @db.VarChar(50)
+  porteeDureeMois          Int? @map("portee_duree_mois")
+  porteeDescription         String? @map("portee_description")                    @db.Text
+  organeGestionCode        String? @map("organe_gestion_code")                    @db.VarChar(50)
+  organeAttribution         String? @map("organe_attribution")                    @db.VarChar(100)
+  systemeInformation        String? @map("systeme_information")                    @db.VarChar(100)
+  modeInstructionCode      String @map("mode_instruction_code")                     @default("manuel") @db.VarChar(50)
+  objectifType              String? @map("objectif_type")                    @db.VarChar(50)
+  brancheActivite           String? @map("branche_activite")                    @db.VarChar(100)
+  typeBeneficiaireCible    String? @map("type_beneficiaire_cible")                    @db.VarChar(100)
+  estDepenseFiscale2024   Boolean @map("est_depense_fiscale_2024")                    @default(false)
+  estEvaluee2024           Boolean @map("est_evaluee_2024")                    @default(false)
+  donneesDisponibles        Boolean @map("donnees_disponibles")                    @default(false)
+  fonctionBudgetaire        String? @map("fonction_budgetaire")                    @db.VarChar(100)
+  conformiteTexteFondament String? @map("conformite_texte_fondament")                    @db.VarChar(10)
+  conformiteDirectiveUemoa String? @map("conformite_directive_uemoa")                    @db.VarChar(10)
+  odd                        String?                    @db.VarChar(20)
+  programmeDotation         String? @map("programme_dotation")                    @db.VarChar(100)
+  positionSh                String? @map("position_sh")                    @db.VarChar(50)
+  estActive                 Boolean @map("est_active")                    @default(true)
+  dateAdoption              DateTime? @map("date_adoption")                  @db.Date
+  dateAbrogation            DateTime? @map("date_abrogation")                  @db.Date
+  validFrom                 DateTime @map("valid_from")                   @default(now())
+  validTo                   DateTime? @map("valid_to")
+  createdAt                 DateTime @map("created_at")                   @default(now())
+  updatedAt                 DateTime @map("updated_at")                   @default(now())
+  versionCouranteFlag      Int? @map("version_courante_flag")                       @db.TinyInt
+  agrements                  Agrement[]
+  anomalies                  Anomalie[]
+  baseJuridiqueDocuments   BaseJuridiqueDocument[]
+  basesJuridiques           BaseJuridique           @relation(fields: [baseJuridiqueId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "base_juridique_versions_ibfk_1")
+  refNaturesMesure         RefNatureMesure         @relation(fields: [natureMesureCode], references: [code], onUpdate: NoAction, map: "base_juridique_versions_ibfk_2")
+  refPorteesCategorie      RefPorteeCategorie      @relation(fields: [porteeCategorieCode], references: [code], onUpdate: NoAction, map: "base_juridique_versions_ibfk_3")
+  refOrganesGestion        RefOrganeGestion?       @relation(fields: [organeGestionCode], references: [code], onUpdate: NoAction, map: "base_juridique_versions_ibfk_4")
+  refModesInstruction      RefModeInstruction      @relation(fields: [modeInstructionCode], references: [code], onUpdate: NoAction, map: "base_juridique_versions_ibfk_5")
+  codesAdditionnels         CodeAdditionnel[]
+  conventions                Convention[]
+  demandes                   Demande[]
+  quotas                     Quota[]
+  workflowTemplates         WorkflowTemplate[]
+
+  @@unique([baseJuridiqueId, version], map: "uk_base_juridique_version")
+  @@unique([baseJuridiqueId, versionCouranteFlag], map: "uk_une_seule_version_active")
+  @@index([baseJuridiqueId], map: "idx_base_juridique_id")
+  @@index([baseJuridiqueId, estActive, validTo], map: "idx_base_juridique_versions_active")
+  @@index([validFrom, validTo], map: "idx_code_mesure_version")
+  @@index([estActive, validTo], map: "idx_est_active_valid_to")
+  @@index([impotConcerne], map: "idx_impot_concerne")
+  @@index([modeInstructionCode], map: "idx_mode_instruction_code")
+  @@index([organeGestionCode], map: "idx_organe_gestion_code")
+  @@index([typeTexte1], map: "idx_type_texte_1")
+  @@index([natureMesureCode], map: "nature_mesure_code")
+  @@index([porteeCategorieCode], map: "portee_categorie_code")
+  @@fulltext([libelle], map: "ft_bjv_libelle")
+  @@map("base_juridique_versions")
+}
+
+model BaseJuridique {
+  id                      String                    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  codeMesure             String @map("code_mesure")                    @unique(map: "code_mesure") @db.VarChar(20)
+  codeMesureMrd         Int? @map("code_mesure_mrd")
+  createdAt              DateTime @map("created_at")                  @default(now())
+  updatedAt              DateTime @map("updated_at")                  @default(now())
+  baseJuridiqueVersions BaseJuridiqueVersion[]
+
+  @@index([codeMesure], map: "idx_code_mesure")
+  @@index([codeMesureMrd], map: "idx_code_mesure_mrd")
+  @@map("bases_juridiques")
+}
+
+model BeneficiaireHistoriqueFiscal {
+  id                 String             @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  beneficiaireId    String @map("beneficiaire_id")             @db.Char(36)
+  statutFiscalCode String @map("statut_fiscal_code")             @db.VarChar(50)
+  dateDebut         DateTime @map("date_debut")           @db.Date
+  dateFin           DateTime? @map("date_fin")          @db.Date
+  source             String?            @db.VarChar(100)
+  connecteurCode    String? @map("connecteur_code")            @db.VarChar(50)
+  createdAt         DateTime @map("created_at")           @default(now())
+  beneficiaires      Beneficiaire      @relation(fields: [beneficiaireId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "beneficiaire_historique_fiscal_ibfk_1")
+  refStatutsFiscal RefStatutFiscal @relation(fields: [statutFiscalCode], references: [code], onUpdate: NoAction, map: "beneficiaire_historique_fiscal_ibfk_2")
+  connecteurs        Connecteur?       @relation(fields: [connecteurCode], references: [codeSysteme], onUpdate: NoAction, map: "fk_histofiscal_connecteur")
+
+  @@index([connecteurCode], map: "fk_histofiscal_connecteur")
+  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([statutFiscalCode], map: "idx_statut_fiscal_code")
+  @@map("beneficiaire_historique_fiscal")
+}
+
+model Beneficiaire {
+  id                             String                           @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  raisonSociale                 String @map("raison_sociale")                           @db.VarChar(200)
+  nif                            String                           @unique(map: "nif") @db.VarChar(20)
+  rccm                           String?                          @db.VarChar(30)
+  typeBeneficiaireCode         String @map("type_beneficiaire_code")                           @db.VarChar(50)
+  statutFiscalCode             String @map("statut_fiscal_code")                           @default("inconnu") @db.VarChar(50)
+  secteur                        String?                          @db.VarChar(100)
+  region                         String?                          @db.VarChar(100)
+  emailContact                  String? @map("email_contact")                          @db.VarChar(200)
+  telephone                      String?                          @db.VarChar(20)
+  adresse                        String?                          @db.Text
+  accordSiegeId                String? @map("accord_siege_id")                          @db.Char(36)
+  userId                        String? @map("user_id")                          @unique(map: "user_id") @db.Char(36)
+  createdAt                     DateTime @map("created_at")                         @default(now())
+  updatedAt                     DateTime @map("updated_at")                         @default(now())
+  actes                          Acte[]
+  agrementBeneficiaires         AgrementBeneficiaire[]
+  agrements                      Agrement[]
+  beneficiaireHistoriqueFiscal BeneficiaireHistoriqueFiscal[]
+  accordsSiege                  AccordSiege?                   @relation(fields: [accordSiegeId], references: [id], onUpdate: NoAction, map: "beneficiaires_ibfk_1")
+  refTypesBeneficiaire         RefTypeBeneficiaire           @relation(fields: [typeBeneficiaireCode], references: [code], onUpdate: NoAction, map: "beneficiaires_ibfk_2")
+  refStatutsFiscal             RefStatutFiscal               @relation(fields: [statutFiscalCode], references: [code], onUpdate: NoAction, map: "beneficiaires_ibfk_3")
+  utilisateurs                   Utilisateur?                    @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "beneficiaires_ibfk_4")
+  conventions                    Convention[]
+  demandes                       Demande[]
+  quotas                         Quota[]
+
+  @@index([accordSiegeId], map: "idx_accord_siege_id")
+  @@index([nif], map: "idx_nif")
+  @@index([statutFiscalCode], map: "idx_statut_fiscal_code")
+  @@index([typeBeneficiaireCode], map: "idx_type_beneficiaire_code")
+  @@fulltext([raisonSociale], map: "ft_beneficiaires")
+  @@map("beneficiaires")
+}
+
+model CodeAdditionnel {
+  id                        String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  baseJuridiqueVersionId String @map("base_juridique_version_id")                  @db.Char(36)
+  code                      String                  @db.VarChar(50)
+  sourceCode               String @map("source_code")                  @db.VarChar(50)
+  estPrincipal             Boolean @map("est_principal")                 @default(true)
+  createdAt                DateTime @map("created_at")                @default(now())
+  baseJuridiqueVersions   BaseJuridiqueVersion @relation(fields: [baseJuridiqueVersionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "codes_additionnels_ibfk_1")
+  refSourcesCode          RefSourceCode        @relation(fields: [sourceCode], references: [code], onUpdate: NoAction, map: "codes_additionnels_ibfk_2")
+
+  @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
+  @@index([code, sourceCode], map: "idx_code_source")
+  @@index([sourceCode], map: "source_code")
+  @@map("codes_additionnels")
+}
+
+model ConnecteurLog {
+  id              String      @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  connecteurId   String @map("connecteur_id")      @db.Char(36)
+  direction       String      @db.VarChar(10)
+  operation       String      @db.VarChar(100)
+  payloadEntrant Json? @map("payload_entrant")
+  payloadSortant Json? @map("payload_sortant")
+  statutHttp     Int? @map("statut_http")
+  dureeMs        Int? @map("duree_ms")
+  estErreur      Boolean @map("est_erreur")     @default(false)
+  messageErreur  String? @map("message_erreur")     @db.Text
+  createdAt      DateTime @map("created_at")    @default(now())
+  connecteurs     Connecteur @relation(fields: [connecteurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "connecteur_logs_ibfk_1")
+
+  @@index([connecteurId], map: "idx_connecteur_id")
+  @@index([connecteurId, createdAt], map: "idx_connecteur_logs_connecteur_date")
+  @@index([createdAt], map: "idx_created_at")
+  @@index([estErreur], map: "idx_est_erreur")
+  @@index([operation], map: "idx_operation")
+  @@map("connecteur_logs")
+}
+
+model Connecteur {
+  id                             String                           @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  nom                            String                           @db.VarChar(50)
+  codeSysteme                   String @map("code_systeme")                           @unique(map: "code_systeme") @db.VarChar(20)
+  institutionId                 String? @map("institution_id")                          @db.Char(36)
+  statutCode                    String @map("statut_code")                           @default("inactif") @db.VarChar(50)
+  endpoint                       String                           @db.VarChar(500)
+  configAuth                    Json @map("config_auth")
+  latenceMs                     Int @map("latence_ms")                              @default(0)
+  tauxErreur                    Decimal @map("taux_erreur")                          @default(0.00) @db.Decimal(5, 2)
+  dernierSync                   DateTime? @map("dernier_sync")
+  volume24h                     Int @map("volume_24h")                              @default(0)
+  fallbackManuel                Boolean @map("fallback_manuel")                          @default(false)
+  timeoutS                      Int @map("timeout_s")                              @default(10)
+  failureThreshold              Int @map("failure_threshold")                              @default(3)
+  createdAt                     DateTime @map("created_at")                         @default(now())
+  updatedAt                     DateTime @map("updated_at")                         @default(now())
+  beneficiaireHistoriqueFiscal BeneficiaireHistoriqueFiscal[]
+  connecteurLogs                ConnecteurLog[]
+  institutions                   Institution?                    @relation(fields: [institutionId], references: [id], onUpdate: NoAction, map: "connecteurs_ibfk_1")
+  refStatutsConnecteur         RefStatutConnecteur           @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "connecteurs_ibfk_2")
+  demandeSyncExterne           DemandeSyncExterne[]
+
+  @@index([institutionId], map: "idx_institution_id")
+  @@index([statutCode], map: "idx_statut_code")
+  @@map("connecteurs")
+}
+
+model ConventionEngagement {
+  id              String      @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  conventionId   String @map("convention_id")      @db.Char(36)
+  typeEngagement String @map("type_engagement")      @db.VarChar(50)
+  periodeAnnee   Int? @map("periode_annee")
+  objectif        BigInt?
+  realise         BigInt?
+  commentaire     String?     @db.Text
+  createdAt      DateTime @map("created_at")    @default(now())
+  updatedAt      DateTime @map("updated_at")    @default(now())
+  conventions     Convention @relation(fields: [conventionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "convention_engagements_ibfk_1")
+
+  @@index([conventionId], map: "idx_convention_id")
+  @@index([typeEngagement], map: "idx_type_engagement")
+  @@map("convention_engagements")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Convention {
+  id                        String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  reference                 String                   @unique(map: "reference") @db.VarChar(30)
+  beneficiaireId           String @map("beneficiaire_id")                   @db.Char(36)
+  baseJuridiqueVersionId String? @map("base_juridique_version_id")                  @db.Char(36)
+  accordSiegeId           String? @map("accord_siege_id")                  @db.Char(36)
+  regimeCode               String @map("regime_code")                   @db.VarChar(50)
+  statutCode               String @map("statut_code")                   @default("active") @db.VarChar(50)
+  dateDebut                DateTime @map("date_debut")                 @db.Date
+  dateFin                  DateTime @map("date_fin")                 @db.Date
+  montantEstime            BigInt? @map("montant_estime")
+  emploisEngages           Int? @map("emplois_engages")
+  emploisCrees             Int? @map("emplois_crees")
+  zoneZfi                  String? @map("zone_zfi")                  @db.VarChar(50)
+  objet                     String?                  @db.Text
+  createdAt                DateTime @map("created_at")                 @default(now())
+  updatedAt                DateTime @map("updated_at")                 @default(now())
+  anomalies                 Anomalie[]
+  conventionEngagements    ConventionEngagement[]
+  beneficiaires             Beneficiaire            @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "conventions_ibfk_1")
+  baseJuridiqueVersions   BaseJuridiqueVersion? @relation(fields: [baseJuridiqueVersionId], references: [id], onUpdate: NoAction, map: "conventions_ibfk_2")
+  accordsSiege             AccordSiege?           @relation(fields: [accordSiegeId], references: [id], onUpdate: NoAction, map: "conventions_ibfk_3")
+  refRegimesConvention    RefRegimeConvention   @relation(fields: [regimeCode], references: [code], onUpdate: NoAction, map: "conventions_ibfk_4")
+  refStatutsConvention    RefStatutConvention   @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "conventions_ibfk_5")
+  demandes                  Demande[]
+  quotas                    Quota[]
+
+  @@index([accordSiegeId], map: "idx_accord_siege_id")
+  @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
+  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([dateFin], map: "idx_date_fin")
+  @@index([statutCode], map: "idx_statut_code")
+  @@index([regimeCode], map: "regime_code")
+  @@map("conventions")
+}
+
+model Decision {
+  id                 String             @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demandeId         String @map("demande_id")             @db.Char(36)
+  utilisateurId     String @map("utilisateur_id")             @db.Char(36)
+  typeCode          String @map("type_code")             @db.VarChar(50)
+  dateDecision      DateTime @map("date_decision")           @default(now())
+  motif              String?            @db.Text
+  documentUrl       String? @map("document_url")            @db.VarChar(500)
+  hashSha256        String? @map("hash_sha256")            @db.Char(64)
+  pinHash           String? @map("pin_hash")            @db.VarChar(60)
+  estSigne          Boolean @map("est_signe")            @default(false)
+  createdAt         DateTime @map("created_at")           @default(now())
+  actes              Acte[]
+  demandes           Demande           @relation(fields: [demandeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "decisions_ibfk_1")
+  utilisateurs       Utilisateur       @relation(fields: [utilisateurId], references: [id], onUpdate: NoAction, map: "decisions_ibfk_2")
+  refTypesDecision RefTypeDecision @relation(fields: [typeCode], references: [code], onUpdate: NoAction, map: "decisions_ibfk_3")
+
+  @@index([demandeId, typeCode], map: "idx_decisions_demande_type")
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([typeCode], map: "idx_type_code")
+  @@index([utilisateurId], map: "idx_utilisateur_id")
+  @@map("decisions")
+}
+
+model DemandeComplement {
+  id                String            @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demandeId        String @map("demande_id")            @db.Char(36)
+  instructeurId    String @map("instructeur_id")            @db.Char(36)
+  motif             String            @db.Text
+  piecesAttendues  String? @map("pieces_attendues")           @db.Text
+  dateDemande      DateTime @map("date_demande")          @default(now())
+  dateReponse      DateTime? @map("date_reponse")
+  statutCode       String @map("statut_code")            @default("en_attente") @db.VarChar(50)
+  createdAt        DateTime @map("created_at")          @default(now())
+  demandes          Demande          @relation(fields: [demandeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_complements_ibfk_1")
+  utilisateurs      Utilisateur      @relation(fields: [instructeurId], references: [id], onUpdate: NoAction, map: "demande_complements_ibfk_2")
+  refStatutsEtape RefStatutEtape @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "demande_complements_ibfk_3")
+
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([instructeurId], map: "idx_instructeur_id")
+  @@index([statutCode], map: "idx_statut_code")
+  @@map("demande_complements")
+}
+
+model DemandeSyncExterne {
+  id                      String      @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demandeId              String @map("demande_id")      @db.Char(36)
+  connecteurId           String @map("connecteur_id")      @db.Char(36)
+  operation               String      @db.VarChar(100)
+  statutCode             String @map("statut_code")      @default("en_attente") @db.VarChar(50)
+  payloadEnvoye          Json? @map("payload_envoye")
+  reponseRecue           Json? @map("reponse_recue")
+  nombreTentatives       Int @map("nombre_tentatives")         @default(0)
+  dateDerniereTentative DateTime? @map("date_derniere_tentative")
+  messageErreur          String? @map("message_erreur")     @db.Text
+  createdAt              DateTime @map("created_at")    @default(now())
+  updatedAt              DateTime @map("updated_at")    @default(now())
+  demandes                Demande    @relation(fields: [demandeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_sync_externe_ibfk_1")
+  connecteurs             Connecteur @relation(fields: [connecteurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_sync_externe_ibfk_2")
+
+  @@index([connecteurId], map: "idx_connecteur_id")
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([statutCode], map: "idx_statut_code")
+  @@map("demande_sync_externe")
+}
+
+model DemandeWorkflowEtape {
+  id                         String                     @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  instanceId                String @map("instance_id")                     @db.Char(36)
+  templateEtapeId          String @map("template_etape_id")                     @db.Char(36)
+  nomEtape                  String @map("nom_etape")                     @db.VarChar(200)
+  ordre                      Int
+  acteurRole                String @map("acteur_role")                     @db.VarChar(50)
+  acteurId                  String? @map("acteur_id")                    @db.Char(36)
+  statutCode                String @map("statut_code")                     @default("en_attente") @db.VarChar(50)
+  dateDebut                 DateTime? @map("date_debut")
+  dateFin                   DateTime? @map("date_fin")
+  delaiCibleJours          Int? @map("delai_cible_jours")
+  commentaire                String?                    @db.Text
+  pinSigne                  Boolean @map("pin_signe")                    @default(false)
+  decisionPrise             Boolean @map("decision_prise")                    @default(false)
+  createdAt                 DateTime @map("created_at")                   @default(now())
+  demandeWorkflowInstances DemandeWorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_workflow_etapes_ibfk_1")
+  workflowTemplateEtapes   WorkflowTemplateEtape   @relation(fields: [templateEtapeId], references: [id], onUpdate: NoAction, map: "demande_workflow_etapes_ibfk_2")
+  utilisateurs               Utilisateur?              @relation(fields: [acteurId], references: [id], onUpdate: NoAction, map: "demande_workflow_etapes_ibfk_3")
+  refStatutsEtape          RefStatutEtape          @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "demande_workflow_etapes_ibfk_4")
+
+  @@index([acteurId], map: "idx_acteur_id")
+  @@index([instanceId, ordre], map: "idx_demande_workflow_etapes_instance_ordre")
+  @@index([instanceId], map: "idx_instance_id")
+  @@index([instanceId, ordre], map: "idx_instance_id_ordre")
+  @@index([statutCode], map: "idx_statut_code")
+  @@index([templateEtapeId], map: "template_etape_id")
+  @@map("demande_workflow_etapes")
+}
+
+model DemandeWorkflowInstance {
+  id                      String                    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demandeId              String @map("demande_id")                    @unique(map: "demande_id") @db.Char(36)
+  workflowTemplateId    String @map("workflow_template_id")                    @db.Char(36)
+  statutCode             String @map("statut_code")                    @default("en_cours") @db.VarChar(50)
+  dateDebut              DateTime @map("date_debut")                  @default(now())
+  dateFin                DateTime? @map("date_fin")
+  createdAt              DateTime @map("created_at")                  @default(now())
+  updatedAt              DateTime @map("updated_at")                  @default(now())
+  demandeWorkflowEtapes DemandeWorkflowEtape[]
+  demandes                Demande                  @relation(fields: [demandeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_workflow_instances_ibfk_1")
+  workflowTemplates      WorkflowTemplate        @relation(fields: [workflowTemplateId], references: [id], onUpdate: NoAction, map: "demande_workflow_instances_ibfk_2")
+  refStatutsEtape       RefStatutEtape         @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "demande_workflow_instances_ibfk_3")
+
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([workflowTemplateId], map: "idx_workflow_template_id")
+  @@index([statutCode], map: "statut_code")
+  @@map("demande_workflow_instances")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Demande {
+  id                         String                      @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  reference                  String                      @unique(map: "reference") @db.VarChar(20)
+  baseJuridiqueVersionId  String @map("base_juridique_version_id")                      @db.Char(36)
+  beneficiaireId            String @map("beneficiaire_id")                      @db.Char(36)
+  conventionId              String? @map("convention_id")                     @db.Char(36)
+  instructeurId             String? @map("instructeur_id")                     @db.Char(36)
+  statutCode                String @map("statut_code")                      @default("brouillon") @db.VarChar(50)
+  dateDepot                 DateTime? @map("date_depot")
+  dateEcheance              DateTime? @map("date_echeance")                   @db.Date
+  dateArchivage             DateTime? @map("date_archivage")                   @db.Date
+  montantFcfa               BigInt @map("montant_fcfa")                      @default(0)
+  devise                     String                      @default("XOF") @db.VarChar(3)
+  quotaConsomme             BigInt? @map("quota_consomme")
+  quotaTotal                BigInt? @map("quota_total")
+  secteur                    String?                     @db.VarChar(100)
+  etapeActuelle             String? @map("etape_actuelle")                     @db.VarChar(200)
+  motifRejet                String? @map("motif_rejet")                     @db.Text
+  declarationHonneur        Boolean @map("declaration_honneur")                     @default(false)
+  estUrgente                Boolean @map("est_urgente")                     @default(false)
+  createdAt                 DateTime @map("created_at")                    @default(now())
+  updatedAt                 DateTime @map("updated_at")                    @default(now())
+  deletedAt                 DateTime? @map("deleted_at")
+  actes                      Acte[]
+  anomalies                  Anomalie[]
+  archivages                 Archivage[]
+  auditLogs                 AuditLog[]
+  decisions                  Decision[]
+  demandeComplements        DemandeComplement[]
+  demandeSyncExterne       DemandeSyncExterne[]
+  demandeWorkflowInstances DemandeWorkflowInstance?
+  baseJuridiqueVersions    BaseJuridiqueVersion     @relation(fields: [baseJuridiqueVersionId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_1")
+  beneficiaires              Beneficiaire               @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_2")
+  conventions                Convention?                @relation(fields: [conventionId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_3")
+  utilisateurs               Utilisateur?               @relation(fields: [instructeurId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_4")
+  refStatutsDemande        RefStatutDemande         @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "demandes_ibfk_5")
+  notificationQueue         NotificationQueue[]
+  notifications              Notification[]
+  piecesJointes             PieceJointe[]
+  quotaMouvements           QuotaMouvement[]
+
+  @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
+  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([conventionId], map: "idx_convention_id")
+  @@index([createdAt], map: "idx_created_at")
+  @@index([dateArchivage], map: "idx_date_archivage")
+  @@index([dateEcheance], map: "idx_date_echeance")
+  @@index([beneficiaireId, statutCode], map: "idx_demandes_beneficiaire_statut")
+  @@index([statutCode, createdAt], map: "idx_demandes_statut_created")
+  @@index([instructeurId], map: "idx_instructeur_id")
+  @@index([reference], map: "idx_reference")
+  @@index([statutCode], map: "idx_statut_code")
+  @@map("demandes")
+}
+
+model ImportMrd {
+  id                  String        @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  nomFichier         String @map("nom_fichier")        @db.VarChar(300)
+  typeFichier        String @map("type_fichier")        @db.VarChar(20)
+  statutCode         String @map("statut_code")        @default("pending") @db.VarChar(50)
+  lignesTotal        Int? @map("lignes_total")
+  lignesImportees    Int? @map("lignes_importees")
+  lignesRejetees     Int? @map("lignes_rejetees")
+  rapport             Json?
+  fichierErreursUrl String? @map("fichier_erreurs_url")       @db.VarChar(500)
+  lanceParId        String @map("lance_par_id")        @db.Char(36)
+  dateDebut          DateTime? @map("date_debut")
+  dateFin            DateTime? @map("date_fin")
+  createdAt          DateTime @map("created_at")      @default(now())
+  updatedAt          DateTime @map("updated_at")      @default(now())
+  utilisateurs        Utilisateur  @relation(fields: [lanceParId], references: [id], onUpdate: NoAction, map: "imports_mrd_ibfk_1")
+  refEtatsJob       RefEtatJob @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "imports_mrd_ibfk_2")
+
+  @@index([lanceParId], map: "idx_lance_par_id")
+  @@index([statutCode], map: "idx_statut_code")
+  @@map("imports_mrd")
+}
+
+model Institution {
+  id                    String                @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                  String                @unique(map: "code") @db.VarChar(20)
+  nom                   String                @db.VarChar(200)
+  typeCode             String @map("type_code")                @db.VarChar(50)
+  estActive            Boolean @map("est_active")               @default(true)
+  createdAt            DateTime @map("created_at")              @default(now())
+  connecteurs           Connecteur[]
+  refTypesInstitution RefTypeInstitution @relation(fields: [typeCode], references: [code], onUpdate: NoAction, map: "institutions_ibfk_1")
+  utilisateurs          Utilisateur[]
+
+  @@index([estActive], map: "idx_est_active")
+  @@index([typeCode], map: "idx_type_code")
+  @@map("institutions")
+}
+
+model JobQueue {
+  id                String        @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  typeJobCode     String @map("type_job_code")        @db.VarChar(50)
+  payload           Json
+  priorite          Int           @default(5)
+  statutCode       String @map("statut_code")        @default("pending") @db.VarChar(50)
+  datePrevue       DateTime? @map("date_prevue")
+  dateDebut        DateTime? @map("date_debut")
+  dateFin          DateTime? @map("date_fin")
+  resultat          Json?
+  erreur            String?       @db.Text
+  nombreTentatives Int @map("nombre_tentatives")           @default(0)
+  createdAt        DateTime @map("created_at")      @default(now())
+  updatedAt        DateTime @map("updated_at")      @default(now())
+  refTypesJob     RefTypeJob @relation(fields: [typeJobCode], references: [code], onUpdate: NoAction, map: "job_queue_ibfk_1")
+  refEtatsJob     RefEtatJob @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "job_queue_ibfk_2")
+
+  @@index([datePrevue], map: "idx_date_prevue")
+  @@index([priorite], map: "idx_priorite")
+  @@index([statutCode], map: "idx_statut_code")
+  @@index([typeJobCode], map: "idx_type_job_code")
+  @@map("job_queue")
+}
+
+model NotificationPreference {
+  id                      String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateurId          String @map("utilisateur_id")                  @db.Char(36)
+  typeNotificationCode  String @map("type_notification_code")                  @db.VarChar(50)
+  canalCode              String @map("canal_code")                  @db.VarChar(50)
+  estActive              Boolean @map("est_active")                 @default(true)
+  createdAt              DateTime @map("created_at")                @default(now())
+  updatedAt              DateTime @map("updated_at")                @default(now())
+  utilisateurs            Utilisateur            @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "notification_preferences_ibfk_1")
+  refTypesNotification  RefTypeNotification  @relation(fields: [typeNotificationCode], references: [code], onUpdate: NoAction, map: "notification_preferences_ibfk_2")
+  refCanauxNotification RefCanalNotification @relation(fields: [canalCode], references: [code], onUpdate: NoAction, map: "notification_preferences_ibfk_3")
+
+  @@unique([utilisateurId, typeNotificationCode, canalCode], map: "uk_user_type_canal")
+  @@index([canalCode], map: "canal_code")
+  @@index([utilisateurId], map: "idx_utilisateur_id")
+  @@index([typeNotificationCode], map: "type_notification_code")
+  @@map("notification_preferences")
+}
+
+model NotificationQueue {
+  id                       String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateurId           String @map("utilisateur_id")                   @db.Char(36)
+  demandeId               String? @map("demande_id")                  @db.Char(36)
+  typeNotificationCode   String @map("type_notification_code")                   @db.VarChar(50)
+  canalCode               String @map("canal_code")                   @db.VarChar(50)
+  sujet                    String                   @db.VarChar(200)
+  corps                    String                   @db.Text
+  statutCode              String @map("statut_code")                   @default("pending") @db.VarChar(50)
+  dateEnvoi               DateTime? @map("date_envoi")
+  dateLecture             DateTime? @map("date_lecture")
+  erreur                   String?                  @db.Text
+  nombreTentatives        Int @map("nombre_tentatives")                      @default(0)
+  createdAt               DateTime @map("created_at")                 @default(now())
+  updatedAt               DateTime @map("updated_at")                 @default(now())
+  utilisateurs             Utilisateur             @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "notification_queue_ibfk_1")
+  demandes                 Demande?                @relation(fields: [demandeId], references: [id], onUpdate: NoAction, map: "notification_queue_ibfk_2")
+  refTypesNotification   RefTypeNotification   @relation(fields: [typeNotificationCode], references: [code], onUpdate: NoAction, map: "notification_queue_ibfk_3")
+  refCanauxNotification  RefCanalNotification  @relation(fields: [canalCode], references: [code], onUpdate: NoAction, map: "notification_queue_ibfk_4")
+  refStatutsNotification RefStatutNotification @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "notification_queue_ibfk_5")
+  notifications            Notification[]
+
+  @@index([canalCode], map: "canal_code")
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([statutCode, createdAt], map: "idx_notification_queue_statut_date")
+  @@index([statutCode], map: "idx_statut_code")
+  @@index([typeNotificationCode], map: "idx_type_notification_code")
+  @@index([utilisateurId], map: "idx_utilisateur_id")
+  @@map("notification_queue")
+}
+
+model NotificationTemplate {
+  id                      String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                    String                  @unique(map: "code") @db.VarChar(100)
+  typeNotificationCode  String @map("type_notification_code")                  @db.VarChar(50)
+  canalCode              String @map("canal_code")                  @db.VarChar(50)
+  sujet                   String                  @db.VarChar(200)
+  corps                   String                  @db.Text
+  variables               String?                 @db.Text
+  estActive              Boolean @map("est_active")                 @default(true)
+  createdAt              DateTime @map("created_at")                @default(now())
+  updatedAt              DateTime @map("updated_at")                @default(now())
+  refTypesNotification  RefTypeNotification  @relation(fields: [typeNotificationCode], references: [code], onUpdate: NoAction, map: "notification_templates_ibfk_1")
+  refCanauxNotification RefCanalNotification @relation(fields: [canalCode], references: [code], onUpdate: NoAction, map: "notification_templates_ibfk_2")
+
+  @@index([canalCode], map: "idx_canal_code")
+  @@index([typeNotificationCode], map: "idx_type_notification_code")
+  @@map("notification_templates")
+}
+
+model Notification {
+  id                      String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateurId          String @map("utilisateur_id")                  @db.Char(36)
+  demandeId              String? @map("demande_id")                 @db.Char(36)
+  typeNotificationCode  String @map("type_notification_code")                  @db.VarChar(50)
+  canalCode              String @map("canal_code")                  @db.VarChar(50)
+  titre                   String                  @db.VarChar(200)
+  corps                   String                  @db.Text
+  estLue                 Boolean @map("est_lue")                 @default(false)
+  dateLecture            DateTime? @map("date_lecture")
+  queueId                String? @map("queue_id")                 @db.Char(36)
+  createdAt              DateTime @map("created_at")                @default(now())
+  utilisateurs            Utilisateur            @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "notifications_ibfk_1")
+  demandes                Demande?               @relation(fields: [demandeId], references: [id], onUpdate: NoAction, map: "notifications_ibfk_2")
+  refTypesNotification  RefTypeNotification  @relation(fields: [typeNotificationCode], references: [code], onUpdate: NoAction, map: "notifications_ibfk_3")
+  refCanauxNotification RefCanalNotification @relation(fields: [canalCode], references: [code], onUpdate: NoAction, map: "notifications_ibfk_4")
+  notificationQueue      NotificationQueue?     @relation(fields: [queueId], references: [id], onUpdate: NoAction, map: "notifications_ibfk_5")
+
+  @@index([canalCode], map: "canal_code")
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([typeNotificationCode], map: "idx_type_notification_code")
+  @@index([utilisateurId, estLue], map: "idx_utilisateur_id_est_lue")
+  @@index([queueId], map: "queue_id")
+  @@map("notifications")
+}
+
+model OpendataPublication {
+  id               String    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  periodeAnnee    Int @map("periode_annee")
+  periodeMois     Int? @map("periode_mois")
+  titre            String    @db.VarChar(200)
+  description      String?   @db.Text
+  fichierUrl      String? @map("fichier_url")   @db.VarChar(500)
+  donneesJson     Json? @map("donnees_json")
+  estPublie       Boolean @map("est_publie")   @default(false)
+  datePublication DateTime? @map("date_publication")
+  createdAt       DateTime @map("created_at")  @default(now())
+  updatedAt       DateTime @map("updated_at")  @default(now())
+
+  @@index([estPublie], map: "idx_est_publie")
+  @@index([periodeAnnee, periodeMois], map: "idx_periode")
+  @@map("opendata_publications")
+}
+
+model ParametreSysteme {
+  id                  String              @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                String              @unique(map: "code") @db.VarChar(100)
+  typeParametreCode String @map("type_parametre_code")              @db.VarChar(50)
+  libelle             String              @db.VarChar(200)
+  valeur              String              @db.Text
+  description         String?             @db.Text
+  estEditable        Boolean @map("est_editable")             @default(true)
+  createdAt          DateTime @map("created_at")            @default(now())
+  updatedAt          DateTime @map("updated_at")            @default(now())
+  refTypesParametre RefTypeParametre @relation(fields: [typeParametreCode], references: [code], onUpdate: NoAction, map: "parametres_systeme_ibfk_1")
+
+  @@index([typeParametreCode], map: "idx_type_parametre_code")
+  @@map("parametres_systeme")
+}
+
+model PieceJointe {
+  id                     String              @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demandeId             String @map("demande_id")              @db.Char(36)
+  nomFichier            String @map("nom_fichier")              @db.VarChar(300)
+  typeMime              String @map("type_mime")              @db.VarChar(100)
+  tailleOctets          BigInt @map("taille_octets")
+  rangCode              String @map("rang_code")              @db.VarChar(50)
+  categorie              String              @db.VarChar(100)
+  typeDocumentCode     String? @map("type_document_code")             @db.VarChar(50)
+  urlStockage           String @map("url_stockage")              @db.VarChar(500)
+  hashSha256            String @map("hash_sha256")              @db.Char(64)
+  estValide             Boolean? @map("est_valide")
+  valideParId          String? @map("valide_par_id")             @db.Char(36)
+  dateValidation        DateTime? @map("date_validation")
+  commentaireValidation String? @map("commentaire_validation")             @db.Text
+  createdAt             DateTime @map("created_at")            @default(now())
+  demandes               Demande            @relation(fields: [demandeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "pieces_jointes_ibfk_1")
+  refRangsPiece        RefRangPiece     @relation(fields: [rangCode], references: [code], onUpdate: NoAction, map: "pieces_jointes_ibfk_2")
+  refTypesDocument     RefTypeDocument? @relation(fields: [typeDocumentCode], references: [code], onUpdate: NoAction, map: "pieces_jointes_ibfk_3")
+  utilisateurs           Utilisateur?       @relation(fields: [valideParId], references: [id], onUpdate: NoAction, map: "pieces_jointes_ibfk_4")
+
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([hashSha256], map: "idx_hash_sha256")
+  @@index([demandeId, rangCode], map: "idx_pieces_jointes_demande_rang")
+  @@index([rangCode], map: "idx_rang_code")
+  @@index([typeDocumentCode], map: "idx_type_document_code")
+  @@index([valideParId], map: "valide_par_id")
+  @@map("pieces_jointes")
+}
+
+model PushToken {
+  id                       String          @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateurId           String @map("utilisateur_id")          @db.Char(36)
+  token                    String          @unique(map: "token") @db.VarChar(500)
+  canalPushCode          String @map("canal_push_code")          @db.VarChar(50)
+  deviceId                String? @map("device_id")         @db.VarChar(200)
+  modeleAppareil          String? @map("modele_appareil")         @db.VarChar(200)
+  systemeExploitation     String? @map("systeme_exploitation")         @db.VarChar(100)
+  versionApp              String? @map("version_app")         @db.VarChar(50)
+  estActif                Boolean @map("est_actif")         @default(true)
+  dateDernierUtilisation DateTime? @map("date_dernier_utilisation")
+  createdAt               DateTime @map("created_at")        @default(now())
+  updatedAt               DateTime @map("updated_at")        @default(now())
+  utilisateurs             Utilisateur    @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "push_tokens_ibfk_1")
+  refCanauxPush          RefCanalPush @relation(fields: [canalPushCode], references: [code], onUpdate: NoAction, map: "push_tokens_ibfk_2")
+
+  @@index([canalPushCode], map: "idx_canal_push_code")
+  @@index([utilisateurId], map: "idx_utilisateur_id")
+  @@map("push_tokens")
+}
+
+model QuotaMouvement {
+  id                        String                    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  quotaId                  String @map("quota_id")                    @db.Char(36)
+  demandeId                String? @map("demande_id")                   @db.Char(36)
+  typeMouvementCode       String @map("type_mouvement_code")                    @db.VarChar(50)
+  montant                   BigInt
+  soldeAvant               BigInt @map("solde_avant")
+  soldeApres               BigInt @map("solde_apres")
+  commentaire               String?                   @db.Text
+  createdAt                DateTime @map("created_at")                  @default(now())
+  quotas                    Quota                    @relation(fields: [quotaId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "quota_mouvements_ibfk_1")
+  demandes                  Demande?                 @relation(fields: [demandeId], references: [id], onUpdate: NoAction, map: "quota_mouvements_ibfk_2")
+  refTypesMouvementQuota RefTypeMouvementQuota @relation(fields: [typeMouvementCode], references: [code], onUpdate: NoAction, map: "quota_mouvements_ibfk_3")
+
+  @@index([demandeId], map: "idx_demande_id")
+  @@index([quotaId], map: "idx_quota_id")
+  @@index([quotaId, createdAt], map: "idx_quota_mouvements_quota_date")
+  @@index([typeMouvementCode], map: "idx_type_mouvement_code")
+  @@map("quota_mouvements")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Quota {
+  id                        String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  baseJuridiqueVersionId String @map("base_juridique_version_id")                  @db.Char(36)
+  beneficiaireId           String? @map("beneficiaire_id")                 @db.Char(36)
+  conventionId             String? @map("convention_id")                 @db.Char(36)
+  exerciceAnnuel           Int? @map("exercice_annuel")
+  typeQuotaCode           String @map("type_quota_code")                  @db.VarChar(50)
+  uniteCode                String @map("unite_code")                  @default("fcfa") @db.VarChar(50)
+  total                     BigInt
+  consomme                  BigInt                  @default(0)
+  alerteSeuilPct          Int @map("alerte_seuil_pct")                     @default(80)
+  alerte80Envoyee         Boolean @map("alerte_80_envoyee")                 @default(false)
+  alerte100Envoyee        Boolean @map("alerte_100_envoyee")                 @default(false)
+  createdAt                DateTime @map("created_at")                @default(now())
+  updatedAt                DateTime @map("updated_at")                @default(now())
+  quotaMouvements          QuotaMouvement[]
+  baseJuridiqueVersions   BaseJuridiqueVersion @relation(fields: [baseJuridiqueVersionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "quotas_ibfk_1")
+  beneficiaires             Beneficiaire?          @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "quotas_ibfk_2")
+  conventions               Convention?            @relation(fields: [conventionId], references: [id], onUpdate: NoAction, map: "quotas_ibfk_3")
+  refTypesQuota           RefTypeQuota         @relation(fields: [typeQuotaCode], references: [code], onUpdate: NoAction, map: "quotas_ibfk_4")
+  refUnitesQuota          RefUniteQuota        @relation(fields: [uniteCode], references: [code], onUpdate: NoAction, map: "quotas_ibfk_5")
+
+  @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
+  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([conventionId], map: "idx_convention_id")
+  @@index([exerciceAnnuel], map: "idx_exercice_annuel")
+  @@index([typeQuotaCode], map: "idx_type_quota_code")
+  @@index([uniteCode], map: "unite_code")
+  @@map("quotas")
+}
+
+model RefCanalNotification {
+  code                     String                     @id @db.VarChar(50)
+  libelle                  String                     @db.VarChar(200)
+  description              String?                    @db.Text
+  ordre                    Int                        @default(0)
+  couleur                  String?                    @db.VarChar(7)
+  estActif                Boolean @map("est_actif")                    @default(true)
+  createdAt               DateTime @map("created_at")                   @default(now())
+  notificationPreferences NotificationPreference[]
+  notificationQueue       NotificationQueue[]
+  notificationTemplates   NotificationTemplate[]
+  notifications            Notification[]
+  @@map("ref_canaux_notification")
+}
+
+model RefCanalPush {
+  code        String        @id @db.VarChar(50)
+  libelle     String        @db.VarChar(200)
+  description String?       @db.Text
+  ordre       Int           @default(0)
+  couleur     String?       @db.VarChar(7)
+  estActif   Boolean @map("est_actif")       @default(true)
+  createdAt  DateTime @map("created_at")      @default(now())
+  pushTokens PushToken[]
+  @@map("ref_canaux_push")
+}
+
+model RefCategorieAnomalie {
+  code            String            @id @db.VarChar(50)
+  libelle         String            @db.VarChar(200)
+  description     String?           @db.Text
+  ordre           Int               @default(0)
+  couleur         String?           @db.VarChar(7)
+  estActif       Boolean @map("est_actif")           @default(true)
+  createdAt      DateTime @map("created_at")          @default(now())
+  anomalies       Anomalie[]
+  reglesAnomalie RegleAnomalie[]
+  @@map("ref_categories_anomalie")
+}
+
+model RefEtatJob {
+  code                 String                 @id @db.VarChar(50)
+  libelle              String                 @db.VarChar(200)
+  description          String?                @db.Text
+  ordre                Int                    @default(0)
+  couleur              String?                @db.VarChar(7)
+  estActif            Boolean @map("est_actif")                @default(true)
+  createdAt           DateTime @map("created_at")               @default(now())
+  importsMrd          ImportMrd[]
+  jobQueue            JobQueue[]
+  reportingExecutions ReportingExecution[]
+  @@map("ref_etats_job")
+}
+
+model RefGraviteAnomalie {
+  code            String            @id @db.VarChar(50)
+  libelle         String            @db.VarChar(200)
+  description     String?           @db.Text
+  ordre           Int               @default(0)
+  couleur         String?           @db.VarChar(7)
+  estActif       Boolean @map("est_actif")           @default(true)
+  createdAt      DateTime @map("created_at")          @default(now())
+  anomalies       Anomalie[]
+  reglesAnomalie RegleAnomalie[]
+  @@map("ref_gravites_anomalie")
+}
+
+model RefModeInstruction {
+  code                    String                    @id @db.VarChar(50)
+  libelle                 String                    @db.VarChar(200)
+  description             String?                   @db.Text
+  ordre                   Int                       @default(0)
+  couleur                 String?                   @db.VarChar(7)
+  estActif               Boolean @map("est_actif")                   @default(true)
+  createdAt              DateTime @map("created_at")                  @default(now())
+  baseJuridiqueVersions BaseJuridiqueVersion[]
+  @@map("ref_modes_instruction")
+}
+
+model RefNatureMesure {
+  code                    String                    @id @db.VarChar(50)
+  libelle                 String                    @db.VarChar(200)
+  description             String?                   @db.Text
+  ordre                   Int                       @default(0)
+  couleur                 String?                   @db.VarChar(7)
+  estActif               Boolean @map("est_actif")                   @default(true)
+  createdAt              DateTime @map("created_at")                  @default(now())
+  baseJuridiqueVersions BaseJuridiqueVersion[]
+  reportingAggregats     ReportingAggregat[]
+  @@map("ref_natures_mesure")
+}
+
+model RefOrganeGestion {
+  code                    String                    @id @db.VarChar(50)
+  libelle                 String                    @db.VarChar(200)
+  description             String?                   @db.Text
+  ordre                   Int                       @default(0)
+  couleur                 String?                   @db.VarChar(7)
+  estActif               Boolean @map("est_actif")                   @default(true)
+  createdAt              DateTime @map("created_at")                  @default(now())
+  baseJuridiqueVersions BaseJuridiqueVersion[]
+  workflowTemplates      WorkflowTemplate[]
+  @@map("ref_organes_gestion")
+}
+
+model RefPorteeCategorie {
+  code                    String                    @id @db.VarChar(50)
+  libelle                 String                    @db.VarChar(200)
+  description             String?                   @db.Text
+  ordre                   Int                       @default(0)
+  couleur                 String?                   @db.VarChar(7)
+  estActif               Boolean @map("est_actif")                   @default(true)
+  createdAt              DateTime @map("created_at")                  @default(now())
+  baseJuridiqueVersions BaseJuridiqueVersion[]
+  @@map("ref_portees_categorie")
+}
+
+model RefRangPiece {
+  code           String           @id @db.VarChar(50)
+  libelle        String           @db.VarChar(200)
+  description    String?          @db.Text
+  ordre          Int              @default(0)
+  couleur        String?          @db.VarChar(7)
+  estActif      Boolean @map("est_actif")          @default(true)
+  createdAt     DateTime @map("created_at")         @default(now())
+  piecesJointes PieceJointe[]
+  @@map("ref_rangs_piece")
+}
+
+model RefRegimeConvention {
+  code                String                @id @db.VarChar(50)
+  libelle             String                @db.VarChar(200)
+  description         String?               @db.Text
+  ordre               Int                   @default(0)
+  couleur             String?               @db.VarChar(7)
+  estActif           Boolean @map("est_actif")               @default(true)
+  createdAt          DateTime @map("created_at")              @default(now())
+  agrements           Agrement[]
+  conventions         Convention[]
+  reportingAggregats ReportingAggregat[]
+  @@map("ref_regimes_convention")
+}
+
+model RefRole {
+  code              String              @id @db.VarChar(50)
+  libelle           String              @db.VarChar(200)
+  description       String?             @db.Text
+  ordre             Int                 @default(0)
+  couleur           String?             @db.VarChar(7)
+  estActif         Boolean @map("est_actif")             @default(true)
+  createdAt        DateTime @map("created_at")            @default(now())
+  rolesPermissions RolePermission[]
+  utilisateurs      Utilisateur[]
+  @@map("ref_roles")
+}
+
+model RefSourceCode {
+  code               String               @id @db.VarChar(50)
+  libelle            String               @db.VarChar(200)
+  description        String?              @db.Text
+  ordre              Int                  @default(0)
+  couleur            String?              @db.VarChar(7)
+  estActif          Boolean @map("est_actif")              @default(true)
+  createdAt         DateTime @map("created_at")             @default(now())
+  codesAdditionnels CodeAdditionnel[]
+  @@map("ref_sources_code")
+}
+
+model RefSourceDetection {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  estActif   Boolean @map("est_actif")     @default(true)
+  createdAt  DateTime @map("created_at")    @default(now())
+  anomalies   Anomalie[]
+  @@map("ref_sources_detection")
+}
+
+model RefStatutAnomalie {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  estActif   Boolean @map("est_actif")     @default(true)
+  createdAt  DateTime @map("created_at")    @default(now())
+  anomalies   Anomalie[]
+  @@map("ref_statuts_anomalie")
+}
+
+model RefStatutArchivage {
+  code        String       @id @db.VarChar(50)
+  libelle     String       @db.VarChar(200)
+  description String?      @db.Text
+  ordre       Int          @default(0)
+  couleur     String?      @db.VarChar(7)
+  estActif   Boolean @map("est_actif")      @default(true)
+  createdAt  DateTime @map("created_at")     @default(now())
+  archivages  Archivage[]
+  @@map("ref_statuts_archivage")
+}
+
+model RefStatutConnecteur {
+  code        String        @id @db.VarChar(50)
+  libelle     String        @db.VarChar(200)
+  description String?       @db.Text
+  ordre       Int           @default(0)
+  couleur     String?       @db.VarChar(7)
+  estActif   Boolean @map("est_actif")       @default(true)
+  createdAt  DateTime @map("created_at")      @default(now())
+  connecteurs Connecteur[]
+  @@map("ref_statuts_connecteur")
+}
+
+model RefStatutConvention {
+  code        String        @id @db.VarChar(50)
+  libelle     String        @db.VarChar(200)
+  description String?       @db.Text
+  ordre       Int           @default(0)
+  couleur     String?       @db.VarChar(7)
+  estActif   Boolean @map("est_actif")       @default(true)
+  createdAt  DateTime @map("created_at")      @default(now())
+  agrements   Agrement[]
+  conventions Convention[]
+  @@map("ref_statuts_convention")
+}
+
+model RefStatutDemande {
+  code        String     @id @db.VarChar(50)
+  libelle     String     @db.VarChar(200)
+  description String?    @db.Text
+  ordre       Int        @default(0)
+  couleur     String?    @db.VarChar(7)
+  isFinal    Boolean @map("is_final")    @default(false)
+  estActif   Boolean @map("est_actif")    @default(true)
+  createdAt  DateTime @map("created_at")   @default(now())
+  demandes    Demande[]
+  @@map("ref_statuts_demande")
+}
+
+model RefStatutEtape {
+  code                       String                       @id @db.VarChar(50)
+  libelle                    String                       @db.VarChar(200)
+  description                String?                      @db.Text
+  ordre                      Int                          @default(0)
+  couleur                    String?                      @db.VarChar(7)
+  estActif                  Boolean @map("est_actif")                      @default(true)
+  createdAt                 DateTime @map("created_at")                     @default(now())
+  demandeComplements        DemandeComplement[]
+  demandeWorkflowEtapes    DemandeWorkflowEtape[]
+  demandeWorkflowInstances DemandeWorkflowInstance[]
+  @@map("ref_statuts_etape")
+}
+
+model RefStatutFiscal {
+  code                           String                           @id @db.VarChar(50)
+  libelle                        String                           @db.VarChar(200)
+  description                    String?                          @db.Text
+  ordre                          Int                              @default(0)
+  couleur                        String?                          @db.VarChar(7)
+  estActif                      Boolean @map("est_actif")                          @default(true)
+  createdAt                     DateTime @map("created_at")                         @default(now())
+  beneficiaireHistoriqueFiscal BeneficiaireHistoriqueFiscal[]
+  beneficiaires                  Beneficiaire[]
+  @@map("ref_statuts_fiscal")
+}
+
+model RefStatutNotification {
+  code               String               @id @db.VarChar(50)
+  libelle            String               @db.VarChar(200)
+  description        String?              @db.Text
+  ordre              Int                  @default(0)
+  couleur            String?              @db.VarChar(7)
+  estActif          Boolean @map("est_actif")              @default(true)
+  createdAt         DateTime @map("created_at")             @default(now())
+  notificationQueue NotificationQueue[]
+  @@map("ref_statuts_notification")
+}
+
+model RefStatutUtilisateur {
+  code         String         @id @db.VarChar(50)
+  libelle      String         @db.VarChar(200)
+  description  String?        @db.Text
+  ordre        Int            @default(0)
+  couleur      String?        @db.VarChar(7)
+  estActif    Boolean @map("est_actif")        @default(true)
+  createdAt   DateTime @map("created_at")       @default(now())
+  utilisateurs Utilisateur[]
+  @@map("ref_statuts_utilisateur")
+}
+
+model RefTypeAccordSiege {
+  code          String          @id @db.VarChar(50)
+  libelle       String          @db.VarChar(200)
+  description   String?         @db.Text
+  ordre         Int             @default(0)
+  couleur       String?         @db.VarChar(7)
+  estActif     Boolean @map("est_actif")         @default(true)
+  createdAt    DateTime @map("created_at")        @default(now())
+  accordsSiege AccordSiege[]
+  @@map("ref_types_accord_siege")
+}
+
+model RefTypeActe {
+  code        String   @id @db.VarChar(50)
+  libelle     String   @db.VarChar(200)
+  description String?  @db.Text
+  ordre       Int      @default(0)
+  couleur     String?  @db.VarChar(7)
+  estActif   Boolean @map("est_actif")  @default(true)
+  createdAt  DateTime @map("created_at") @default(now())
+  actes       Acte[]
+  @@map("ref_types_acte")
+}
+
+model RefTypeAgrement {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  estActif   Boolean @map("est_actif")     @default(true)
+  createdAt  DateTime @map("created_at")    @default(now())
+  agrements   Agrement[]
+  @@map("ref_types_agrement")
+}
+
+model RefTypeBeneficiaire {
+  code                String                @id @db.VarChar(50)
+  libelle             String                @db.VarChar(200)
+  description         String?               @db.Text
+  ordre               Int                   @default(0)
+  couleur             String?               @db.VarChar(7)
+  estActif           Boolean @map("est_actif")               @default(true)
+  createdAt          DateTime @map("created_at")              @default(now())
+  beneficiaires       Beneficiaire[]
+  reportingAggregats ReportingAggregat[]
+  @@map("ref_types_beneficiaire")
+}
+
+model RefTypeDecision {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  estActif   Boolean @map("est_actif")     @default(true)
+  createdAt  DateTime @map("created_at")    @default(now())
+  decisions   Decision[]
+  @@map("ref_types_decision")
+}
+
+model RefTypeDocument {
+  code           String           @id @db.VarChar(50)
+  libelle        String           @db.VarChar(200)
+  description    String?          @db.Text
+  ordre          Int              @default(0)
+  couleur        String?          @db.VarChar(7)
+  estActif      Boolean @map("est_actif")          @default(true)
+  createdAt     DateTime @map("created_at")         @default(now())
+  piecesJointes PieceJointe[]
+  @@map("ref_types_document")
+}
+
+model RefTypeInstitution {
+  code                     String                     @id @db.VarChar(50)
+  libelle                  String                     @db.VarChar(200)
+  description              String?                    @db.Text
+  ordre                    Int                        @default(0)
+  couleur                  String?                    @db.VarChar(7)
+  estActif                Boolean @map("est_actif")                    @default(true)
+  createdAt               DateTime @map("created_at")                   @default(now())
+  institutions             Institution[]
+  workflowTemplateEtapes WorkflowTemplateEtape[]
+  @@map("ref_types_institution")
+}
+
+model RefTypeJob {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  estActif   Boolean @map("est_actif")     @default(true)
+  createdAt  DateTime @map("created_at")    @default(now())
+  jobQueue   JobQueue[]
+  @@map("ref_types_job")
+}
+
+model RefTypeMouvementQuota {
+  code             String             @id @db.VarChar(50)
+  libelle          String             @db.VarChar(200)
+  description      String?            @db.Text
+  ordre            Int                @default(0)
+  couleur          String?            @db.VarChar(7)
+  estActif        Boolean @map("est_actif")            @default(true)
+  createdAt       DateTime @map("created_at")           @default(now())
+  quotaMouvements QuotaMouvement[]
+  @@map("ref_types_mouvement_quota")
+}
+
+model RefTypeNotification {
+  code                     String                     @id @db.VarChar(50)
+  libelle                  String                     @db.VarChar(200)
+  description              String?                    @db.Text
+  ordre                    Int                        @default(0)
+  couleur                  String?                    @db.VarChar(7)
+  estActif                Boolean @map("est_actif")                    @default(true)
+  createdAt               DateTime @map("created_at")                   @default(now())
+  notificationPreferences NotificationPreference[]
+  notificationQueue       NotificationQueue[]
+  notificationTemplates   NotificationTemplate[]
+  notifications            Notification[]
+  @@map("ref_types_notification")
+}
+
+model RefTypeParametre {
+  code               String               @id @db.VarChar(50)
+  libelle            String               @db.VarChar(200)
+  description        String?              @db.Text
+  ordre              Int                  @default(0)
+  couleur            String?              @db.VarChar(7)
+  estActif          Boolean @map("est_actif")              @default(true)
+  createdAt         DateTime @map("created_at")             @default(now())
+  parametresSysteme ParametreSysteme[]
+  @@map("ref_types_parametre")
+}
+
+model RefTypeQuota {
+  code        String   @id @db.VarChar(50)
+  libelle     String   @db.VarChar(200)
+  description String?  @db.Text
+  ordre       Int      @default(0)
+  couleur     String?  @db.VarChar(7)
+  estActif   Boolean @map("est_actif")  @default(true)
+  createdAt  DateTime @map("created_at") @default(now())
+  quotas      Quota[]
+  @@map("ref_types_quota")
+}
+
+model RefTypeRapport {
+  code                 String                 @id @db.VarChar(50)
+  libelle              String                 @db.VarChar(200)
+  description          String?                @db.Text
+  ordre                Int                    @default(0)
+  couleur              String?                @db.VarChar(7)
+  estActif            Boolean @map("est_actif")                @default(true)
+  createdAt           DateTime @map("created_at")               @default(now())
+  reportingExecutions ReportingExecution[]
+  @@map("ref_types_rapport")
+}
+
+model RefUniteQuota {
+  code        String   @id @db.VarChar(50)
+  libelle     String   @db.VarChar(200)
+  description String?  @db.Text
+  ordre       Int      @default(0)
+  couleur     String?  @db.VarChar(7)
+  estActif   Boolean @map("est_actif")  @default(true)
+  createdAt  DateTime @map("created_at") @default(now())
+  quotas      Quota[]
+  @@map("ref_unites_quota")
+}
+
+model RefreshToken {
+  id             String       @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateurId String @map("utilisateur_id")       @db.Char(36)
+  tokenHash     String @map("token_hash")       @unique(map: "token_hash") @db.Char(64)
+  expiresAt     DateTime @map("expires_at")
+  estRevoque    Boolean @map("est_revoque")      @default(false)
+  ip             String?      @db.VarChar(45)
+  userAgent     String? @map("user_agent")      @db.Text
+  createdAt     DateTime @map("created_at")     @default(now())
+  utilisateurs   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "refresh_tokens_ibfk_1")
+
+  @@index([expiresAt], map: "idx_expires_at")
+  @@index([utilisateurId], map: "idx_utilisateur_id")
+  @@map("refresh_tokens")
+}
+
+model RegleAnomalie {
+  id                      String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                    String                  @unique(map: "code") @db.VarChar(100)
+  nom                     String                  @db.VarChar(200)
+  categorieCode          String @map("categorie_code")                  @db.VarChar(50)
+  graviteCode            String @map("gravite_code")                  @db.VarChar(50)
+  description             String                  @db.Text
+  expression              String                  @db.Text
+  estActive              Boolean @map("est_active")                 @default(true)
+  createdAt              DateTime @map("created_at")                @default(now())
+  updatedAt              DateTime @map("updated_at")                @default(now())
+  anomalies               Anomalie[]
+  refCategoriesAnomalie RefCategorieAnomalie @relation(fields: [categorieCode], references: [code], onUpdate: NoAction, map: "regles_anomalie_ibfk_1")
+  refGravitesAnomalie   RefGraviteAnomalie   @relation(fields: [graviteCode], references: [code], onUpdate: NoAction, map: "regles_anomalie_ibfk_2")
+
+  @@index([categorieCode], map: "idx_categorie_code")
+  @@index([graviteCode], map: "idx_gravite_code")
+  @@map("regles_anomalie")
+}
+
+model ReportingAggregat {
+  id                            String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  periodeAnnee                 Int @map("periode_annee")
+  periodeMois                  Int? @map("periode_mois")
+  typeTexte1                  String? @map("type_texte_1")                 @db.VarChar(100)
+  impotConcerne                String? @map("impot_concerne")                 @db.VarChar(100)
+  natureMesureCode            String? @map("nature_mesure_code")                 @db.VarChar(50)
+  typeBeneficiaireCode        String? @map("type_beneficiaire_code")                 @db.VarChar(50)
+  regimeCode                   String? @map("regime_code")                 @db.VarChar(50)
+  region                        String?                 @db.VarChar(100)
+  secteur                       String?                 @db.VarChar(100)
+  nbDemandesSoumis            Int @map("nb_demandes_soumis")                     @default(0)
+  nbDemandesApprouve          Int @map("nb_demandes_approuve")                     @default(0)
+  nbDemandesRejete            Int @map("nb_demandes_rejete")                     @default(0)
+  montantTotalDemandes        BigInt @map("montant_total_demandes")                  @default(0)
+  montantTotalApprouve        BigInt @map("montant_total_approuve")                  @default(0)
+  delaiMoyenInstructionJours Decimal? @map("delai_moyen_instruction_jours")                @db.Decimal(8, 2)
+  nbAnomaliesCritique         Int @map("nb_anomalies_critique")                     @default(0)
+  estAnonymise                 Boolean @map("est_anonymise")                 @default(true)
+  dateCalcul                   DateTime @map("date_calcul")                @default(now())
+  createdAt                    DateTime @map("created_at")                @default(now())
+  refNaturesMesure            RefNatureMesure?     @relation(fields: [natureMesureCode], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_1")
+  refTypesBeneficiaire        RefTypeBeneficiaire? @relation(fields: [typeBeneficiaireCode], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_2")
+  refRegimesConvention        RefRegimeConvention? @relation(fields: [regimeCode], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_3")
+
+  @@index([estAnonymise], map: "idx_est_anonymise")
+  @@index([impotConcerne], map: "idx_impot_concerne")
+  @@index([natureMesureCode], map: "idx_nature_mesure_code")
+  @@index([periodeAnnee, periodeMois], map: "idx_periode")
+  @@index([typeTexte1], map: "idx_type_texte_1")
+  @@index([regimeCode], map: "regime_code")
+  @@index([typeBeneficiaireCode], map: "type_beneficiaire_code")
+  @@map("reporting_aggregats")
+}
+
+model ReportingExecution {
+  id                String            @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  typeRapportCode String @map("type_rapport_code")            @db.VarChar(50)
+  periodeAnnee     Int @map("periode_annee")
+  periodeMois      Int? @map("periode_mois")
+  parametres        Json?
+  fichierUrl       String? @map("fichier_url")           @db.VarChar(500)
+  hashFichier      String? @map("hash_fichier")           @db.Char(64)
+  estProgramme     Boolean @map("est_programme")           @default(false)
+  dateDebut        DateTime @map("date_debut")          @default(now())
+  dateFin          DateTime? @map("date_fin")
+  statutCode       String @map("statut_code")            @default("pending") @db.VarChar(50)
+  messageErreur    String? @map("message_erreur")           @db.Text
+  createdAt        DateTime @map("created_at")          @default(now())
+  refTypesRapport RefTypeRapport @relation(fields: [typeRapportCode], references: [code], onUpdate: NoAction, map: "reporting_executions_ibfk_1")
+  refEtatsJob     RefEtatJob     @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "reporting_executions_ibfk_2")
+
+  @@index([periodeAnnee, periodeMois], map: "idx_periode")
+  @@index([statutCode], map: "idx_statut_code")
+  @@index([typeRapportCode], map: "idx_type_rapport_code")
+  @@map("reporting_executions")
+}
+
+model ResetPasswordToken {
+  id             String       @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateurId String @map("utilisateur_id")       @db.Char(36)
+  tokenHash     String @map("token_hash")       @unique(map: "token_hash") @db.Char(64)
+  expiresAt     DateTime @map("expires_at")
+  estUtilise    Boolean @map("est_utilise")      @default(false)
+  createdAt     DateTime @map("created_at")     @default(now())
+  utilisateurs   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reset_password_tokens_ibfk_1")
+
+  @@index([utilisateurId], map: "idx_utilisateur_id")
+  @@map("reset_password_tokens")
+}
+
+model RolePermission {
+  role       String    @db.VarChar(50)
+  ressource  String    @db.VarChar(50)
+  action     String    @db.VarChar(50)
+  perimetre  String?   @db.VarChar(100)
+  createdAt DateTime @map("created_at")  @default(now())
+  refRoles  RefRole @relation(fields: [role], references: [code], onDelete: Cascade, onUpdate: NoAction, map: "fk_rolesperm_role")
+
+  @@id([role, ressource, action])
+  @@index([role], map: "idx_role")
+  @@map("roles_permissions")
+}
+
+model SessionUtilisateur {
+  id                     String       @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateurId         String @map("utilisateur_id")       @db.Char(36)
+  jetonSessionHash     String @map("jeton_session_hash")       @unique(map: "jeton_session_hash") @db.Char(64)
+  ip                     String?      @db.VarChar(45)
+  userAgent             String? @map("user_agent")      @db.Text
+  pays                   String?      @db.VarChar(100)
+  ville                  String?      @db.VarChar(100)
+  dateConnexion         DateTime @map("date_connexion")     @default(now())
+  dateDerniereActivite DateTime @map("date_derniere_activite")     @default(now())
+  dateDeconnexion       DateTime? @map("date_deconnexion")
+  estActive             Boolean @map("est_active")      @default(true)
+  createdAt             DateTime @map("created_at")     @default(now())
+  utilisateurs           Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "sessions_utilisateur_ibfk_1")
+
+  @@index([estActive], map: "idx_est_active")
+  @@index([jetonSessionHash], map: "idx_jeton_session_hash")
+  @@index([utilisateurId], map: "idx_utilisateur_id")
+  @@map("sessions_utilisateur")
+}
+
+model SystemLog {
+  id         String   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  niveau     String   @db.VarChar(20)
+  source     String   @db.VarChar(100)
+  message    String   @db.Text
+  contexte   Json?
+  trace      String?  @db.Text
+  createdAt DateTime @map("created_at") @default(now())
+
+  @@index([createdAt], map: "idx_created_at")
+  @@index([niveau], map: "idx_niveau")
+  @@index([source], map: "idx_source")
+  @@map("system_logs")
+}
+
+model Utilisateur {
+  id                       String                     @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  nom                      String                     @db.VarChar(100)
+  prenom                   String                     @db.VarChar(100)
+  email                    String                     @unique(map: "email") @db.VarChar(200)
+  passwordHash            String @map("password_hash")                     @db.VarChar(255)
+  role                     String                     @db.VarChar(50)
+  institutionId           String @map("institution_id")                     @db.Char(36)
+  statutCode              String @map("statut_code")                     @default("actif") @db.VarChar(50)
+  mfaActive               Boolean @map("mfa_active")                    @default(true)
+  mfaSecretEnc           String? @map("mfa_secret_enc")                    @db.VarChar(500)
+  pinHash                 String? @map("pin_hash")                    @db.VarChar(60)
+  secteurAffecte          String? @map("secteur_affecte")                    @db.VarChar(100)
+  telephone                String?                    @db.VarChar(20)
+  derniereConnexion       DateTime? @map("derniere_connexion")
+  ipDerniereCx           String? @map("ip_derniere_cx")                    @db.VarChar(45)
+  createdAt               DateTime @map("created_at")                   @default(now())
+  updatedAt               DateTime @map("updated_at")                   @default(now())
+  anomalies                Anomalie[]
+  auditLogs               AuditLog[]
+  baseJuridiqueDocuments BaseJuridiqueDocument[]
+  beneficiaires            Beneficiaire?
+  decisions                Decision[]
+  demandeComplements      DemandeComplement[]
+  demandeWorkflowEtapes  DemandeWorkflowEtape[]
+  demandes                 Demande[]
+  importsMrd              ImportMrd[]
+  notificationPreferences NotificationPreference[]
+  notificationQueue       NotificationQueue[]
+  notifications            Notification[]
+  piecesJointes           PieceJointe[]
+  pushTokens              PushToken[]
+  refreshTokens           RefreshToken[]
+  resetPasswordTokens    ResetPasswordToken[]
+  sessionsUtilisateur     SessionUtilisateur[]
+  refRoles                RefRole                  @relation(fields: [role], references: [code], onUpdate: NoAction, map: "fk_utilisateurs_role")
+  institutions             Institution               @relation(fields: [institutionId], references: [id], onUpdate: NoAction, map: "utilisateurs_ibfk_1")
+  refStatutsUtilisateur  RefStatutUtilisateur    @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "utilisateurs_ibfk_2")
+
+  @@index([email], map: "idx_email")
+  @@index([institutionId], map: "idx_institution_id")
+  @@index([role], map: "idx_role")
+  @@index([statutCode], map: "idx_statut_code")
+  @@map("utilisateurs")
+}
+
+model WorkflowTemplateEtape {
+  id                      String                    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  workflowTemplateId    String @map("workflow_template_id")                    @db.Char(36)
+  nomEtape               String @map("nom_etape")                    @db.VarChar(200)
+  ordre                   Int
+  acteurRole             String @map("acteur_role")                    @db.VarChar(50)
+  institutionTypeCode   String? @map("institution_type_code")                   @db.VarChar(50)
+  delaiCibleJours       Int? @map("delai_cible_jours")
+  pinRequis              Boolean @map("pin_requis")                   @default(false)
+  estObligatoire         Boolean @map("est_obligatoire")                   @default(true)
+  conditionActivation    String? @map("condition_activation")                   @db.Text
+  actionDeclenchee       String? @map("action_declenchee")                   @db.VarChar(100)
+  createdAt              DateTime @map("created_at")                  @default(now())
+  demandeWorkflowEtapes DemandeWorkflowEtape[]
+  workflowTemplates      WorkflowTemplate        @relation(fields: [workflowTemplateId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "workflow_template_etapes_ibfk_1")
+  refTypesInstitution   RefTypeInstitution?    @relation(fields: [institutionTypeCode], references: [code], onUpdate: NoAction, map: "workflow_template_etapes_ibfk_2")
+
+  @@unique([workflowTemplateId, ordre], map: "uk_workflow_etape_ordre")
+  @@index([workflowTemplateId, ordre], map: "idx_workflow_template_etapes_template_ordre")
+  @@index([workflowTemplateId], map: "idx_workflow_template_id")
+  @@index([institutionTypeCode], map: "institution_type_code")
+  @@map("workflow_template_etapes")
+}
+
+model WorkflowTemplateTransition {
+  id                   String             @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  workflowTemplateId String @map("workflow_template_id")             @db.Char(36)
+  etapeSourceOrdre   Int @map("etape_source_ordre")
+  etapeCibleOrdre    Int @map("etape_cible_ordre")
+  action               String             @db.VarChar(100)
+  conditionTransition String? @map("condition_transition")            @db.Text
+  createdAt           DateTime @map("created_at")           @default(now())
+  workflowTemplates   WorkflowTemplate @relation(fields: [workflowTemplateId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "workflow_template_transitions_ibfk_1")
+
+  @@index([workflowTemplateId], map: "idx_workflow_template_id")
+  @@map("workflow_template_transitions")
+}
+
+model WorkflowTemplate {
+  id                            String                          @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                          String                          @unique(map: "code") @db.VarChar(50)
+  nom                           String                          @db.VarChar(100)
+  description                   String?                         @db.Text
+  baseJuridiqueVersionId     String? @map("base_juridique_version_id")                         @db.Char(36)
+  typeTexte1                  String @map("type_texte_1")                          @db.VarChar(100)
+  organeGestionCode           String? @map("organe_gestion_code")                         @db.VarChar(50)
+  estActif                     Boolean @map("est_actif")                         @default(true)
+  versionTemplate              Int @map("version_template")                             @default(1)
+  createdAt                    DateTime @map("created_at")                        @default(now())
+  updatedAt                    DateTime @map("updated_at")                        @default(now())
+  demandeWorkflowInstances    DemandeWorkflowInstance[]
+  workflowTemplateEtapes      WorkflowTemplateEtape[]
+  workflowTemplateTransitions WorkflowTemplateTransition[]
+  baseJuridiqueVersions       BaseJuridiqueVersion?        @relation(fields: [baseJuridiqueVersionId], references: [id], onUpdate: NoAction, map: "workflow_templates_ibfk_1")
+  refOrganesGestion           RefOrganeGestion?            @relation(fields: [organeGestionCode], references: [code], onUpdate: NoAction, map: "workflow_templates_ibfk_2")
+
+  @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
+  @@index([organeGestionCode], map: "idx_organe_gestion_code")
+  @@index([typeTexte1], map: "idx_type_texte_1")
+  @@map("workflow_templates")
+}

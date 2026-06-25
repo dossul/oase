@@ -1,0 +1,32 @@
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": MySQL database "oase_test" at "localhost:3306"
+
+- Introspecting based on datasource defined in prisma\schema.prisma
+✔ Introspected 85 models and wrote them into prisma\schema.prisma in 309ms
+      
+*** WARNING ***
+
+These constraints are not supported by Prisma Client, because Prisma currently does not fully support check constraints. Read more: https://pris.ly/d/check-constraints
+  - Model: "agrements", constraint: "chk_agrements_dates"
+  - Model: "agrements", constraint: "chk_agrements_dates"
+  - Model: "agrements", constraint: "chk_agrements_dates"
+  - Model: "conventions", constraint: "chk_conventions_dates"
+  - Model: "conventions", constraint: "chk_conventions_dates"
+  - Model: "conventions", constraint: "chk_conventions_dates"
+  - Model: "demandes", constraint: "chk_demandes_montant_positif"
+  - Model: "demandes", constraint: "chk_demandes_montant_positif"
+  - Model: "demandes", constraint: "chk_demandes_montant_positif"
+  - Model: "quotas", constraint: "chk_quotas_alerte_seuil"
+  - Model: "quotas", constraint: "chk_quotas_consomme"
+  - Model: "quotas", constraint: "chk_quotas_total_positif"
+  - Model: "quotas", constraint: "chk_quotas_alerte_seuil"
+  - Model: "quotas", constraint: "chk_quotas_consomme"
+  - Model: "quotas", constraint: "chk_quotas_total_positif"
+  - Model: "quotas", constraint: "chk_quotas_alerte_seuil"
+  - Model: "quotas", constraint: "chk_quotas_consomme"
+  - Model: "quotas", constraint: "chk_quotas_total_positif"
+
+Run prisma generate to generate Prisma Client.
+

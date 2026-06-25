@@ -1,0 +1,44 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { LoggerModule } from 'nestjs-pino';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { validate } from './config/config.schema';
+import { PrismaModule } from './prisma/prisma.module';
+import { HealthModule } from './health/health.module';
+import { AuthModule } from './auth/auth.module';
+import { AuditModule } from './audit/audit.module';
+import { ConnecteursModule } from './connecteurs/connecteurs.module';
+import { CommonModule } from './common/common.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate,
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+        transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
+      },
+    }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60_000,
+        limit: 100,
+      },
+    ]),
+    CommonModule,
+    PrismaModule,
+    HealthModule,
+    AuditModule,
+    AuthModule,
+    ConnecteursModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}

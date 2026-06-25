@@ -1,0 +1,171 @@
+[2J[3J[H[[90m12:14:57[0m] Starting compilation in watch mode...
+
+[[90m12:15:04[0m] Found 0 errors. Watching for file changes.
+
+OASE API running on http://localhost:3000/api/v1
+Swagger UI available on http://localhost:3000/api/docs
+[12:15:07.032] [32mINFO[39m (40404): [36mStarting Nest application...[39m
+    [35mcontext[39m: "NestFactory"
+[12:15:07.032] [32mINFO[39m (40404): [36mPrismaModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.032] [32mINFO[39m (40404): [36mPassportModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.032] [32mINFO[39m (40404): [36mThrottlerModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.032] [32mINFO[39m (40404): [36mConfigHostModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mAuditModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mAppModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mLoggerModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mCommonModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mTerminusModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mConfigModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mConfigModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mHealthModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mConnecteursModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mJwtModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mAuthModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:15:07.033] [32mINFO[39m (40404): [36mAppController {/api/v1}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:15:07.033] [32mINFO[39m (40404): [36mHealthController {/api/v1/health}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/health, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:15:07.033] [32mINFO[39m (40404): [36mAuthController {/api/v1/auth}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/login, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/mfa/verify, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/refresh, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/logout, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/pin/set, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/me, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:15:07.033] [32mINFO[39m (40404): [36mNest application successfully started[39m
+    [35mcontext[39m: "NestApplication"
+[12:15:34.387] [32mINFO[39m (40404): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 1,
+      "method": "POST",
+      "url": "/api/v1/auth/login",
+      "query": {},
+      "params": {
+        "0": "auth/login"
+      },
+      "headers": {
+        "content-type": "application/json",
+        "content-length": "49",
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+      },
+      "remoteAddress": "::1",
+      "remotePort": 55039
+    }
+    [35mres[39m: {
+      "statusCode": 200,
+      "headers": {
+        "x-powered-by": "Express",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "269",
+        "etag": "W/\"10d-FN6M3q98/TG7OSZAFvU3aJfsPzM\""
+      }
+    }
+    [35mresponseTime[39m: 392
+[12:15:34.520] [32mINFO[39m (40404): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 2,
+      "method": "GET",
+      "url": "/api/v1/health",
+      "query": {},
+      "params": {
+        "0": "health"
+      },
+      "headers": {
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+      },
+      "remoteAddress": "::1",
+      "remotePort": 55040
+    }
+    [35mres[39m: {
+      "statusCode": 200,
+      "headers": {
+        "x-powered-by": "Express",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "49",
+        "etag": "W/\"31-dxKeoZI+mvmnahNSR0ys2MInE1I\""
+      }
+    }
+    [35mresponseTime[39m: 2
+[12:15:34.526] [32mINFO[39m (40404): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 3,
+      "method": "GET",
+      "url": "/api/v1/",
+      "query": {},
+      "params": {
+        "0": ""
+      },
+      "headers": {
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+      },
+      "remoteAddress": "::1",
+      "remotePort": 55040
+    }
+    [35mres[39m: {
+      "statusCode": 200,
+      "headers": {
+        "x-powered-by": "Express",
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "11",
+        "etag": "W/\"b-nvsHFoPHdu0H0p2xy0i6dAMokp8\""
+      }
+    }
+    [35mresponseTime[39m: 1
+[12:15:41.277] [32mINFO[39m (40404): [36mrequest completed[39m
+    [35mreq[39m: {
+      "id": 4,
+      "method": "POST",
+      "url": "/api/v1/auth/login",
+      "query": {},
+      "params": {
+        "0": "auth/login"
+      },
+      "headers": {
+        "content-type": "application/json",
+        "content-length": "49",
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+      },
+      "remoteAddress": "::1",
+      "remotePort": 59586
+    }
+    [35mres[39m: {
+      "statusCode": 200,
+      "headers": {
+        "x-powered-by": "Express",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "269",
+        "etag": "W/\"10d-JJts/lOi/xj91Mdrh2dehrz26JM\""
+      }
+    }
+    [35mresponseTime[39m: 429

@@ -1,0 +1,18 @@
+// ============================================================
+// OASE — Prisma Schema v3.3
+// Version : 3.3.0 (MySQL 8/9) — 85 tables
+// Date    : 17 juin 2026
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// NOTE: Ce fichier est un squelette. Executez 'npx prisma db pull' 
+// pour generer automatiquement les 85 modeles depuis la base 'oase'
+// puis appliquez les conventions de nommage (PascalCase + @@map)

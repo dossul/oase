@@ -1,0 +1,55 @@
+{
+  "project": "OASE",
+  "epic": "Phase A — Reconciliation Modele de Donnees",
+  "description": "Reconcilier schema.prisma avec MLD v3.3 (85 tables MySQL). Verrou bloquant pour tout developpement module.",
+  "issues": [
+    {
+      "title": "A.1 — Introspection Prisma depuis MySQL oase v3.3",
+      "type": "Feature",
+      "priority": "urgent",
+      "estimate": "4h",
+      "description": "Executer 'npx prisma db pull' sur base 'oase' (85 tables). Verifier generation de tous les modeles. DATABASE_URL=mysql://root:@localhost:3306/oase",
+      "acceptance": ["schema.prisma contient 85 modeles @model", "prisma validate OK"]
+    },
+    {
+      "title": "A.2 — Nettoyage conventions de nommage",
+      "type": "Refactor", 
+      "priority": "urgent",
+      "estimate": "8h",
+      "description": "Renommer modeles en PascalCase, ajouter @@map() pour noms SQL originaux, verifier relations @relation avec FK explicites, types MySQL→Prisma corrects",
+      "acceptance": ["Tous modeles PascalCase avec @@map", "Relations explicites sur toutes FK", "Index @@index declares"]
+    },
+    {
+      "title": "A.3 — Generation enums TypeScript depuis ref_*",
+      "type": "Feature",
+      "priority": "high", 
+      "estimate": "4h",
+      "description": "Creer script scripts/generate-enums.ts pour generer enums TypeScript depuis 38 tables ref_*. Integrer au build npm run generate-enums",
+      "acceptance": ["src/common/enums/generated.ts cree", "Enums synchronises avec ref_roles, ref_statuts_demande, etc."]
+    },
+    {
+      "title": "A.4 — Baseline migration 001_init_v33",
+      "type": "Feature",
+      "priority": "high",
+      "estimate": "2h", 
+      "description": "Creer migration initiale avec 'prisma migrate diff'. Marquer comme appliquee avec 'prisma migrate resolve'",
+      "acceptance": ["prisma/migrations/001_init_v33/ contient migration.sql", "prisma migrate status OK"]
+    },
+    {
+      "title": "A.5 — Seed demo aligne sur v3.3 (15 roles, MRD)",
+      "type": "Feature",
+      "priority": "high",
+      "estimate": "8h",
+      "description": "Mettre a jour prisma/seed.ts avec 15 roles canoniques, 38 tables ref_*, 5 bases juridiques SCD2, 3 beneficiaires, 5 demandes demo",
+      "acceptance": ["prisma db seed execute sans erreur", "85 tables peuplees avec donnees coherentes"]
+    },
+    {
+      "title": "A.6 — Tests d'integrite post-reconciliation",
+      "type": "Testing",
+      "priority": "high", 
+      "estimate": "4h",
+      "description": "Verifier 85 modeles ↔ 85 tables MySQL. Test CRUD sur Demande, Utilisateur, Workflow, Quota, Audit. Verifier SCD2 (unicite version active)",
+      "acceptance": ["Compte modeles = 85", "Tests CRUD OK sur 5 modeles critiques", "Audit verifyChain = 0 rupture"]
+    }
+  ]
+}

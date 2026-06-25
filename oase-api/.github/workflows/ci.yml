@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-build-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: oase_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: mysql://root:root@localhost:3306/oase_test
+      JWT_SECRET: github-ci-jwt-secret-min-16-chars
+      JWT_REFRESH_SECRET: github-ci-refresh-secret-min-16-chars
+      JWT_ACCESS_EXPIRATION: 15m
+      JWT_REFRESH_EXPIRATION: 7d
+      ENCRYPTION_KEY: github-ci-enc-key-min-16
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: oase-api/package-lock.json
+
+      - name: Install dependencies
+        working-directory: oase-api
+        run: npm ci
+
+      - name: Prisma generate
+        working-directory: oase-api
+        run: npx prisma generate
+
+      - name: Prisma validate
+        working-directory: oase-api
+        run: npx prisma validate
+
+      - name: Run migrations
+        working-directory: oase-api
+        run: npx prisma migrate deploy
+
+      - name: Seed test data
+        working-directory: oase-api
+        run: npm run seed
+
+      - name: Lint
+        working-directory: oase-api
+        run: npm run lint:check
+
+      - name: Build
+        working-directory: oase-api
+        run: npm run build
+
+      - name: Unit tests
+        working-directory: oase-api
+        run: npm test
+
+      - name: E2E tests
+        working-directory: oase-api
+        run: npm run test:e2e
+
+      - name: Integrity test
+        working-directory: oase-api
+        run: npm run integration:test

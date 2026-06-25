@@ -1,0 +1,45 @@
+
+=== ref_types_institution ===
+  agence : Agence de promotion
+  conedef : Conseil Economique et Social
+  cour_comptes : Cour des Comptes
+  dgbf : Direction Generale du Budget et des Finances
+  dgmg : Direction Generale des Mines et de la Geologie
+  dgtcp : Direction Generale du Tresor et de la Comptabilite Publique
+  dsi : Direction des Systemes d Information
+  externe : Institution externe
+  igf : Inspection Generale des Finances
+  mae : Ministere des Affaires Etrangeres
+  ministere_sectoriel : Ministere sectoriel
+  otr : Office Togolais des Recettes
+  upf : Unite de Politique Fiscale — MEF
+
+=== ref_statuts_utilisateur ===
+  actif : Actif
+  inactif : Inactif
+  suspendu : Suspendu
+
+=== ref_types_beneficiaire ===
+  autre : Autre
+  entreprise_privee : Entreprise privee
+  entreprises_et_menages : Entreprises et menages
+  institution_diplomatique : Institution diplomatique
+  ong : ONG
+  organisation_internationale : Organisation internationale
+  organisme_public : Organisme public
+  personne_physique : Personne physique
+
+=== ref_statuts_fiscal ===
+  conforme : Conforme
+  dette_active : Dette fiscale active
+  inconnu : Inconnu / Non verifie
+
+=== ref_statuts_demande ===
+  action_requise : Action requise
+  approuve : Approuve
+  archive : Archive
+  brouillon : Brouillon
+  en_instruction : En instruction
+  expire : Expire
+  rejete : Rejete
+  soumis : Soumis

@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Data / documents volumineux
+kb/
+.kilo/
+.kombai/
+backups/
+comprehension/
+elaboration_rapport/
+graphify-out/
+pscript/
+pour_oase*/
+
+# Maquette (separate repo)
+maquette/
+
+# Generated archives
+*.zip
+*.7z
+*.tar.gz
+
+# Database dumps
+*.sql
+
+# Logs / temp
+*.log
+tmp_*
+_rapport_*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,716 @@
+// ============================================================
+// OASE — Prisma Schema
+// Version : 1.0.0 (OASE-11)
+// Date    : 2026-06-16
+// Sources : OASE-5 (corrections MRD), OASE-6 (Domain Model),
+//           OASE-7 (Statuts), OASE-8 (RBAC)
+// DB cible : PostgreSQL 15 (prod) | MySQL 8 (cPanel demo)
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum StatutDemande {
+  brouillon
+  soumis
+  en_instruction
+  action_requise
+  approuve
+  rejete
+  expire
+  archive
+}
+
+enum StatutEtape {
+  en_attente
+  en_cours
+  valide
+  rejete
+  annule
+}
+
+enum StatutConvention {
+  active
+  suspendue
+  resiliee
+  expiree
+}
+
+enum StatutAnomalie {
+  nouvelle
+  en_examen
+  traitee
+  classee
+}
+
+enum StatutConnecteur {
+  actif
+  erreur
+  maintenance
+  inactif
+}
+
+enum StatutFiscal {
+  conforme
+  dette_active
+  inconnu
+}
+
+enum StatutUtilisateur {
+  actif
+  inactif
+  suspendu
+}
+
+enum TypeBeneficiaire {
+  entreprise_privee
+  organisme_public
+  ong
+  institution_diplomatique
+  organisation_internationale
+  personne_physique
+  entreprises_et_menages
+  autre
+}
+
+enum TypeInstitution {
+  otr
+  dgbf
+  dgtcp
+  agence
+  dgmg
+  mae
+  ministere_sectoriel
+  igf
+  cour_comptes
+  upf
+  dsi
+  conedef
+  externe
+}
+
+enum NatureMesure {
+  Exoneration
+  Exemption
+  Abattement
+  Reduction_impot
+  Taux_reduit
+  Credit_impot
+}
+
+enum PorteeCategorie {
+  Permanente
+  Temporaire_Determinee
+  Temporaire_Phase
+  Liee_Convention
+}
+
+enum ModeInstruction {
+  automatique
+  semi_automatique
+  manuel
+}
+
+enum OrganeGestion {
+  CI
+  CDDI
+  CDDI_CI
+  OTR
+}
+
+enum TypeQuota {
+  global_mesure
+  par_beneficiaire
+  par_convention
+  annuel
+}
+
+enum UniteQuota {
+  fcfa
+  quantite_physique
+  nombre_operations
+}
+
+enum RangPiece {
+  premier
+  second
+}
+
+enum GraviteAnomalie {
+  critique
+  elevee
+  moyenne
+  faible
+}
+
+enum CategorieAnomalie {
+  juridique
+  financiere
+  temporelle
+  procedurale
+}
+
+enum SourceDetectionAnomalie {
+  moteur_regles
+  auditeur
+  connecteur
+}
+
+enum CanalNotification {
+  inapp
+  email
+  sms
+}
+
+enum TypeDecision {
+  approbation
+  rejet
+  demande_complement
+}
+
+enum TypeAccordSiege {
+  onu
+  union_africaine
+  ambassade
+  consulat
+  ong_internationale
+  autre
+}
+
+enum SourceCodeAdditionnel {
+  sydonia
+  etax
+  autre
+}
+
+enum RegimeConvention {
+  ZFI
+  ZES
+  Code_Investissements
+  Minier
+  Hydrocarbures
+  Siege
+  Autre
+}
+
+// ============================================================
+// INSTITUTIONS
+// ============================================================
+
+model Institution {
+  id         String          @id @default(uuid()) @db.Uuid
+  code       String          @unique @db.VarChar(20)
+  nom        String          @db.VarChar(200)
+  type       TypeInstitution
+  est_active Boolean         @default(true)
+  created_at DateTime        @default(now())
+
+  utilisateurs Utilisateur[]
+
+  @@map("institutions")
+}
+
+// ============================================================
+// UTILISATEURS
+// ============================================================
+
+model Utilisateur {
+  id                  String             @id @default(uuid()) @db.Uuid
+  nom                 String             @db.VarChar(100)
+  prenom              String             @db.VarChar(100)
+  email               String             @unique @db.VarChar(200)
+  password_hash       String             @db.VarChar(255)
+  role                String             @db.VarChar(50)
+  institution_id      String             @db.Uuid
+  institution         Institution        @relation(fields: [institution_id], references: [id])
+  statut              StatutUtilisateur  @default(actif)
+  mfa_active          Boolean            @default(true)
+  mfa_secret_enc      String?            @db.VarChar(500)  // AES-256 chiffré
+  pin_hash            String?            @db.VarChar(60)   // bcrypt
+  secteur_affecte     String?            @db.VarChar(100)  // pour agent_ministere RLS-07
+  derniere_connexion  DateTime?
+  ip_derniere_cx      String?            @db.VarChar(45)
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+
+  demandes_instruites    Demande[]              @relation("InstructeurDemande")
+  decisions              Decision[]
+  etapes_traitees        EtapeWorkflow[]
+  anomalies_creees       Anomalie[]
+  pieces_validees        PieceJointe[]
+  notifications          Notification[]
+  audit_logs             AuditLog[]
+
+  @@index([email])
+  @@index([role])
+  @@index([institution_id])
+  @@map("utilisateurs")
+}
+
+// ============================================================
+// ACCORDS DE SIEGE
+// ============================================================
+
+model AccordSiege {
+  id               String          @id @default(uuid()) @db.Uuid
+  institution      String          @db.VarChar(200)
+  type_institution TypeAccordSiege
+  texte_fondateur  String?         @db.Text
+  date_signature   DateTime?       @db.Date
+  est_actif        Boolean         @default(true)
+  created_at       DateTime        @default(now())
+
+  beneficiaires Beneficiaire[]
+  conventions   Convention[]
+
+  @@map("accords_siege")
+}
+
+// ============================================================
+// BENEFICIAIRES
+// ============================================================
+
+model Beneficiaire {
+  id               String           @id @default(uuid()) @db.Uuid
+  raison_sociale   String           @db.VarChar(200)
+  nif              String           @unique @db.VarChar(20)
+  rccm             String?          @db.VarChar(30)
+  type_beneficiaire TypeBeneficiaire
+  statut_fiscal    StatutFiscal     @default(inconnu)
+  secteur          String?          @db.VarChar(100)
+  region           String?          @db.VarChar(100)
+  email_contact    String?          @db.VarChar(200)
+  telephone        String?          @db.VarChar(20)
+  accord_siege_id  String?          @db.Uuid
+  accord_siege     AccordSiege?     @relation(fields: [accord_siege_id], references: [id])
+  user_id          String?          @unique @db.Uuid  // compte P1 associé
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  demandes    Demande[]
+  conventions Convention[]
+  quotas      Quota[]
+
+  @@index([nif])
+  @@index([type_beneficiaire])
+  @@map("beneficiaires")
+}
+
+// ============================================================
+// BASES JURIDIQUES (MRD — SCD Type 2)
+// ============================================================
+
+model BaseJuridique {
+  id                          String          @id @default(uuid()) @db.Uuid
+  code_mesure                 String          @unique @db.VarChar(20)   // MRD-2024-0042
+  code_mesure_mrd             Int?                                      // N° d'ordre original MRD
+  libelle                     String          @db.Text
+  impot_concerne              String          @db.VarChar(100)
+  nature_mesure               NatureMesure
+  type_texte_1                String?         @db.VarChar(100)          // Accord de siège | CGI | Zone Franche...
+  type_texte_2                String?         @db.VarChar(50)           // Loi | Convention | Arrêté...
+  support_juridique_base      String?         @db.Text
+  support_juridique_complem   String?         @db.Text
+  article                     String?         @db.VarChar(200)          // Valeur brute MRD
+  article_cgi_2025            String?         @db.VarChar(100)          // Article normalisé CGI 2025
+  portee_categorie            PorteeCategorie @default(Permanente)
+  portee_duree_mois           Int?
+  portee_description          String?         @db.Text                  // Valeur brute MRD
+  organe_gestion              OrganeGestion?
+  organe_attribution          String?         @db.VarChar(100)          // OTR | SAZOF | DGMG...
+  systeme_information         String?         @db.VarChar(100)          // Sydonia World | E-TAX | ND
+  mode_instruction            ModeInstruction @default(manuel)
+  objectif_type               String?         @db.VarChar(50)           // Economique | Social | ...
+  branche_activite            String?         @db.VarChar(100)
+  type_beneficiaire_cible     String?         @db.VarChar(100)          // Types bénéficiaires MRD
+  est_depense_fiscale_2024    Boolean         @default(false)
+  est_evaluee_2024            Boolean         @default(false)
+  donnees_disponibles         Boolean         @default(false)
+  fonction_budgetaire         String?         @db.VarChar(100)
+  conformite_texte_fondament  String?         @db.VarChar(10)           // oui | non
+  conformite_directive_uemoa  String?         @db.VarChar(10)           // oui | non | N/A
+  odd                         String?         @db.VarChar(20)
+  programme_dotation          String?         @db.VarChar(100)
+  position_sh                 String?         @db.VarChar(50)           // Position SH douanes
+  est_active                  Boolean         @default(true)
+  date_adoption               DateTime?       @db.Date
+  date_abrogation             DateTime?       @db.Date
+  version                     Int             @default(1)
+  valid_from                  DateTime        @default(now())
+  valid_to                    DateTime?
+  created_at                  DateTime        @default(now())
+  updated_at                  DateTime        @updatedAt
+
+  codes_additionnels CodeAdditionnel[]
+  demandes           Demande[]
+  conventions        Convention[]
+  quotas             Quota[]
+  anomalies          Anomalie[]
+
+  @@index([code_mesure])
+  @@index([type_texte_1])
+  @@index([organe_gestion])
+  @@index([mode_instruction])
+  @@index([impot_concerne])
+  @@index([est_active, valid_to])
+  @@map("bases_juridiques")
+}
+
+// ============================================================
+// CODES ADDITIONNELS (Sydonia / E-TAX — relation 1-N)
+// ============================================================
+
+model CodeAdditionnel {
+  id                String                @id @default(uuid()) @db.Uuid
+  base_juridique_id String                @db.Uuid
+  base_juridique    BaseJuridique         @relation(fields: [base_juridique_id], references: [id])
+  code              String                @db.VarChar(50)
+  source            SourceCodeAdditionnel
+  est_principal     Boolean               @default(true)
+  created_at        DateTime              @default(now())
+
+  @@index([base_juridique_id])
+  @@index([code, source])
+  @@map("codes_additionnels")
+}
+
+// ============================================================
+// DEMANDES
+// ============================================================
+
+model Demande {
+  id                String        @id @default(uuid()) @db.Uuid
+  reference         String        @unique @db.VarChar(20)  // OASE-2024-000001
+  base_juridique_id String        @db.Uuid
+  base_juridique    BaseJuridique @relation(fields: [base_juridique_id], references: [id])
+  beneficiaire_id   String        @db.Uuid
+  beneficiaire      Beneficiaire  @relation(fields: [beneficiaire_id], references: [id])
+  instructeur_id    String?       @db.Uuid
+  instructeur       Utilisateur?  @relation("InstructeurDemande", fields: [instructeur_id], references: [id])
+  statut            StatutDemande @default(brouillon)
+  date_depot        DateTime?
+  date_echeance     DateTime?
+  montant_fcfa      BigInt        @default(0)
+  quota_consomme    BigInt?
+  quota_total       BigInt?
+  secteur           String?       @db.VarChar(100)
+  etape_actuelle    String?       @db.VarChar(200)
+  motif_rejet       String?       @db.Text
+  attestation_url   String?       @db.VarChar(500)
+  qr_code_hash      String?       @db.Char(64)
+  convention_id     String?       @db.Uuid
+  convention        Convention?   @relation(fields: [convention_id], references: [id])
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  deleted_at        DateTime?
+
+  pieces_jointes PieceJointe[]
+  etapes         EtapeWorkflow[]
+  decisions      Decision[]
+  anomalies      Anomalie[]
+  notifications  Notification[]
+  audit_logs     AuditLog[]
+
+  @@index([reference])
+  @@index([beneficiaire_id])
+  @@index([instructeur_id])
+  @@index([statut])
+  @@index([base_juridique_id])
+  @@index([created_at])
+  @@map("demandes")
+}
+
+// ============================================================
+// PIECES JOINTES
+// ============================================================
+
+model PieceJointe {
+  id             String      @id @default(uuid()) @db.Uuid
+  demande_id     String      @db.Uuid
+  demande        Demande     @relation(fields: [demande_id], references: [id])
+  nom_fichier    String      @db.VarChar(300)
+  type_mime      String      @db.VarChar(100)
+  taille_octets  BigInt
+  rang           RangPiece
+  categorie      String      @db.VarChar(100)  // NIF | RCCM | Statuts | Business_plan...
+  url_stockage   String      @db.VarChar(500)
+  hash_sha256    String      @db.Char(64)
+  est_valide     Boolean?
+  valide_par_id  String?     @db.Uuid
+  valide_par     Utilisateur? @relation(fields: [valide_par_id], references: [id])
+  date_validation DateTime?
+  created_at     DateTime    @default(now())
+
+  @@index([demande_id])
+  @@index([rang])
+  @@map("pieces_jointes")
+}
+
+// ============================================================
+// WORKFLOW TEMPLATES
+// ============================================================
+
+model WorkflowTemplate {
+  id            String   @id @default(uuid()) @db.Uuid
+  code          String   @unique @db.VarChar(50)  // cgi-ci | cgi-cddi | zone-franche...
+  nom           String   @db.VarChar(100)
+  type_texte_1  String   @db.VarChar(100)          // clé de routage
+  definition    Json                                // tableau d'étapes JSON
+  est_actif     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@map("workflow_templates")
+}
+
+// ============================================================
+// ETAPES WORKFLOW
+// ============================================================
+
+model EtapeWorkflow {
+  id              String        @id @default(uuid()) @db.Uuid
+  demande_id      String        @db.Uuid
+  demande         Demande       @relation(fields: [demande_id], references: [id])
+  nom_etape       String        @db.VarChar(200)
+  ordre           Int
+  acteur_role     String        @db.VarChar(50)
+  acteur_id       String?       @db.Uuid
+  acteur          Utilisateur?  @relation(fields: [acteur_id], references: [id])
+  statut          StatutEtape   @default(en_attente)
+  date_debut      DateTime?
+  date_fin        DateTime?
+  delai_cible_j   Int?
+  commentaire     String?       @db.Text
+  pin_signe       Boolean       @default(false)
+  created_at      DateTime      @default(now())
+
+  @@index([demande_id, ordre])
+  @@index([acteur_id])
+  @@map("etapes_workflow")
+}
+
+// ============================================================
+// DECISIONS
+// ============================================================
+
+model Decision {
+  id             String      @id @default(uuid()) @db.Uuid
+  demande_id     String      @db.Uuid
+  demande        Demande     @relation(fields: [demande_id], references: [id])
+  utilisateur_id String      @db.Uuid
+  utilisateur    Utilisateur @relation(fields: [utilisateur_id], references: [id])
+  type           TypeDecision
+  date_decision  DateTime    @default(now())
+  motif          String?     @db.Text
+  document_url   String?     @db.VarChar(500)
+  hash_sha256    String?     @db.Char(64)
+  pin_hash       String?     @db.VarChar(60)  // bcrypt — preuve signature
+  created_at     DateTime    @default(now())
+
+  @@index([demande_id])
+  @@map("decisions")
+}
+
+// ============================================================
+// CONVENTIONS
+// ============================================================
+
+model Convention {
+  id                String            @id @default(uuid()) @db.Uuid
+  reference         String            @unique @db.VarChar(30)
+  beneficiaire_id   String            @db.Uuid
+  beneficiaire      Beneficiaire      @relation(fields: [beneficiaire_id], references: [id])
+  base_juridique_id String?           @db.Uuid
+  base_juridique    BaseJuridique?    @relation(fields: [base_juridique_id], references: [id])
+  accord_siege_id   String?           @db.Uuid
+  accord_siege      AccordSiege?      @relation(fields: [accord_siege_id], references: [id])
+  regime            RegimeConvention
+  statut            StatutConvention  @default(active)
+  date_debut        DateTime          @db.Date
+  date_fin          DateTime          @db.Date
+  montant_estime    BigInt?
+  emplois_engages   Int?
+  emplois_crees     Int?
+  zone_zfi          String?           @db.VarChar(50)
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+
+  demandes  Demande[]
+  anomalies Anomalie[]
+
+  @@index([beneficiaire_id])
+  @@index([statut])
+  @@map("conventions")
+}
+
+// ============================================================
+// QUOTAS
+// ============================================================
+
+model Quota {
+  id                String        @id @default(uuid()) @db.Uuid
+  base_juridique_id String        @db.Uuid
+  base_juridique    BaseJuridique @relation(fields: [base_juridique_id], references: [id])
+  beneficiaire_id   String?       @db.Uuid
+  beneficiaire      Beneficiaire? @relation(fields: [beneficiaire_id], references: [id])
+  convention_id     String?       @db.Uuid
+  exercice_annuel   Int?
+  type_quota        TypeQuota
+  unite             UniteQuota    @default(fcfa)
+  total             BigInt
+  consomme          BigInt        @default(0)
+  alerte_seuil_pct  Int           @default(80)
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+
+  @@index([base_juridique_id])
+  @@map("quotas")
+}
+
+// ============================================================
+// ANOMALIES
+// ============================================================
+
+model Anomalie {
+  id                String                  @id @default(uuid()) @db.Uuid
+  categorie         CategorieAnomalie
+  gravite           GraviteAnomalie
+  description       String                  @db.Text
+  demande_id        String?                 @db.Uuid
+  demande           Demande?                @relation(fields: [demande_id], references: [id])
+  base_juridique_id String?                 @db.Uuid
+  base_juridique    BaseJuridique?          @relation(fields: [base_juridique_id], references: [id])
+  convention_id     String?                 @db.Uuid
+  convention        Convention?             @relation(fields: [convention_id], references: [id])
+  date_detection    DateTime                @default(now())
+  statut            StatutAnomalie          @default(nouvelle)
+  detectee_par      SourceDetectionAnomalie
+  utilisateur_id    String?                 @db.Uuid
+  utilisateur       Utilisateur?            @relation(fields: [utilisateur_id], references: [id])
+  regle_id          String?                 @db.VarChar(100)
+  commentaire       String?                 @db.Text
+  created_at        DateTime                @default(now())
+
+  @@index([demande_id])
+  @@index([gravite, statut])
+  @@map("anomalies")
+}
+
+// ============================================================
+// AUDIT LOGS (append-only — SHA-256 chaîné)
+// ============================================================
+
+model AuditLog {
+  id               String      @id @default(uuid()) @db.Uuid
+  horodatage       DateTime    @default(now())
+  utilisateur_id   String?     @db.Uuid
+  utilisateur      Utilisateur? @relation(fields: [utilisateur_id], references: [id])
+  role_au_moment   String?     @db.VarChar(50)
+  institution      String?     @db.VarChar(100)
+  action           String      @db.VarChar(100)   // SOUMETTRE_DEMANDE | APPROUVER | ...
+  entite           String      @db.VarChar(50)    // demandes | conventions | utilisateurs
+  entite_id        String      @db.Uuid
+  demande_id       String?     @db.Uuid
+  demande          Demande?    @relation(fields: [demande_id], references: [id])
+  ancienne_valeur  Json?
+  nouvelle_valeur  Json?
+  ip               String?     @db.VarChar(45)
+  user_agent       String?     @db.Text
+  hash_precedent   String?     @db.Char(64)
+  empreinte_sha256 String      @db.Char(64)
+
+  @@index([entite, entite_id])
+  @@index([utilisateur_id])
+  @@index([horodatage])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// CONNECTEURS (SI externes)
+// ============================================================
+
+model Connecteur {
+  id              String           @id @default(uuid()) @db.Uuid
+  nom             String           @db.VarChar(50)
+  code_systeme    String           @unique @db.VarChar(20)  // SYDONIA | SIGTAS | SIGFIP...
+  institution_id  String?          @db.Uuid
+  statut          StatutConnecteur @default(inactif)
+  endpoint        String           @db.VarChar(500)
+  config_auth     Json                                       // OAuth2 chiffré AES-256
+  latence_ms      Int              @default(0)
+  taux_erreur     Decimal          @default(0) @db.Decimal(5, 2)
+  dernier_sync    DateTime?
+  volume_24h      Int              @default(0)
+  fallback_manuel Boolean          @default(false)
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+
+  @@map("connecteurs")
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id             String            @id @default(uuid()) @db.Uuid
+  utilisateur_id String            @db.Uuid
+  utilisateur    Utilisateur       @relation(fields: [utilisateur_id], references: [id])
+  demande_id     String?           @db.Uuid
+  demande        Demande?          @relation(fields: [demande_id], references: [id])
+  type           String            @db.VarChar(100)  // SOUMISSION | APPROBATION | ECHEANCE...
+  canal          CanalNotification @default(inapp)
+  titre          String            @db.VarChar(200)
+  corps          String            @db.Text
+  est_lue        Boolean           @default(false)
+  date_lecture   DateTime?
+  created_at     DateTime          @default(now())
+
+  @@index([utilisateur_id, est_lue])
+  @@index([demande_id])
+  @@map("notifications")
+}
+
+// ============================================================
+// REFRESH TOKENS (JWT rotation)
+// ============================================================
+
+model RefreshToken {
+  id             String   @id @default(uuid()) @db.Uuid
+  utilisateur_id String   @db.Uuid
+  token_hash     String   @unique @db.Char(64)  // SHA-256 du token
+  expires_at     DateTime
+  est_revoque    Boolean  @default(false)
+  ip             String?  @db.VarChar(45)
+  user_agent     String?  @db.Text
+  created_at     DateTime @default(now())
+
+  @@index([utilisateur_id])
+  @@index([expires_at])
+  @@map("refresh_tokens")
+}
+
+// ============================================================
+// ROLES PERMISSIONS (RBAC dynamique — optionnel)
+// ============================================================
+
+model RolePermission {
+  role      String  @db.VarChar(50)
+  ressource String  @db.VarChar(50)
+  action    String  @db.VarChar(50)
+  perimetre String? @db.VarChar(100)  // ex: 'organe_gestion=CI'
+
+  @@id([role, ressource, action])
+  @@map("roles_permissions")
+}

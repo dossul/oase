@@ -1,0 +1,1591 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model accords_siege {
+  id                     String                 @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  institution            String                 @db.VarChar(200)
+  type_institution_code  String                 @db.VarChar(50)
+  texte_fondateur        String?                @db.Text
+  date_signature         DateTime?              @db.Date
+  est_actif              Boolean                @default(true)
+  created_at             DateTime               @default(now())
+  ref_types_accord_siege ref_types_accord_siege @relation(fields: [type_institution_code], references: [code], onUpdate: NoAction, map: "accords_siege_ibfk_1")
+  beneficiaires          beneficiaires[]
+  conventions            conventions[]
+
+  @@index([type_institution_code], map: "idx_type_institution_code")
+}
+
+model actes {
+  id                String         @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demande_id        String         @db.Char(36)
+  decision_id       String?        @db.Char(36)
+  type_code         String         @db.VarChar(50)
+  reference         String         @unique(map: "reference") @db.VarChar(50)
+  beneficiaire_id   String         @db.Char(36)
+  montant_fcfa      BigInt?
+  date_effet        DateTime       @db.Date
+  document_url      String         @db.VarChar(500)
+  hash_document     String         @db.Char(64)
+  qr_code_hash      String         @db.Char(64)
+  qr_code_image_url String?        @db.VarChar(500)
+  est_revoke        Boolean        @default(false)
+  date_revocation   DateTime?
+  motif_revocation  String?        @db.Text
+  created_at        DateTime       @default(now())
+  demandes          demandes       @relation(fields: [demande_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "actes_ibfk_1")
+  decisions         decisions?     @relation(fields: [decision_id], references: [id], onUpdate: NoAction, map: "actes_ibfk_2")
+  ref_types_acte    ref_types_acte @relation(fields: [type_code], references: [code], onUpdate: NoAction, map: "actes_ibfk_3")
+  beneficiaires     beneficiaires  @relation(fields: [beneficiaire_id], references: [id], onUpdate: NoAction, map: "actes_ibfk_4")
+
+  @@index([demande_id, type_code], map: "idx_actes_demande_type")
+  @@index([beneficiaire_id], map: "idx_beneficiaire_id")
+  @@index([decision_id], map: "idx_decision_id")
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([qr_code_hash], map: "idx_qr_code_hash")
+  @@index([reference], map: "idx_reference")
+  @@index([type_code], map: "idx_type_code")
+}
+
+model agrement_beneficiaires {
+  id              String        @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  agrement_id     String        @db.Char(36)
+  beneficiaire_id String        @db.Char(36)
+  role            String?       @db.VarChar(50)
+  created_at      DateTime      @default(now())
+  agrements       agrements     @relation(fields: [agrement_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_beneficiaires_ibfk_1")
+  beneficiaires   beneficiaires @relation(fields: [beneficiaire_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_beneficiaires_ibfk_2")
+
+  @@unique([agrement_id, beneficiaire_id], map: "uk_agrement_beneficiaire")
+  @@index([agrement_id], map: "idx_agrement_id")
+  @@index([beneficiaire_id], map: "idx_beneficiaire_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model agrements {
+  id                        String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  reference                 String                   @unique(map: "reference") @db.VarChar(30)
+  beneficiaire_id           String                   @db.Char(36)
+  type_agrement_code        String                   @db.VarChar(50)
+  base_juridique_version_id String?                  @db.Char(36)
+  regime_code               String?                  @db.VarChar(50)
+  statut_code               String                   @default("active") @db.VarChar(50)
+  date_debut                DateTime                 @db.Date
+  date_fin                  DateTime                 @db.Date
+  montant_estime            BigInt?
+  objet                     String?                  @db.Text
+  document_url              String?                  @db.VarChar(500)
+  hash_document             String?                  @db.Char(64)
+  created_at                DateTime                 @default(now())
+  updated_at                DateTime                 @default(now())
+  agrement_beneficiaires    agrement_beneficiaires[]
+  beneficiaires             beneficiaires            @relation(fields: [beneficiaire_id], references: [id], onUpdate: NoAction, map: "agrements_ibfk_1")
+  ref_types_agrement        ref_types_agrement       @relation(fields: [type_agrement_code], references: [code], onUpdate: NoAction, map: "agrements_ibfk_2")
+  base_juridique_versions   base_juridique_versions? @relation(fields: [base_juridique_version_id], references: [id], onUpdate: NoAction, map: "agrements_ibfk_3")
+  ref_regimes_convention    ref_regimes_convention?  @relation(fields: [regime_code], references: [code], onUpdate: NoAction, map: "agrements_ibfk_4")
+  ref_statuts_convention    ref_statuts_convention   @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "agrements_ibfk_5")
+
+  @@index([base_juridique_version_id], map: "idx_base_juridique_version_id")
+  @@index([beneficiaire_id], map: "idx_beneficiaire_id")
+  @@index([statut_code], map: "idx_statut_code")
+  @@index([type_agrement_code], map: "idx_type_agrement_code")
+  @@index([regime_code], map: "regime_code")
+}
+
+model anomalies {
+  id                        String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  categorie_code            String                   @db.VarChar(50)
+  gravite_code              String                   @db.VarChar(50)
+  description               String                   @db.Text
+  demande_id                String?                  @db.Char(36)
+  base_juridique_version_id String?                  @db.Char(36)
+  convention_id             String?                  @db.Char(36)
+  date_detection            DateTime                 @default(now())
+  statut_code               String                   @default("nouvelle") @db.VarChar(50)
+  detectee_par_code         String                   @db.VarChar(50)
+  utilisateur_id            String?                  @db.Char(36)
+  regle_id                  String?                  @db.VarChar(100)
+  commentaire               String?                  @db.Text
+  date_resolution           DateTime?
+  created_at                DateTime                 @default(now())
+  updated_at                DateTime                 @default(now())
+  demandes                  demandes?                @relation(fields: [demande_id], references: [id], onUpdate: NoAction, map: "anomalies_ibfk_1")
+  base_juridique_versions   base_juridique_versions? @relation(fields: [base_juridique_version_id], references: [id], onUpdate: NoAction, map: "anomalies_ibfk_2")
+  conventions               conventions?             @relation(fields: [convention_id], references: [id], onUpdate: NoAction, map: "anomalies_ibfk_3")
+  utilisateurs              utilisateurs?            @relation(fields: [utilisateur_id], references: [id], onUpdate: NoAction, map: "anomalies_ibfk_4")
+  ref_categories_anomalie   ref_categories_anomalie  @relation(fields: [categorie_code], references: [code], onUpdate: NoAction, map: "anomalies_ibfk_5")
+  ref_gravites_anomalie     ref_gravites_anomalie    @relation(fields: [gravite_code], references: [code], onUpdate: NoAction, map: "anomalies_ibfk_6")
+  ref_statuts_anomalie      ref_statuts_anomalie     @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "anomalies_ibfk_7")
+  ref_sources_detection     ref_sources_detection    @relation(fields: [detectee_par_code], references: [code], onUpdate: NoAction, map: "anomalies_ibfk_8")
+  regles_anomalie           regles_anomalie?         @relation(fields: [regle_id], references: [code], onUpdate: NoAction, map: "fk_anomalies_regle")
+
+  @@index([regle_id], map: "fk_anomalies_regle")
+  @@index([demande_id, gravite_code], map: "idx_anomalies_demande_gravite")
+  @@index([base_juridique_version_id], map: "idx_base_juridique_version_id")
+  @@index([categorie_code], map: "idx_categorie_code")
+  @@index([convention_id], map: "idx_convention_id")
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([detectee_par_code], map: "idx_detectee_par_code")
+  @@index([gravite_code, statut_code], map: "idx_gravite_code_statut_code")
+  @@index([statut_code], map: "statut_code")
+  @@index([utilisateur_id], map: "utilisateur_id")
+}
+
+model archivages {
+  id                    String                @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  type_entite           String                @db.VarChar(50)
+  entite_id             String                @db.Char(36)
+  demande_id            String?               @db.Char(36)
+  statut_code           String                @default("en_attente") @db.VarChar(50)
+  chemin_archive        String?               @db.VarChar(500)
+  hash_archive          String?               @db.Char(64)
+  declenche_par         String                @default("systeme") @db.VarChar(50)
+  date_archivage        DateTime?
+  created_at            DateTime              @default(now())
+  demandes              demandes?             @relation(fields: [demande_id], references: [id], onUpdate: NoAction, map: "archivages_ibfk_1")
+  ref_statuts_archivage ref_statuts_archivage @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "archivages_ibfk_2")
+
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([statut_code], map: "idx_statut_code")
+  @@index([type_entite, entite_id], map: "idx_type_entite_entite_id")
+}
+
+model audit_logs {
+  id               String        @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  horodatage       DateTime      @default(now())
+  utilisateur_id   String?       @db.Char(36)
+  role_au_moment   String?       @db.VarChar(50)
+  institution      String?       @db.VarChar(100)
+  action           String        @db.VarChar(100)
+  entite           String        @db.VarChar(50)
+  entite_id        String        @db.Char(36)
+  demande_id       String?       @db.Char(36)
+  ancienne_valeur  Json?
+  nouvelle_valeur  Json?
+  ip               String?       @db.VarChar(45)
+  user_agent       String?       @db.Text
+  hash_precedent   String?       @db.Char(64)
+  empreinte_sha256 String        @db.Char(64)
+  created_at       DateTime      @default(now())
+  utilisateurs     utilisateurs? @relation(fields: [utilisateur_id], references: [id], onUpdate: NoAction, map: "audit_logs_ibfk_1")
+  demandes         demandes?     @relation(fields: [demande_id], references: [id], onUpdate: NoAction, map: "audit_logs_ibfk_2")
+
+  @@index([action], map: "idx_action")
+  @@index([action, entite], map: "idx_audit_logs_action_entite")
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([entite, entite_id], map: "idx_entite_entite_id")
+  @@index([horodatage], map: "idx_horodatage")
+  @@index([utilisateur_id], map: "idx_utilisateur_id")
+}
+
+model base_juridique_documents {
+  id                        String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  base_juridique_version_id String                  @db.Char(36)
+  type_document             String                  @db.VarChar(50)
+  reference_document        String?                 @db.VarChar(200)
+  date_document             DateTime?               @db.Date
+  nom_fichier               String                  @db.VarChar(300)
+  type_mime                 String                  @default("application/pdf") @db.VarChar(100)
+  taille_octets             BigInt?
+  url_stockage              String                  @db.VarChar(500)
+  hash_sha256               String                  @db.Char(64)
+  est_texte_fondateur       Boolean                 @default(false)
+  est_public                Boolean                 @default(true)
+  uploaded_by_id            String?                 @db.Char(36)
+  created_at                DateTime                @default(now())
+  updated_at                DateTime                @default(now())
+  base_juridique_versions   base_juridique_versions @relation(fields: [base_juridique_version_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "base_juridique_documents_ibfk_1")
+  utilisateurs              utilisateurs?           @relation(fields: [uploaded_by_id], references: [id], onUpdate: NoAction, map: "base_juridique_documents_ibfk_2")
+
+  @@index([base_juridique_version_id], map: "idx_base_juridique_version_id")
+  @@index([date_document], map: "idx_date_document")
+  @@index([est_public], map: "idx_est_public")
+  @@index([est_texte_fondateur], map: "idx_est_texte_fondateur")
+  @@index([type_document], map: "idx_type_document")
+  @@index([uploaded_by_id], map: "uploaded_by_id")
+}
+
+model base_juridique_versions {
+  id                         String                     @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  base_juridique_id          String                     @db.Char(36)
+  version                    Int                        @default(1)
+  libelle                    String                     @db.Text
+  impot_concerne             String                     @db.VarChar(100)
+  nature_mesure_code         String                     @db.VarChar(50)
+  type_texte_1               String?                    @db.VarChar(100)
+  type_texte_2               String?                    @db.VarChar(50)
+  support_juridique_base     String?                    @db.Text
+  support_juridique_complem  String?                    @db.Text
+  article                    String?                    @db.VarChar(200)
+  article_cgi_2025           String?                    @db.VarChar(100)
+  portee_categorie_code      String                     @default("Permanente") @db.VarChar(50)
+  portee_duree_mois          Int?
+  portee_description         String?                    @db.Text
+  organe_gestion_code        String?                    @db.VarChar(50)
+  organe_attribution         String?                    @db.VarChar(100)
+  systeme_information        String?                    @db.VarChar(100)
+  mode_instruction_code      String                     @default("manuel") @db.VarChar(50)
+  objectif_type              String?                    @db.VarChar(50)
+  branche_activite           String?                    @db.VarChar(100)
+  type_beneficiaire_cible    String?                    @db.VarChar(100)
+  est_depense_fiscale_2024   Boolean                    @default(false)
+  est_evaluee_2024           Boolean                    @default(false)
+  donnees_disponibles        Boolean                    @default(false)
+  fonction_budgetaire        String?                    @db.VarChar(100)
+  conformite_texte_fondament String?                    @db.VarChar(10)
+  conformite_directive_uemoa String?                    @db.VarChar(10)
+  odd                        String?                    @db.VarChar(20)
+  programme_dotation         String?                    @db.VarChar(100)
+  position_sh                String?                    @db.VarChar(50)
+  est_active                 Boolean                    @default(true)
+  date_adoption              DateTime?                  @db.Date
+  date_abrogation            DateTime?                  @db.Date
+  valid_from                 DateTime                   @default(now())
+  valid_to                   DateTime?
+  created_at                 DateTime                   @default(now())
+  updated_at                 DateTime                   @default(now())
+  version_courante_flag      Int?                       @db.TinyInt
+  agrements                  agrements[]
+  anomalies                  anomalies[]
+  base_juridique_documents   base_juridique_documents[]
+  bases_juridiques           bases_juridiques           @relation(fields: [base_juridique_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "base_juridique_versions_ibfk_1")
+  ref_natures_mesure         ref_natures_mesure         @relation(fields: [nature_mesure_code], references: [code], onUpdate: NoAction, map: "base_juridique_versions_ibfk_2")
+  ref_portees_categorie      ref_portees_categorie      @relation(fields: [portee_categorie_code], references: [code], onUpdate: NoAction, map: "base_juridique_versions_ibfk_3")
+  ref_organes_gestion        ref_organes_gestion?       @relation(fields: [organe_gestion_code], references: [code], onUpdate: NoAction, map: "base_juridique_versions_ibfk_4")
+  ref_modes_instruction      ref_modes_instruction      @relation(fields: [mode_instruction_code], references: [code], onUpdate: NoAction, map: "base_juridique_versions_ibfk_5")
+  codes_additionnels         codes_additionnels[]
+  conventions                conventions[]
+  demandes                   demandes[]
+  quotas                     quotas[]
+  workflow_templates         workflow_templates[]
+
+  @@unique([base_juridique_id, version], map: "uk_base_juridique_version")
+  @@unique([base_juridique_id, version_courante_flag], map: "uk_une_seule_version_active")
+  @@index([base_juridique_id], map: "idx_base_juridique_id")
+  @@index([base_juridique_id, est_active, valid_to], map: "idx_base_juridique_versions_active")
+  @@index([valid_from, valid_to], map: "idx_code_mesure_version")
+  @@index([est_active, valid_to], map: "idx_est_active_valid_to")
+  @@index([impot_concerne], map: "idx_impot_concerne")
+  @@index([mode_instruction_code], map: "idx_mode_instruction_code")
+  @@index([organe_gestion_code], map: "idx_organe_gestion_code")
+  @@index([type_texte_1], map: "idx_type_texte_1")
+  @@index([nature_mesure_code], map: "nature_mesure_code")
+  @@index([portee_categorie_code], map: "portee_categorie_code")
+  @@fulltext([libelle], map: "ft_bjv_libelle")
+}
+
+model bases_juridiques {
+  id                      String                    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code_mesure             String                    @unique(map: "code_mesure") @db.VarChar(20)
+  code_mesure_mrd         Int?
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime                  @default(now())
+  base_juridique_versions base_juridique_versions[]
+
+  @@index([code_mesure], map: "idx_code_mesure")
+  @@index([code_mesure_mrd], map: "idx_code_mesure_mrd")
+}
+
+model beneficiaire_historique_fiscal {
+  id                 String             @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  beneficiaire_id    String             @db.Char(36)
+  statut_fiscal_code String             @db.VarChar(50)
+  date_debut         DateTime           @db.Date
+  date_fin           DateTime?          @db.Date
+  source             String?            @db.VarChar(100)
+  connecteur_code    String?            @db.VarChar(50)
+  created_at         DateTime           @default(now())
+  beneficiaires      beneficiaires      @relation(fields: [beneficiaire_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "beneficiaire_historique_fiscal_ibfk_1")
+  ref_statuts_fiscal ref_statuts_fiscal @relation(fields: [statut_fiscal_code], references: [code], onUpdate: NoAction, map: "beneficiaire_historique_fiscal_ibfk_2")
+  connecteurs        connecteurs?       @relation(fields: [connecteur_code], references: [code_systeme], onUpdate: NoAction, map: "fk_histofiscal_connecteur")
+
+  @@index([connecteur_code], map: "fk_histofiscal_connecteur")
+  @@index([beneficiaire_id], map: "idx_beneficiaire_id")
+  @@index([statut_fiscal_code], map: "idx_statut_fiscal_code")
+}
+
+model beneficiaires {
+  id                             String                           @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  raison_sociale                 String                           @db.VarChar(200)
+  nif                            String                           @unique(map: "nif") @db.VarChar(20)
+  rccm                           String?                          @db.VarChar(30)
+  type_beneficiaire_code         String                           @db.VarChar(50)
+  statut_fiscal_code             String                           @default("inconnu") @db.VarChar(50)
+  secteur                        String?                          @db.VarChar(100)
+  region                         String?                          @db.VarChar(100)
+  email_contact                  String?                          @db.VarChar(200)
+  telephone                      String?                          @db.VarChar(20)
+  adresse                        String?                          @db.Text
+  accord_siege_id                String?                          @db.Char(36)
+  user_id                        String?                          @unique(map: "user_id") @db.Char(36)
+  created_at                     DateTime                         @default(now())
+  updated_at                     DateTime                         @default(now())
+  actes                          actes[]
+  agrement_beneficiaires         agrement_beneficiaires[]
+  agrements                      agrements[]
+  beneficiaire_historique_fiscal beneficiaire_historique_fiscal[]
+  accords_siege                  accords_siege?                   @relation(fields: [accord_siege_id], references: [id], onUpdate: NoAction, map: "beneficiaires_ibfk_1")
+  ref_types_beneficiaire         ref_types_beneficiaire           @relation(fields: [type_beneficiaire_code], references: [code], onUpdate: NoAction, map: "beneficiaires_ibfk_2")
+  ref_statuts_fiscal             ref_statuts_fiscal               @relation(fields: [statut_fiscal_code], references: [code], onUpdate: NoAction, map: "beneficiaires_ibfk_3")
+  utilisateurs                   utilisateurs?                    @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "beneficiaires_ibfk_4")
+  conventions                    conventions[]
+  demandes                       demandes[]
+  quotas                         quotas[]
+
+  @@index([accord_siege_id], map: "idx_accord_siege_id")
+  @@index([nif], map: "idx_nif")
+  @@index([statut_fiscal_code], map: "idx_statut_fiscal_code")
+  @@index([type_beneficiaire_code], map: "idx_type_beneficiaire_code")
+  @@fulltext([raison_sociale], map: "ft_beneficiaires")
+}
+
+model codes_additionnels {
+  id                        String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  base_juridique_version_id String                  @db.Char(36)
+  code                      String                  @db.VarChar(50)
+  source_code               String                  @db.VarChar(50)
+  est_principal             Boolean                 @default(true)
+  created_at                DateTime                @default(now())
+  base_juridique_versions   base_juridique_versions @relation(fields: [base_juridique_version_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "codes_additionnels_ibfk_1")
+  ref_sources_code          ref_sources_code        @relation(fields: [source_code], references: [code], onUpdate: NoAction, map: "codes_additionnels_ibfk_2")
+
+  @@index([base_juridique_version_id], map: "idx_base_juridique_version_id")
+  @@index([code, source_code], map: "idx_code_source")
+  @@index([source_code], map: "source_code")
+}
+
+model connecteur_logs {
+  id              String      @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  connecteur_id   String      @db.Char(36)
+  direction       String      @db.VarChar(10)
+  operation       String      @db.VarChar(100)
+  payload_entrant Json?
+  payload_sortant Json?
+  statut_http     Int?
+  duree_ms        Int?
+  est_erreur      Boolean     @default(false)
+  message_erreur  String?     @db.Text
+  created_at      DateTime    @default(now())
+  connecteurs     connecteurs @relation(fields: [connecteur_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "connecteur_logs_ibfk_1")
+
+  @@index([connecteur_id], map: "idx_connecteur_id")
+  @@index([connecteur_id, created_at], map: "idx_connecteur_logs_connecteur_date")
+  @@index([created_at], map: "idx_created_at")
+  @@index([est_erreur], map: "idx_est_erreur")
+  @@index([operation], map: "idx_operation")
+}
+
+model connecteurs {
+  id                             String                           @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  nom                            String                           @db.VarChar(50)
+  code_systeme                   String                           @unique(map: "code_systeme") @db.VarChar(20)
+  institution_id                 String?                          @db.Char(36)
+  statut_code                    String                           @default("inactif") @db.VarChar(50)
+  endpoint                       String                           @db.VarChar(500)
+  config_auth                    Json
+  latence_ms                     Int                              @default(0)
+  taux_erreur                    Decimal                          @default(0.00) @db.Decimal(5, 2)
+  dernier_sync                   DateTime?
+  volume_24h                     Int                              @default(0)
+  fallback_manuel                Boolean                          @default(false)
+  timeout_s                      Int                              @default(10)
+  failure_threshold              Int                              @default(3)
+  created_at                     DateTime                         @default(now())
+  updated_at                     DateTime                         @default(now())
+  beneficiaire_historique_fiscal beneficiaire_historique_fiscal[]
+  connecteur_logs                connecteur_logs[]
+  institutions                   institutions?                    @relation(fields: [institution_id], references: [id], onUpdate: NoAction, map: "connecteurs_ibfk_1")
+  ref_statuts_connecteur         ref_statuts_connecteur           @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "connecteurs_ibfk_2")
+  demande_sync_externe           demande_sync_externe[]
+
+  @@index([institution_id], map: "idx_institution_id")
+  @@index([statut_code], map: "idx_statut_code")
+}
+
+model convention_engagements {
+  id              String      @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  convention_id   String      @db.Char(36)
+  type_engagement String      @db.VarChar(50)
+  periode_annee   Int?
+  objectif        BigInt?
+  realise         BigInt?
+  commentaire     String?     @db.Text
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @default(now())
+  conventions     conventions @relation(fields: [convention_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "convention_engagements_ibfk_1")
+
+  @@index([convention_id], map: "idx_convention_id")
+  @@index([type_engagement], map: "idx_type_engagement")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model conventions {
+  id                        String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  reference                 String                   @unique(map: "reference") @db.VarChar(30)
+  beneficiaire_id           String                   @db.Char(36)
+  base_juridique_version_id String?                  @db.Char(36)
+  accord_siege_id           String?                  @db.Char(36)
+  regime_code               String                   @db.VarChar(50)
+  statut_code               String                   @default("active") @db.VarChar(50)
+  date_debut                DateTime                 @db.Date
+  date_fin                  DateTime                 @db.Date
+  montant_estime            BigInt?
+  emplois_engages           Int?
+  emplois_crees             Int?
+  zone_zfi                  String?                  @db.VarChar(50)
+  objet                     String?                  @db.Text
+  created_at                DateTime                 @default(now())
+  updated_at                DateTime                 @default(now())
+  anomalies                 anomalies[]
+  convention_engagements    convention_engagements[]
+  beneficiaires             beneficiaires            @relation(fields: [beneficiaire_id], references: [id], onUpdate: NoAction, map: "conventions_ibfk_1")
+  base_juridique_versions   base_juridique_versions? @relation(fields: [base_juridique_version_id], references: [id], onUpdate: NoAction, map: "conventions_ibfk_2")
+  accords_siege             accords_siege?           @relation(fields: [accord_siege_id], references: [id], onUpdate: NoAction, map: "conventions_ibfk_3")
+  ref_regimes_convention    ref_regimes_convention   @relation(fields: [regime_code], references: [code], onUpdate: NoAction, map: "conventions_ibfk_4")
+  ref_statuts_convention    ref_statuts_convention   @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "conventions_ibfk_5")
+  demandes                  demandes[]
+  quotas                    quotas[]
+
+  @@index([accord_siege_id], map: "idx_accord_siege_id")
+  @@index([base_juridique_version_id], map: "idx_base_juridique_version_id")
+  @@index([beneficiaire_id], map: "idx_beneficiaire_id")
+  @@index([date_fin], map: "idx_date_fin")
+  @@index([statut_code], map: "idx_statut_code")
+  @@index([regime_code], map: "regime_code")
+}
+
+model decisions {
+  id                 String             @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demande_id         String             @db.Char(36)
+  utilisateur_id     String             @db.Char(36)
+  type_code          String             @db.VarChar(50)
+  date_decision      DateTime           @default(now())
+  motif              String?            @db.Text
+  document_url       String?            @db.VarChar(500)
+  hash_sha256        String?            @db.Char(64)
+  pin_hash           String?            @db.VarChar(60)
+  est_signe          Boolean            @default(false)
+  created_at         DateTime           @default(now())
+  actes              actes[]
+  demandes           demandes           @relation(fields: [demande_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "decisions_ibfk_1")
+  utilisateurs       utilisateurs       @relation(fields: [utilisateur_id], references: [id], onUpdate: NoAction, map: "decisions_ibfk_2")
+  ref_types_decision ref_types_decision @relation(fields: [type_code], references: [code], onUpdate: NoAction, map: "decisions_ibfk_3")
+
+  @@index([demande_id, type_code], map: "idx_decisions_demande_type")
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([type_code], map: "idx_type_code")
+  @@index([utilisateur_id], map: "idx_utilisateur_id")
+}
+
+model demande_complements {
+  id                String            @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demande_id        String            @db.Char(36)
+  instructeur_id    String            @db.Char(36)
+  motif             String            @db.Text
+  pieces_attendues  String?           @db.Text
+  date_demande      DateTime          @default(now())
+  date_reponse      DateTime?
+  statut_code       String            @default("en_attente") @db.VarChar(50)
+  created_at        DateTime          @default(now())
+  demandes          demandes          @relation(fields: [demande_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_complements_ibfk_1")
+  utilisateurs      utilisateurs      @relation(fields: [instructeur_id], references: [id], onUpdate: NoAction, map: "demande_complements_ibfk_2")
+  ref_statuts_etape ref_statuts_etape @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "demande_complements_ibfk_3")
+
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([instructeur_id], map: "idx_instructeur_id")
+  @@index([statut_code], map: "idx_statut_code")
+}
+
+model demande_sync_externe {
+  id                      String      @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demande_id              String      @db.Char(36)
+  connecteur_id           String      @db.Char(36)
+  operation               String      @db.VarChar(100)
+  statut_code             String      @default("en_attente") @db.VarChar(50)
+  payload_envoye          Json?
+  reponse_recue           Json?
+  nombre_tentatives       Int         @default(0)
+  date_derniere_tentative DateTime?
+  message_erreur          String?     @db.Text
+  created_at              DateTime    @default(now())
+  updated_at              DateTime    @default(now())
+  demandes                demandes    @relation(fields: [demande_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_sync_externe_ibfk_1")
+  connecteurs             connecteurs @relation(fields: [connecteur_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_sync_externe_ibfk_2")
+
+  @@index([connecteur_id], map: "idx_connecteur_id")
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([statut_code], map: "idx_statut_code")
+}
+
+model demande_workflow_etapes {
+  id                         String                     @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  instance_id                String                     @db.Char(36)
+  template_etape_id          String                     @db.Char(36)
+  nom_etape                  String                     @db.VarChar(200)
+  ordre                      Int
+  acteur_role                String                     @db.VarChar(50)
+  acteur_id                  String?                    @db.Char(36)
+  statut_code                String                     @default("en_attente") @db.VarChar(50)
+  date_debut                 DateTime?
+  date_fin                   DateTime?
+  delai_cible_jours          Int?
+  commentaire                String?                    @db.Text
+  pin_signe                  Boolean                    @default(false)
+  decision_prise             Boolean                    @default(false)
+  created_at                 DateTime                   @default(now())
+  demande_workflow_instances demande_workflow_instances @relation(fields: [instance_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_workflow_etapes_ibfk_1")
+  workflow_template_etapes   workflow_template_etapes   @relation(fields: [template_etape_id], references: [id], onUpdate: NoAction, map: "demande_workflow_etapes_ibfk_2")
+  utilisateurs               utilisateurs?              @relation(fields: [acteur_id], references: [id], onUpdate: NoAction, map: "demande_workflow_etapes_ibfk_3")
+  ref_statuts_etape          ref_statuts_etape          @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "demande_workflow_etapes_ibfk_4")
+
+  @@index([acteur_id], map: "idx_acteur_id")
+  @@index([instance_id, ordre], map: "idx_demande_workflow_etapes_instance_ordre")
+  @@index([instance_id], map: "idx_instance_id")
+  @@index([instance_id, ordre], map: "idx_instance_id_ordre")
+  @@index([statut_code], map: "idx_statut_code")
+  @@index([template_etape_id], map: "template_etape_id")
+}
+
+model demande_workflow_instances {
+  id                      String                    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demande_id              String                    @unique(map: "demande_id") @db.Char(36)
+  workflow_template_id    String                    @db.Char(36)
+  statut_code             String                    @default("en_cours") @db.VarChar(50)
+  date_debut              DateTime                  @default(now())
+  date_fin                DateTime?
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime                  @default(now())
+  demande_workflow_etapes demande_workflow_etapes[]
+  demandes                demandes                  @relation(fields: [demande_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "demande_workflow_instances_ibfk_1")
+  workflow_templates      workflow_templates        @relation(fields: [workflow_template_id], references: [id], onUpdate: NoAction, map: "demande_workflow_instances_ibfk_2")
+  ref_statuts_etape       ref_statuts_etape         @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "demande_workflow_instances_ibfk_3")
+
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([workflow_template_id], map: "idx_workflow_template_id")
+  @@index([statut_code], map: "statut_code")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model demandes {
+  id                         String                      @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  reference                  String                      @unique(map: "reference") @db.VarChar(20)
+  base_juridique_version_id  String                      @db.Char(36)
+  beneficiaire_id            String                      @db.Char(36)
+  convention_id              String?                     @db.Char(36)
+  instructeur_id             String?                     @db.Char(36)
+  statut_code                String                      @default("brouillon") @db.VarChar(50)
+  date_depot                 DateTime?
+  date_echeance              DateTime?                   @db.Date
+  date_archivage             DateTime?                   @db.Date
+  montant_fcfa               BigInt                      @default(0)
+  devise                     String                      @default("XOF") @db.VarChar(3)
+  quota_consomme             BigInt?
+  quota_total                BigInt?
+  secteur                    String?                     @db.VarChar(100)
+  etape_actuelle             String?                     @db.VarChar(200)
+  motif_rejet                String?                     @db.Text
+  declaration_honneur        Boolean                     @default(false)
+  est_urgente                Boolean                     @default(false)
+  created_at                 DateTime                    @default(now())
+  updated_at                 DateTime                    @default(now())
+  deleted_at                 DateTime?
+  actes                      actes[]
+  anomalies                  anomalies[]
+  archivages                 archivages[]
+  audit_logs                 audit_logs[]
+  decisions                  decisions[]
+  demande_complements        demande_complements[]
+  demande_sync_externe       demande_sync_externe[]
+  demande_workflow_instances demande_workflow_instances?
+  base_juridique_versions    base_juridique_versions     @relation(fields: [base_juridique_version_id], references: [id], onUpdate: NoAction, map: "demandes_ibfk_1")
+  beneficiaires              beneficiaires               @relation(fields: [beneficiaire_id], references: [id], onUpdate: NoAction, map: "demandes_ibfk_2")
+  conventions                conventions?                @relation(fields: [convention_id], references: [id], onUpdate: NoAction, map: "demandes_ibfk_3")
+  utilisateurs               utilisateurs?               @relation(fields: [instructeur_id], references: [id], onUpdate: NoAction, map: "demandes_ibfk_4")
+  ref_statuts_demande        ref_statuts_demande         @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "demandes_ibfk_5")
+  notification_queue         notification_queue[]
+  notifications              notifications[]
+  pieces_jointes             pieces_jointes[]
+  quota_mouvements           quota_mouvements[]
+
+  @@index([base_juridique_version_id], map: "idx_base_juridique_version_id")
+  @@index([beneficiaire_id], map: "idx_beneficiaire_id")
+  @@index([convention_id], map: "idx_convention_id")
+  @@index([created_at], map: "idx_created_at")
+  @@index([date_archivage], map: "idx_date_archivage")
+  @@index([date_echeance], map: "idx_date_echeance")
+  @@index([beneficiaire_id, statut_code], map: "idx_demandes_beneficiaire_statut")
+  @@index([statut_code, created_at], map: "idx_demandes_statut_created")
+  @@index([instructeur_id], map: "idx_instructeur_id")
+  @@index([reference], map: "idx_reference")
+  @@index([statut_code], map: "idx_statut_code")
+}
+
+model imports_mrd {
+  id                  String        @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  nom_fichier         String        @db.VarChar(300)
+  type_fichier        String        @db.VarChar(20)
+  statut_code         String        @default("pending") @db.VarChar(50)
+  lignes_total        Int?
+  lignes_importees    Int?
+  lignes_rejetees     Int?
+  rapport             Json?
+  fichier_erreurs_url String?       @db.VarChar(500)
+  lance_par_id        String        @db.Char(36)
+  date_debut          DateTime?
+  date_fin            DateTime?
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @default(now())
+  utilisateurs        utilisateurs  @relation(fields: [lance_par_id], references: [id], onUpdate: NoAction, map: "imports_mrd_ibfk_1")
+  ref_etats_job       ref_etats_job @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "imports_mrd_ibfk_2")
+
+  @@index([lance_par_id], map: "idx_lance_par_id")
+  @@index([statut_code], map: "idx_statut_code")
+}
+
+model institutions {
+  id                    String                @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                  String                @unique(map: "code") @db.VarChar(20)
+  nom                   String                @db.VarChar(200)
+  type_code             String                @db.VarChar(50)
+  est_active            Boolean               @default(true)
+  created_at            DateTime              @default(now())
+  connecteurs           connecteurs[]
+  ref_types_institution ref_types_institution @relation(fields: [type_code], references: [code], onUpdate: NoAction, map: "institutions_ibfk_1")
+  utilisateurs          utilisateurs[]
+
+  @@index([est_active], map: "idx_est_active")
+  @@index([type_code], map: "idx_type_code")
+}
+
+model job_queue {
+  id                String        @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  type_job_code     String        @db.VarChar(50)
+  payload           Json
+  priorite          Int           @default(5)
+  statut_code       String        @default("pending") @db.VarChar(50)
+  date_prevue       DateTime?
+  date_debut        DateTime?
+  date_fin          DateTime?
+  resultat          Json?
+  erreur            String?       @db.Text
+  nombre_tentatives Int           @default(0)
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @default(now())
+  ref_types_job     ref_types_job @relation(fields: [type_job_code], references: [code], onUpdate: NoAction, map: "job_queue_ibfk_1")
+  ref_etats_job     ref_etats_job @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "job_queue_ibfk_2")
+
+  @@index([date_prevue], map: "idx_date_prevue")
+  @@index([priorite], map: "idx_priorite")
+  @@index([statut_code], map: "idx_statut_code")
+  @@index([type_job_code], map: "idx_type_job_code")
+}
+
+model notification_preferences {
+  id                      String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateur_id          String                  @db.Char(36)
+  type_notification_code  String                  @db.VarChar(50)
+  canal_code              String                  @db.VarChar(50)
+  est_active              Boolean                 @default(true)
+  created_at              DateTime                @default(now())
+  updated_at              DateTime                @default(now())
+  utilisateurs            utilisateurs            @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "notification_preferences_ibfk_1")
+  ref_types_notification  ref_types_notification  @relation(fields: [type_notification_code], references: [code], onUpdate: NoAction, map: "notification_preferences_ibfk_2")
+  ref_canaux_notification ref_canaux_notification @relation(fields: [canal_code], references: [code], onUpdate: NoAction, map: "notification_preferences_ibfk_3")
+
+  @@unique([utilisateur_id, type_notification_code, canal_code], map: "uk_user_type_canal")
+  @@index([canal_code], map: "canal_code")
+  @@index([utilisateur_id], map: "idx_utilisateur_id")
+  @@index([type_notification_code], map: "type_notification_code")
+}
+
+model notification_queue {
+  id                       String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateur_id           String                   @db.Char(36)
+  demande_id               String?                  @db.Char(36)
+  type_notification_code   String                   @db.VarChar(50)
+  canal_code               String                   @db.VarChar(50)
+  sujet                    String                   @db.VarChar(200)
+  corps                    String                   @db.Text
+  statut_code              String                   @default("pending") @db.VarChar(50)
+  date_envoi               DateTime?
+  date_lecture             DateTime?
+  erreur                   String?                  @db.Text
+  nombre_tentatives        Int                      @default(0)
+  created_at               DateTime                 @default(now())
+  updated_at               DateTime                 @default(now())
+  utilisateurs             utilisateurs             @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "notification_queue_ibfk_1")
+  demandes                 demandes?                @relation(fields: [demande_id], references: [id], onUpdate: NoAction, map: "notification_queue_ibfk_2")
+  ref_types_notification   ref_types_notification   @relation(fields: [type_notification_code], references: [code], onUpdate: NoAction, map: "notification_queue_ibfk_3")
+  ref_canaux_notification  ref_canaux_notification  @relation(fields: [canal_code], references: [code], onUpdate: NoAction, map: "notification_queue_ibfk_4")
+  ref_statuts_notification ref_statuts_notification @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "notification_queue_ibfk_5")
+  notifications            notifications[]
+
+  @@index([canal_code], map: "canal_code")
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([statut_code, created_at], map: "idx_notification_queue_statut_date")
+  @@index([statut_code], map: "idx_statut_code")
+  @@index([type_notification_code], map: "idx_type_notification_code")
+  @@index([utilisateur_id], map: "idx_utilisateur_id")
+}
+
+model notification_templates {
+  id                      String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                    String                  @unique(map: "code") @db.VarChar(100)
+  type_notification_code  String                  @db.VarChar(50)
+  canal_code              String                  @db.VarChar(50)
+  sujet                   String                  @db.VarChar(200)
+  corps                   String                  @db.Text
+  variables               String?                 @db.Text
+  est_active              Boolean                 @default(true)
+  created_at              DateTime                @default(now())
+  updated_at              DateTime                @default(now())
+  ref_types_notification  ref_types_notification  @relation(fields: [type_notification_code], references: [code], onUpdate: NoAction, map: "notification_templates_ibfk_1")
+  ref_canaux_notification ref_canaux_notification @relation(fields: [canal_code], references: [code], onUpdate: NoAction, map: "notification_templates_ibfk_2")
+
+  @@index([canal_code], map: "idx_canal_code")
+  @@index([type_notification_code], map: "idx_type_notification_code")
+}
+
+model notifications {
+  id                      String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateur_id          String                  @db.Char(36)
+  demande_id              String?                 @db.Char(36)
+  type_notification_code  String                  @db.VarChar(50)
+  canal_code              String                  @db.VarChar(50)
+  titre                   String                  @db.VarChar(200)
+  corps                   String                  @db.Text
+  est_lue                 Boolean                 @default(false)
+  date_lecture            DateTime?
+  queue_id                String?                 @db.Char(36)
+  created_at              DateTime                @default(now())
+  utilisateurs            utilisateurs            @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "notifications_ibfk_1")
+  demandes                demandes?               @relation(fields: [demande_id], references: [id], onUpdate: NoAction, map: "notifications_ibfk_2")
+  ref_types_notification  ref_types_notification  @relation(fields: [type_notification_code], references: [code], onUpdate: NoAction, map: "notifications_ibfk_3")
+  ref_canaux_notification ref_canaux_notification @relation(fields: [canal_code], references: [code], onUpdate: NoAction, map: "notifications_ibfk_4")
+  notification_queue      notification_queue?     @relation(fields: [queue_id], references: [id], onUpdate: NoAction, map: "notifications_ibfk_5")
+
+  @@index([canal_code], map: "canal_code")
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([type_notification_code], map: "idx_type_notification_code")
+  @@index([utilisateur_id, est_lue], map: "idx_utilisateur_id_est_lue")
+  @@index([queue_id], map: "queue_id")
+}
+
+model opendata_publications {
+  id               String    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  periode_annee    Int
+  periode_mois     Int?
+  titre            String    @db.VarChar(200)
+  description      String?   @db.Text
+  fichier_url      String?   @db.VarChar(500)
+  donnees_json     Json?
+  est_publie       Boolean   @default(false)
+  date_publication DateTime?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @default(now())
+
+  @@index([est_publie], map: "idx_est_publie")
+  @@index([periode_annee, periode_mois], map: "idx_periode")
+}
+
+model parametres_systeme {
+  id                  String              @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                String              @unique(map: "code") @db.VarChar(100)
+  type_parametre_code String              @db.VarChar(50)
+  libelle             String              @db.VarChar(200)
+  valeur              String              @db.Text
+  description         String?             @db.Text
+  est_editable        Boolean             @default(true)
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @default(now())
+  ref_types_parametre ref_types_parametre @relation(fields: [type_parametre_code], references: [code], onUpdate: NoAction, map: "parametres_systeme_ibfk_1")
+
+  @@index([type_parametre_code], map: "idx_type_parametre_code")
+}
+
+model pieces_jointes {
+  id                     String              @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  demande_id             String              @db.Char(36)
+  nom_fichier            String              @db.VarChar(300)
+  type_mime              String              @db.VarChar(100)
+  taille_octets          BigInt
+  rang_code              String              @db.VarChar(50)
+  categorie              String              @db.VarChar(100)
+  type_document_code     String?             @db.VarChar(50)
+  url_stockage           String              @db.VarChar(500)
+  hash_sha256            String              @db.Char(64)
+  est_valide             Boolean?
+  valide_par_id          String?             @db.Char(36)
+  date_validation        DateTime?
+  commentaire_validation String?             @db.Text
+  created_at             DateTime            @default(now())
+  demandes               demandes            @relation(fields: [demande_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "pieces_jointes_ibfk_1")
+  ref_rangs_piece        ref_rangs_piece     @relation(fields: [rang_code], references: [code], onUpdate: NoAction, map: "pieces_jointes_ibfk_2")
+  ref_types_document     ref_types_document? @relation(fields: [type_document_code], references: [code], onUpdate: NoAction, map: "pieces_jointes_ibfk_3")
+  utilisateurs           utilisateurs?       @relation(fields: [valide_par_id], references: [id], onUpdate: NoAction, map: "pieces_jointes_ibfk_4")
+
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([hash_sha256], map: "idx_hash_sha256")
+  @@index([demande_id, rang_code], map: "idx_pieces_jointes_demande_rang")
+  @@index([rang_code], map: "idx_rang_code")
+  @@index([type_document_code], map: "idx_type_document_code")
+  @@index([valide_par_id], map: "valide_par_id")
+}
+
+model push_tokens {
+  id                       String          @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateur_id           String          @db.Char(36)
+  token                    String          @unique(map: "token") @db.VarChar(500)
+  canal_push_code          String          @db.VarChar(50)
+  device_id                String?         @db.VarChar(200)
+  modele_appareil          String?         @db.VarChar(200)
+  systeme_exploitation     String?         @db.VarChar(100)
+  version_app              String?         @db.VarChar(50)
+  est_actif                Boolean         @default(true)
+  date_dernier_utilisation DateTime?
+  created_at               DateTime        @default(now())
+  updated_at               DateTime        @default(now())
+  utilisateurs             utilisateurs    @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "push_tokens_ibfk_1")
+  ref_canaux_push          ref_canaux_push @relation(fields: [canal_push_code], references: [code], onUpdate: NoAction, map: "push_tokens_ibfk_2")
+
+  @@index([canal_push_code], map: "idx_canal_push_code")
+  @@index([utilisateur_id], map: "idx_utilisateur_id")
+}
+
+model quota_mouvements {
+  id                        String                    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  quota_id                  String                    @db.Char(36)
+  demande_id                String?                   @db.Char(36)
+  type_mouvement_code       String                    @db.VarChar(50)
+  montant                   BigInt
+  solde_avant               BigInt
+  solde_apres               BigInt
+  commentaire               String?                   @db.Text
+  created_at                DateTime                  @default(now())
+  quotas                    quotas                    @relation(fields: [quota_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "quota_mouvements_ibfk_1")
+  demandes                  demandes?                 @relation(fields: [demande_id], references: [id], onUpdate: NoAction, map: "quota_mouvements_ibfk_2")
+  ref_types_mouvement_quota ref_types_mouvement_quota @relation(fields: [type_mouvement_code], references: [code], onUpdate: NoAction, map: "quota_mouvements_ibfk_3")
+
+  @@index([demande_id], map: "idx_demande_id")
+  @@index([quota_id], map: "idx_quota_id")
+  @@index([quota_id, created_at], map: "idx_quota_mouvements_quota_date")
+  @@index([type_mouvement_code], map: "idx_type_mouvement_code")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model quotas {
+  id                        String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  base_juridique_version_id String                  @db.Char(36)
+  beneficiaire_id           String?                 @db.Char(36)
+  convention_id             String?                 @db.Char(36)
+  exercice_annuel           Int?
+  type_quota_code           String                  @db.VarChar(50)
+  unite_code                String                  @default("fcfa") @db.VarChar(50)
+  total                     BigInt
+  consomme                  BigInt                  @default(0)
+  alerte_seuil_pct          Int                     @default(80)
+  alerte_80_envoyee         Boolean                 @default(false)
+  alerte_100_envoyee        Boolean                 @default(false)
+  created_at                DateTime                @default(now())
+  updated_at                DateTime                @default(now())
+  quota_mouvements          quota_mouvements[]
+  base_juridique_versions   base_juridique_versions @relation(fields: [base_juridique_version_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "quotas_ibfk_1")
+  beneficiaires             beneficiaires?          @relation(fields: [beneficiaire_id], references: [id], onUpdate: NoAction, map: "quotas_ibfk_2")
+  conventions               conventions?            @relation(fields: [convention_id], references: [id], onUpdate: NoAction, map: "quotas_ibfk_3")
+  ref_types_quota           ref_types_quota         @relation(fields: [type_quota_code], references: [code], onUpdate: NoAction, map: "quotas_ibfk_4")
+  ref_unites_quota          ref_unites_quota        @relation(fields: [unite_code], references: [code], onUpdate: NoAction, map: "quotas_ibfk_5")
+
+  @@index([base_juridique_version_id], map: "idx_base_juridique_version_id")
+  @@index([beneficiaire_id], map: "idx_beneficiaire_id")
+  @@index([convention_id], map: "idx_convention_id")
+  @@index([exercice_annuel], map: "idx_exercice_annuel")
+  @@index([type_quota_code], map: "idx_type_quota_code")
+  @@index([unite_code], map: "unite_code")
+}
+
+model ref_canaux_notification {
+  code                     String                     @id @db.VarChar(50)
+  libelle                  String                     @db.VarChar(200)
+  description              String?                    @db.Text
+  ordre                    Int                        @default(0)
+  couleur                  String?                    @db.VarChar(7)
+  est_actif                Boolean                    @default(true)
+  created_at               DateTime                   @default(now())
+  notification_preferences notification_preferences[]
+  notification_queue       notification_queue[]
+  notification_templates   notification_templates[]
+  notifications            notifications[]
+}
+
+model ref_canaux_push {
+  code        String        @id @db.VarChar(50)
+  libelle     String        @db.VarChar(200)
+  description String?       @db.Text
+  ordre       Int           @default(0)
+  couleur     String?       @db.VarChar(7)
+  est_actif   Boolean       @default(true)
+  created_at  DateTime      @default(now())
+  push_tokens push_tokens[]
+}
+
+model ref_categories_anomalie {
+  code            String            @id @db.VarChar(50)
+  libelle         String            @db.VarChar(200)
+  description     String?           @db.Text
+  ordre           Int               @default(0)
+  couleur         String?           @db.VarChar(7)
+  est_actif       Boolean           @default(true)
+  created_at      DateTime          @default(now())
+  anomalies       anomalies[]
+  regles_anomalie regles_anomalie[]
+}
+
+model ref_etats_job {
+  code                 String                 @id @db.VarChar(50)
+  libelle              String                 @db.VarChar(200)
+  description          String?                @db.Text
+  ordre                Int                    @default(0)
+  couleur              String?                @db.VarChar(7)
+  est_actif            Boolean                @default(true)
+  created_at           DateTime               @default(now())
+  imports_mrd          imports_mrd[]
+  job_queue            job_queue[]
+  reporting_executions reporting_executions[]
+}
+
+model ref_gravites_anomalie {
+  code            String            @id @db.VarChar(50)
+  libelle         String            @db.VarChar(200)
+  description     String?           @db.Text
+  ordre           Int               @default(0)
+  couleur         String?           @db.VarChar(7)
+  est_actif       Boolean           @default(true)
+  created_at      DateTime          @default(now())
+  anomalies       anomalies[]
+  regles_anomalie regles_anomalie[]
+}
+
+model ref_modes_instruction {
+  code                    String                    @id @db.VarChar(50)
+  libelle                 String                    @db.VarChar(200)
+  description             String?                   @db.Text
+  ordre                   Int                       @default(0)
+  couleur                 String?                   @db.VarChar(7)
+  est_actif               Boolean                   @default(true)
+  created_at              DateTime                  @default(now())
+  base_juridique_versions base_juridique_versions[]
+}
+
+model ref_natures_mesure {
+  code                    String                    @id @db.VarChar(50)
+  libelle                 String                    @db.VarChar(200)
+  description             String?                   @db.Text
+  ordre                   Int                       @default(0)
+  couleur                 String?                   @db.VarChar(7)
+  est_actif               Boolean                   @default(true)
+  created_at              DateTime                  @default(now())
+  base_juridique_versions base_juridique_versions[]
+  reporting_aggregats     reporting_aggregats[]
+}
+
+model ref_organes_gestion {
+  code                    String                    @id @db.VarChar(50)
+  libelle                 String                    @db.VarChar(200)
+  description             String?                   @db.Text
+  ordre                   Int                       @default(0)
+  couleur                 String?                   @db.VarChar(7)
+  est_actif               Boolean                   @default(true)
+  created_at              DateTime                  @default(now())
+  base_juridique_versions base_juridique_versions[]
+  workflow_templates      workflow_templates[]
+}
+
+model ref_portees_categorie {
+  code                    String                    @id @db.VarChar(50)
+  libelle                 String                    @db.VarChar(200)
+  description             String?                   @db.Text
+  ordre                   Int                       @default(0)
+  couleur                 String?                   @db.VarChar(7)
+  est_actif               Boolean                   @default(true)
+  created_at              DateTime                  @default(now())
+  base_juridique_versions base_juridique_versions[]
+}
+
+model ref_rangs_piece {
+  code           String           @id @db.VarChar(50)
+  libelle        String           @db.VarChar(200)
+  description    String?          @db.Text
+  ordre          Int              @default(0)
+  couleur        String?          @db.VarChar(7)
+  est_actif      Boolean          @default(true)
+  created_at     DateTime         @default(now())
+  pieces_jointes pieces_jointes[]
+}
+
+model ref_regimes_convention {
+  code                String                @id @db.VarChar(50)
+  libelle             String                @db.VarChar(200)
+  description         String?               @db.Text
+  ordre               Int                   @default(0)
+  couleur             String?               @db.VarChar(7)
+  est_actif           Boolean               @default(true)
+  created_at          DateTime              @default(now())
+  agrements           agrements[]
+  conventions         conventions[]
+  reporting_aggregats reporting_aggregats[]
+}
+
+model ref_roles {
+  code              String              @id @db.VarChar(50)
+  libelle           String              @db.VarChar(200)
+  description       String?             @db.Text
+  ordre             Int                 @default(0)
+  couleur           String?             @db.VarChar(7)
+  est_actif         Boolean             @default(true)
+  created_at        DateTime            @default(now())
+  roles_permissions roles_permissions[]
+  utilisateurs      utilisateurs[]
+}
+
+model ref_sources_code {
+  code               String               @id @db.VarChar(50)
+  libelle            String               @db.VarChar(200)
+  description        String?              @db.Text
+  ordre              Int                  @default(0)
+  couleur            String?              @db.VarChar(7)
+  est_actif          Boolean              @default(true)
+  created_at         DateTime             @default(now())
+  codes_additionnels codes_additionnels[]
+}
+
+model ref_sources_detection {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  est_actif   Boolean     @default(true)
+  created_at  DateTime    @default(now())
+  anomalies   anomalies[]
+}
+
+model ref_statuts_anomalie {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  est_actif   Boolean     @default(true)
+  created_at  DateTime    @default(now())
+  anomalies   anomalies[]
+}
+
+model ref_statuts_archivage {
+  code        String       @id @db.VarChar(50)
+  libelle     String       @db.VarChar(200)
+  description String?      @db.Text
+  ordre       Int          @default(0)
+  couleur     String?      @db.VarChar(7)
+  est_actif   Boolean      @default(true)
+  created_at  DateTime     @default(now())
+  archivages  archivages[]
+}
+
+model ref_statuts_connecteur {
+  code        String        @id @db.VarChar(50)
+  libelle     String        @db.VarChar(200)
+  description String?       @db.Text
+  ordre       Int           @default(0)
+  couleur     String?       @db.VarChar(7)
+  est_actif   Boolean       @default(true)
+  created_at  DateTime      @default(now())
+  connecteurs connecteurs[]
+}
+
+model ref_statuts_convention {
+  code        String        @id @db.VarChar(50)
+  libelle     String        @db.VarChar(200)
+  description String?       @db.Text
+  ordre       Int           @default(0)
+  couleur     String?       @db.VarChar(7)
+  est_actif   Boolean       @default(true)
+  created_at  DateTime      @default(now())
+  agrements   agrements[]
+  conventions conventions[]
+}
+
+model ref_statuts_demande {
+  code        String     @id @db.VarChar(50)
+  libelle     String     @db.VarChar(200)
+  description String?    @db.Text
+  ordre       Int        @default(0)
+  couleur     String?    @db.VarChar(7)
+  is_final    Boolean    @default(false)
+  est_actif   Boolean    @default(true)
+  created_at  DateTime   @default(now())
+  demandes    demandes[]
+}
+
+model ref_statuts_etape {
+  code                       String                       @id @db.VarChar(50)
+  libelle                    String                       @db.VarChar(200)
+  description                String?                      @db.Text
+  ordre                      Int                          @default(0)
+  couleur                    String?                      @db.VarChar(7)
+  est_actif                  Boolean                      @default(true)
+  created_at                 DateTime                     @default(now())
+  demande_complements        demande_complements[]
+  demande_workflow_etapes    demande_workflow_etapes[]
+  demande_workflow_instances demande_workflow_instances[]
+}
+
+model ref_statuts_fiscal {
+  code                           String                           @id @db.VarChar(50)
+  libelle                        String                           @db.VarChar(200)
+  description                    String?                          @db.Text
+  ordre                          Int                              @default(0)
+  couleur                        String?                          @db.VarChar(7)
+  est_actif                      Boolean                          @default(true)
+  created_at                     DateTime                         @default(now())
+  beneficiaire_historique_fiscal beneficiaire_historique_fiscal[]
+  beneficiaires                  beneficiaires[]
+}
+
+model ref_statuts_notification {
+  code               String               @id @db.VarChar(50)
+  libelle            String               @db.VarChar(200)
+  description        String?              @db.Text
+  ordre              Int                  @default(0)
+  couleur            String?              @db.VarChar(7)
+  est_actif          Boolean              @default(true)
+  created_at         DateTime             @default(now())
+  notification_queue notification_queue[]
+}
+
+model ref_statuts_utilisateur {
+  code         String         @id @db.VarChar(50)
+  libelle      String         @db.VarChar(200)
+  description  String?        @db.Text
+  ordre        Int            @default(0)
+  couleur      String?        @db.VarChar(7)
+  est_actif    Boolean        @default(true)
+  created_at   DateTime       @default(now())
+  utilisateurs utilisateurs[]
+}
+
+model ref_types_accord_siege {
+  code          String          @id @db.VarChar(50)
+  libelle       String          @db.VarChar(200)
+  description   String?         @db.Text
+  ordre         Int             @default(0)
+  couleur       String?         @db.VarChar(7)
+  est_actif     Boolean         @default(true)
+  created_at    DateTime        @default(now())
+  accords_siege accords_siege[]
+}
+
+model ref_types_acte {
+  code        String   @id @db.VarChar(50)
+  libelle     String   @db.VarChar(200)
+  description String?  @db.Text
+  ordre       Int      @default(0)
+  couleur     String?  @db.VarChar(7)
+  est_actif   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  actes       actes[]
+}
+
+model ref_types_agrement {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  est_actif   Boolean     @default(true)
+  created_at  DateTime    @default(now())
+  agrements   agrements[]
+}
+
+model ref_types_beneficiaire {
+  code                String                @id @db.VarChar(50)
+  libelle             String                @db.VarChar(200)
+  description         String?               @db.Text
+  ordre               Int                   @default(0)
+  couleur             String?               @db.VarChar(7)
+  est_actif           Boolean               @default(true)
+  created_at          DateTime              @default(now())
+  beneficiaires       beneficiaires[]
+  reporting_aggregats reporting_aggregats[]
+}
+
+model ref_types_decision {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  est_actif   Boolean     @default(true)
+  created_at  DateTime    @default(now())
+  decisions   decisions[]
+}
+
+model ref_types_document {
+  code           String           @id @db.VarChar(50)
+  libelle        String           @db.VarChar(200)
+  description    String?          @db.Text
+  ordre          Int              @default(0)
+  couleur        String?          @db.VarChar(7)
+  est_actif      Boolean          @default(true)
+  created_at     DateTime         @default(now())
+  pieces_jointes pieces_jointes[]
+}
+
+model ref_types_institution {
+  code                     String                     @id @db.VarChar(50)
+  libelle                  String                     @db.VarChar(200)
+  description              String?                    @db.Text
+  ordre                    Int                        @default(0)
+  couleur                  String?                    @db.VarChar(7)
+  est_actif                Boolean                    @default(true)
+  created_at               DateTime                   @default(now())
+  institutions             institutions[]
+  workflow_template_etapes workflow_template_etapes[]
+}
+
+model ref_types_job {
+  code        String      @id @db.VarChar(50)
+  libelle     String      @db.VarChar(200)
+  description String?     @db.Text
+  ordre       Int         @default(0)
+  couleur     String?     @db.VarChar(7)
+  est_actif   Boolean     @default(true)
+  created_at  DateTime    @default(now())
+  job_queue   job_queue[]
+}
+
+model ref_types_mouvement_quota {
+  code             String             @id @db.VarChar(50)
+  libelle          String             @db.VarChar(200)
+  description      String?            @db.Text
+  ordre            Int                @default(0)
+  couleur          String?            @db.VarChar(7)
+  est_actif        Boolean            @default(true)
+  created_at       DateTime           @default(now())
+  quota_mouvements quota_mouvements[]
+}
+
+model ref_types_notification {
+  code                     String                     @id @db.VarChar(50)
+  libelle                  String                     @db.VarChar(200)
+  description              String?                    @db.Text
+  ordre                    Int                        @default(0)
+  couleur                  String?                    @db.VarChar(7)
+  est_actif                Boolean                    @default(true)
+  created_at               DateTime                   @default(now())
+  notification_preferences notification_preferences[]
+  notification_queue       notification_queue[]
+  notification_templates   notification_templates[]
+  notifications            notifications[]
+}
+
+model ref_types_parametre {
+  code               String               @id @db.VarChar(50)
+  libelle            String               @db.VarChar(200)
+  description        String?              @db.Text
+  ordre              Int                  @default(0)
+  couleur            String?              @db.VarChar(7)
+  est_actif          Boolean              @default(true)
+  created_at         DateTime             @default(now())
+  parametres_systeme parametres_systeme[]
+}
+
+model ref_types_quota {
+  code        String   @id @db.VarChar(50)
+  libelle     String   @db.VarChar(200)
+  description String?  @db.Text
+  ordre       Int      @default(0)
+  couleur     String?  @db.VarChar(7)
+  est_actif   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  quotas      quotas[]
+}
+
+model ref_types_rapport {
+  code                 String                 @id @db.VarChar(50)
+  libelle              String                 @db.VarChar(200)
+  description          String?                @db.Text
+  ordre                Int                    @default(0)
+  couleur              String?                @db.VarChar(7)
+  est_actif            Boolean                @default(true)
+  created_at           DateTime               @default(now())
+  reporting_executions reporting_executions[]
+}
+
+model ref_unites_quota {
+  code        String   @id @db.VarChar(50)
+  libelle     String   @db.VarChar(200)
+  description String?  @db.Text
+  ordre       Int      @default(0)
+  couleur     String?  @db.VarChar(7)
+  est_actif   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  quotas      quotas[]
+}
+
+model refresh_tokens {
+  id             String       @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateur_id String       @db.Char(36)
+  token_hash     String       @unique(map: "token_hash") @db.Char(64)
+  expires_at     DateTime
+  est_revoque    Boolean      @default(false)
+  ip             String?      @db.VarChar(45)
+  user_agent     String?      @db.Text
+  created_at     DateTime     @default(now())
+  utilisateurs   utilisateurs @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "refresh_tokens_ibfk_1")
+
+  @@index([expires_at], map: "idx_expires_at")
+  @@index([utilisateur_id], map: "idx_utilisateur_id")
+}
+
+model regles_anomalie {
+  id                      String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                    String                  @unique(map: "code") @db.VarChar(100)
+  nom                     String                  @db.VarChar(200)
+  categorie_code          String                  @db.VarChar(50)
+  gravite_code            String                  @db.VarChar(50)
+  description             String                  @db.Text
+  expression              String                  @db.Text
+  est_active              Boolean                 @default(true)
+  created_at              DateTime                @default(now())
+  updated_at              DateTime                @default(now())
+  anomalies               anomalies[]
+  ref_categories_anomalie ref_categories_anomalie @relation(fields: [categorie_code], references: [code], onUpdate: NoAction, map: "regles_anomalie_ibfk_1")
+  ref_gravites_anomalie   ref_gravites_anomalie   @relation(fields: [gravite_code], references: [code], onUpdate: NoAction, map: "regles_anomalie_ibfk_2")
+
+  @@index([categorie_code], map: "idx_categorie_code")
+  @@index([gravite_code], map: "idx_gravite_code")
+}
+
+model reporting_aggregats {
+  id                            String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  periode_annee                 Int
+  periode_mois                  Int?
+  type_texte_1                  String?                 @db.VarChar(100)
+  impot_concerne                String?                 @db.VarChar(100)
+  nature_mesure_code            String?                 @db.VarChar(50)
+  type_beneficiaire_code        String?                 @db.VarChar(50)
+  regime_code                   String?                 @db.VarChar(50)
+  region                        String?                 @db.VarChar(100)
+  secteur                       String?                 @db.VarChar(100)
+  nb_demandes_soumis            Int                     @default(0)
+  nb_demandes_approuve          Int                     @default(0)
+  nb_demandes_rejete            Int                     @default(0)
+  montant_total_demandes        BigInt                  @default(0)
+  montant_total_approuve        BigInt                  @default(0)
+  delai_moyen_instruction_jours Decimal?                @db.Decimal(8, 2)
+  nb_anomalies_critique         Int                     @default(0)
+  est_anonymise                 Boolean                 @default(true)
+  date_calcul                   DateTime                @default(now())
+  created_at                    DateTime                @default(now())
+  ref_natures_mesure            ref_natures_mesure?     @relation(fields: [nature_mesure_code], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_1")
+  ref_types_beneficiaire        ref_types_beneficiaire? @relation(fields: [type_beneficiaire_code], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_2")
+  ref_regimes_convention        ref_regimes_convention? @relation(fields: [regime_code], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_3")
+
+  @@index([est_anonymise], map: "idx_est_anonymise")
+  @@index([impot_concerne], map: "idx_impot_concerne")
+  @@index([nature_mesure_code], map: "idx_nature_mesure_code")
+  @@index([periode_annee, periode_mois], map: "idx_periode")
+  @@index([type_texte_1], map: "idx_type_texte_1")
+  @@index([regime_code], map: "regime_code")
+  @@index([type_beneficiaire_code], map: "type_beneficiaire_code")
+}
+
+model reporting_executions {
+  id                String            @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  type_rapport_code String            @db.VarChar(50)
+  periode_annee     Int
+  periode_mois      Int?
+  parametres        Json?
+  fichier_url       String?           @db.VarChar(500)
+  hash_fichier      String?           @db.Char(64)
+  est_programme     Boolean           @default(false)
+  date_debut        DateTime          @default(now())
+  date_fin          DateTime?
+  statut_code       String            @default("pending") @db.VarChar(50)
+  message_erreur    String?           @db.Text
+  created_at        DateTime          @default(now())
+  ref_types_rapport ref_types_rapport @relation(fields: [type_rapport_code], references: [code], onUpdate: NoAction, map: "reporting_executions_ibfk_1")
+  ref_etats_job     ref_etats_job     @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "reporting_executions_ibfk_2")
+
+  @@index([periode_annee, periode_mois], map: "idx_periode")
+  @@index([statut_code], map: "idx_statut_code")
+  @@index([type_rapport_code], map: "idx_type_rapport_code")
+}
+
+model reset_password_tokens {
+  id             String       @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateur_id String       @db.Char(36)
+  token_hash     String       @unique(map: "token_hash") @db.Char(64)
+  expires_at     DateTime
+  est_utilise    Boolean      @default(false)
+  created_at     DateTime     @default(now())
+  utilisateurs   utilisateurs @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reset_password_tokens_ibfk_1")
+
+  @@index([utilisateur_id], map: "idx_utilisateur_id")
+}
+
+model roles_permissions {
+  role       String    @db.VarChar(50)
+  ressource  String    @db.VarChar(50)
+  action     String    @db.VarChar(50)
+  perimetre  String?   @db.VarChar(100)
+  created_at DateTime  @default(now())
+  ref_roles  ref_roles @relation(fields: [role], references: [code], onDelete: Cascade, onUpdate: NoAction, map: "fk_rolesperm_role")
+
+  @@id([role, ressource, action])
+  @@index([role], map: "idx_role")
+}
+
+model sessions_utilisateur {
+  id                     String       @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateur_id         String       @db.Char(36)
+  jeton_session_hash     String       @unique(map: "jeton_session_hash") @db.Char(64)
+  ip                     String?      @db.VarChar(45)
+  user_agent             String?      @db.Text
+  pays                   String?      @db.VarChar(100)
+  ville                  String?      @db.VarChar(100)
+  date_connexion         DateTime     @default(now())
+  date_derniere_activite DateTime     @default(now())
+  date_deconnexion       DateTime?
+  est_active             Boolean      @default(true)
+  created_at             DateTime     @default(now())
+  utilisateurs           utilisateurs @relation(fields: [utilisateur_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "sessions_utilisateur_ibfk_1")
+
+  @@index([est_active], map: "idx_est_active")
+  @@index([jeton_session_hash], map: "idx_jeton_session_hash")
+  @@index([utilisateur_id], map: "idx_utilisateur_id")
+}
+
+model system_logs {
+  id         String   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  niveau     String   @db.VarChar(20)
+  source     String   @db.VarChar(100)
+  message    String   @db.Text
+  contexte   Json?
+  trace      String?  @db.Text
+  created_at DateTime @default(now())
+
+  @@index([created_at], map: "idx_created_at")
+  @@index([niveau], map: "idx_niveau")
+  @@index([source], map: "idx_source")
+}
+
+model utilisateurs {
+  id                       String                     @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  nom                      String                     @db.VarChar(100)
+  prenom                   String                     @db.VarChar(100)
+  email                    String                     @unique(map: "email") @db.VarChar(200)
+  password_hash            String                     @db.VarChar(255)
+  role                     String                     @db.VarChar(50)
+  institution_id           String                     @db.Char(36)
+  statut_code              String                     @default("actif") @db.VarChar(50)
+  mfa_active               Boolean                    @default(true)
+  mfa_secret_enc           String?                    @db.VarChar(500)
+  pin_hash                 String?                    @db.VarChar(60)
+  secteur_affecte          String?                    @db.VarChar(100)
+  telephone                String?                    @db.VarChar(20)
+  derniere_connexion       DateTime?
+  ip_derniere_cx           String?                    @db.VarChar(45)
+  created_at               DateTime                   @default(now())
+  updated_at               DateTime                   @default(now())
+  anomalies                anomalies[]
+  audit_logs               audit_logs[]
+  base_juridique_documents base_juridique_documents[]
+  beneficiaires            beneficiaires?
+  decisions                decisions[]
+  demande_complements      demande_complements[]
+  demande_workflow_etapes  demande_workflow_etapes[]
+  demandes                 demandes[]
+  imports_mrd              imports_mrd[]
+  notification_preferences notification_preferences[]
+  notification_queue       notification_queue[]
+  notifications            notifications[]
+  pieces_jointes           pieces_jointes[]
+  push_tokens              push_tokens[]
+  refresh_tokens           refresh_tokens[]
+  reset_password_tokens    reset_password_tokens[]
+  sessions_utilisateur     sessions_utilisateur[]
+  ref_roles                ref_roles                  @relation(fields: [role], references: [code], onUpdate: NoAction, map: "fk_utilisateurs_role")
+  institutions             institutions               @relation(fields: [institution_id], references: [id], onUpdate: NoAction, map: "utilisateurs_ibfk_1")
+  ref_statuts_utilisateur  ref_statuts_utilisateur    @relation(fields: [statut_code], references: [code], onUpdate: NoAction, map: "utilisateurs_ibfk_2")
+
+  @@index([email], map: "idx_email")
+  @@index([institution_id], map: "idx_institution_id")
+  @@index([role], map: "idx_role")
+  @@index([statut_code], map: "idx_statut_code")
+}
+
+model workflow_template_etapes {
+  id                      String                    @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  workflow_template_id    String                    @db.Char(36)
+  nom_etape               String                    @db.VarChar(200)
+  ordre                   Int
+  acteur_role             String                    @db.VarChar(50)
+  institution_type_code   String?                   @db.VarChar(50)
+  delai_cible_jours       Int?
+  pin_requis              Boolean                   @default(false)
+  est_obligatoire         Boolean                   @default(true)
+  condition_activation    String?                   @db.Text
+  action_declenchee       String?                   @db.VarChar(100)
+  created_at              DateTime                  @default(now())
+  demande_workflow_etapes demande_workflow_etapes[]
+  workflow_templates      workflow_templates        @relation(fields: [workflow_template_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "workflow_template_etapes_ibfk_1")
+  ref_types_institution   ref_types_institution?    @relation(fields: [institution_type_code], references: [code], onUpdate: NoAction, map: "workflow_template_etapes_ibfk_2")
+
+  @@unique([workflow_template_id, ordre], map: "uk_workflow_etape_ordre")
+  @@index([workflow_template_id, ordre], map: "idx_workflow_template_etapes_template_ordre")
+  @@index([workflow_template_id], map: "idx_workflow_template_id")
+  @@index([institution_type_code], map: "institution_type_code")
+}
+
+model workflow_template_transitions {
+  id                   String             @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  workflow_template_id String             @db.Char(36)
+  etape_source_ordre   Int
+  etape_cible_ordre    Int
+  action               String             @db.VarChar(100)
+  condition_transition String?            @db.Text
+  created_at           DateTime           @default(now())
+  workflow_templates   workflow_templates @relation(fields: [workflow_template_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "workflow_template_transitions_ibfk_1")
+
+  @@index([workflow_template_id], map: "idx_workflow_template_id")
+}
+
+model workflow_templates {
+  id                            String                          @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  code                          String                          @unique(map: "code") @db.VarChar(50)
+  nom                           String                          @db.VarChar(100)
+  description                   String?                         @db.Text
+  base_juridique_version_id     String?                         @db.Char(36)
+  type_texte_1                  String                          @db.VarChar(100)
+  organe_gestion_code           String?                         @db.VarChar(50)
+  est_actif                     Boolean                         @default(true)
+  version_template              Int                             @default(1)
+  created_at                    DateTime                        @default(now())
+  updated_at                    DateTime                        @default(now())
+  demande_workflow_instances    demande_workflow_instances[]
+  workflow_template_etapes      workflow_template_etapes[]
+  workflow_template_transitions workflow_template_transitions[]
+  base_juridique_versions       base_juridique_versions?        @relation(fields: [base_juridique_version_id], references: [id], onUpdate: NoAction, map: "workflow_templates_ibfk_1")
+  ref_organes_gestion           ref_organes_gestion?            @relation(fields: [organe_gestion_code], references: [code], onUpdate: NoAction, map: "workflow_templates_ibfk_2")
+
+  @@index([base_juridique_version_id], map: "idx_base_juridique_version_id")
+  @@index([organe_gestion_code], map: "idx_organe_gestion_code")
+  @@index([type_texte_1], map: "idx_type_texte_1")
+}

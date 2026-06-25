@@ -1,0 +1,21 @@
+
+=== bases_juridiques ===
+id, code_mesure, code_mesure_mrd, created_at, updated_at
+
+=== base_juridique_versions ===
+id, base_juridique_id, version, libelle, impot_concerne, nature_mesure_code, type_texte_1, type_texte_2, support_juridique_base, support_juridique_complem, article, article_cgi_2025, portee_categorie_code, portee_duree_mois, portee_description, organe_gestion_code, organe_attribution, systeme_information, mode_instruction_code, objectif_type, branche_activite, type_beneficiaire_cible, est_depense_fiscale_2024, est_evaluee_2024, donnees_disponibles, fonction_budgetaire, conformite_texte_fondament, conformite_directive_uemoa, odd, programme_dotation, position_sh, est_active, date_adoption, date_abrogation, valid_from, valid_to, created_at, updated_at, version_courante_flag
+
+=== beneficiaires ===
+id, raison_sociale, nif, rccm, type_beneficiaire_code, statut_fiscal_code, secteur, region, email_contact, telephone, adresse, accord_siege_id, user_id, created_at, updated_at
+
+=== demandes ===
+id, reference, base_juridique_version_id, beneficiaire_id, convention_id, instructeur_id, statut_code, date_depot, date_echeance, date_archivage, montant_fcfa, devise, quota_consomme, quota_total, secteur, etape_actuelle, motif_rejet, declaration_honneur, est_urgente, created_at, updated_at, deleted_at
+
+=== institutions ===
+id, code, nom, type_code, est_active, created_at
+
+=== utilisateurs ===
+id, nom, prenom, email, password_hash, role, institution_id, statut_code, mfa_active, mfa_secret_enc, pin_hash, secteur_affecte, telephone, derniere_connexion, ip_derniere_cx, created_at, updated_at
+
+=== ref_roles ===
+code, libelle, description, ordre, couleur, est_actif, created_at

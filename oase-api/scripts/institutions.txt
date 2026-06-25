@@ -1,0 +1,62 @@
+[
+  {
+    id: 'inst-001',
+    code: 'OTR-CI',
+    nom: 'Office Togolais des Recettes — Centre des Impots',
+    type_code: 'otr'
+  },
+  {
+    id: 'inst-002',
+    code: 'OTR-CDDI',
+    nom: 'OTR — Centre des Douanes et du Droit Indirect',
+    type_code: 'otr'
+  },
+  {
+    id: 'inst-003',
+    code: 'DGBF',
+    nom: 'Direction Generale du Budget et des Finances',
+    type_code: 'dgbf'
+  },
+  {
+    id: 'inst-004',
+    code: 'DGTCP',
+    nom: 'Direction Generale du Tresor et de la Comptabilite Publique',
+    type_code: 'dgtcp'
+  },
+  {
+    id: 'inst-005',
+    code: 'API',
+    nom: 'Agence de Promotion des Investissements',
+    type_code: 'agence'
+  },
+  {
+    id: 'inst-006',
+    code: 'UPF',
+    nom: 'Unite de Politique Fiscale — MEF',
+    type_code: 'upf'
+  },
+  {
+    id: 'inst-007',
+    code: 'IGF',
+    nom: 'Inspection Generale des Finances',
+    type_code: 'igf'
+  },
+  {
+    id: 'inst-008',
+    code: 'MAE',
+    nom: 'Ministere des Affaires Etrangeres',
+    type_code: 'mae'
+  },
+  {
+    id: 'inst-009',
+    code: 'DGMG',
+    nom: 'Direction Generale des Mines et de la Geologie',
+    type_code: 'dgmg'
+  },
+  {
+    id: 'inst-010',
+    code: 'DSI',
+    nom: 'Direction des Systemes d Information',
+    type_code: 'dsi'
+  }
+]
