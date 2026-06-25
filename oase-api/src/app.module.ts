@@ -20,6 +20,7 @@ import { ReglesBlocageModule } from './regles-blocage/regles-blocage.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { AttestationsModule } from './attestations/attestations.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { BasesJuridiquesModule } from './bases-juridiques/bases-juridiques.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     DecisionsModule,
     AttestationsModule,
     NotificationsModule,
+    BasesJuridiquesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
