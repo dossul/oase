@@ -14,6 +14,7 @@ import { CommonModule } from './common/common.module';
 import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 import { BeneficiairesModule } from './beneficiaires/beneficiaires.module';
 import { DemandesModule } from './demandes/demandes.module';
+import { PiecesJointesModule } from './pieces-jointes/pieces-jointes.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { DemandesModule } from './demandes/demandes.module';
     UtilisateursModule,
     BeneficiairesModule,
     DemandesModule,
+    PiecesJointesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
