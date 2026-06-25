@@ -28,6 +28,9 @@ maquette/
 # Database dumps
 *.sql
 
+# Keep Prisma migrations
+!oase-api/prisma/migrations/**/*.sql
+
 # Logs / temp
 *.log
 tmp_*
