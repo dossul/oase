@@ -18,6 +18,7 @@ import { PiecesJointesModule } from './pieces-jointes/pieces-jointes.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { ReglesBlocageModule } from './regles-blocage/regles-blocage.module';
 import { DecisionsModule } from './decisions/decisions.module';
+import { AttestationsModule } from './attestations/attestations.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { DecisionsModule } from './decisions/decisions.module';
     WorkflowModule,
     ReglesBlocageModule,
     DecisionsModule,
+    AttestationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
