@@ -228,6 +228,14 @@ async function main() {
       ['ministere', 'Ministère', 'Ministère ou institution gouvernementale']
     );
 
+    // 2b. Statuts utilisateur
+    await connection.execute(
+      `INSERT INTO ref_statuts_utilisateur (code, libelle, description, est_actif, created_at)
+       VALUES (?, ?, ?, true, NOW())
+       ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
+      ['actif', 'Actif', 'Utilisateur actif']
+    );
+
     // 3. Institutions
     for (const inst of INSTITUTIONS) {
       await connection.execute(
