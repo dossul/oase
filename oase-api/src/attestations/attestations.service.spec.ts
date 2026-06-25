@@ -36,7 +36,12 @@ describe('AttestationsService', () => {
   });
 
   it('devrait verifier une attestation par QR hash', async () => {
-    mockPrisma.acte.findFirst.mockResolvedValue({ id: 'a-1', reference: 'ACTE-1', hashDocument: 'hash-doc', qrCodeHash: 'qr-hash' });
+    mockPrisma.acte.findFirst.mockResolvedValue({
+      id: 'a-1',
+      reference: 'ACTE-1',
+      hashDocument: 'hash-doc',
+      qrCodeHash: 'qr-hash',
+    });
     const result = await service.verifier('qr-hash');
     expect(result.valide).toBe(true);
   });
