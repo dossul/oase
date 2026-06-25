@@ -19,6 +19,7 @@ import { WorkflowModule } from './workflow/workflow.module';
 import { ReglesBlocageModule } from './regles-blocage/regles-blocage.module';
 import { DecisionsModule } from './decisions/decisions.module';
 import { AttestationsModule } from './attestations/attestations.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { AttestationsModule } from './attestations/attestations.module';
     ReglesBlocageModule,
     DecisionsModule,
     AttestationsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
