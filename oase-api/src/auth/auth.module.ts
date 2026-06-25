@@ -27,6 +27,6 @@ import { AuditModule } from '../audit/audit.module';
   ],
   controllers: [AuthController],
   providers: [AuthService, MfaService, TokenBlacklistService, JwtStrategy, PinGuard],
-  exports: [AuthService, JwtModule, PinGuard],
+  exports: [AuthService, MfaService, JwtModule, PinGuard],
 })
 export class AuthModule {}

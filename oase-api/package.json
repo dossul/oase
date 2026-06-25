@@ -25,7 +25,8 @@
     "generate-enums": "node scripts/generate-enums.js",
     "seed": "node prisma/seed.js",
     "db:reset": "prisma migrate reset --force",
-    "integration:test": "node scripts/integration-test.js"
+    "integration:test": "node scripts/integration-test.js",
+    "test:e2e-playwright": "playwright test"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -60,6 +61,7 @@
     "@nestjs/cli": "^10.4.0",
     "@nestjs/schematics": "^10.1.0",
     "@nestjs/testing": "^10.4.0",
+    "@playwright/test": "^1.49.0",
     "@prisma/client": "^6.6.0",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
