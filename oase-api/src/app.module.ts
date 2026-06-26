@@ -25,6 +25,7 @@ import { QuotasModule } from './quotas/quotas.module';
 import { AnomaliesModule } from './anomalies/anomalies.module';
 import { ConventionsModule } from './conventions/conventions.module';
 import { DashboardsModule } from './dashboards/dashboards.module';
+import { RapportsModule } from './rapports/rapports.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { DashboardsModule } from './dashboards/dashboards.module';
     AnomaliesModule,
     ConventionsModule,
     DashboardsModule,
+    RapportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
