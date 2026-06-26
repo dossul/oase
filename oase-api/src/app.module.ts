@@ -24,6 +24,7 @@ import { BasesJuridiquesModule } from './bases-juridiques/bases-juridiques.modul
 import { QuotasModule } from './quotas/quotas.module';
 import { AnomaliesModule } from './anomalies/anomalies.module';
 import { ConventionsModule } from './conventions/conventions.module';
+import { DashboardsModule } from './dashboards/dashboards.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ConventionsModule } from './conventions/conventions.module';
     QuotasModule,
     AnomaliesModule,
     ConventionsModule,
+    DashboardsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
