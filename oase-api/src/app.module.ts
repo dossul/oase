@@ -23,6 +23,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { BasesJuridiquesModule } from './bases-juridiques/bases-juridiques.module';
 import { QuotasModule } from './quotas/quotas.module';
 import { AnomaliesModule } from './anomalies/anomalies.module';
+import { ConventionsModule } from './conventions/conventions.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { AnomaliesModule } from './anomalies/anomalies.module';
     BasesJuridiquesModule,
     QuotasModule,
     AnomaliesModule,
+    ConventionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
