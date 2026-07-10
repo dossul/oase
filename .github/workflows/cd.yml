@@ -50,8 +50,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_USER: ${{ github.actor }}
         run: |
-          echo "==> Test 1: SSH simple"
-          ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" 'echo SSH_OK; hostname; pwd'
+          set -x
+          echo "==> VPS_HOST='$VPS_HOST'"
+          echo "==> VPS_USER='$VPS_USER'"
+          echo "==> Clé SSH existe: $(ls -la ~/.ssh/id_test 2>&1)"
+          echo "==> Premier byte: $(head -c 30 ~/.ssh/id_test 2>&1)"
+          echo "==> Tentative SSH"
+          ssh -vvv -i ~/.ssh/id_test -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes "$VPS_USER@$VPS_HOST" 'echo SSH_OK; hostname; pwd' 2>&1 | tail -30
+          echo "==> Test 1 fini"
 
           echo "==> Test 2: git pull"
           ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" 'cd /opt/oase && git fetch origin && git reset --hard origin/main 2>&1 | tail -5'
