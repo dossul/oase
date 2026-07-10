@@ -27,7 +27,7 @@ env:
 
 jobs:
   # ============================================================
-  # 1. BUILD DES IMAGES + PUSH GHCR
+  # 1. BUILD DES IMAGES + PUSH GHCR (en shell direct)
   # ============================================================
   build:
     name: Build & push images
@@ -50,25 +50,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push oase-api
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ github.workspace }}
-          file: ${{ github.workspace }}/deploy/api.Dockerfile
-          platforms: linux/amd64
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-api:latest
-          provenance: false
+      - name: Build & push oase-api (shell direct)
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --file deploy/api.Dockerfile \
+            --tag ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-api:latest \
+            --push \
+            --provenance=false \
+            .
 
-      - name: Build & push oase-frontend
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ github.workspace }}
-          file: ${{ github.workspace }}/deploy/frontend.Dockerfile
-          platforms: linux/amd64
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-frontend:latest
-          provenance: false
+      - name: Build & push oase-frontend (shell direct)
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --file deploy/frontend.Dockerfile \
+            --tag ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-frontend:latest \
+            --push \
+            --provenance=false \
+            .
 
   # ============================================================
   # 2. DEPLOY SUR LE VPS (apres build OK)
