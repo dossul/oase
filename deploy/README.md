@@ -73,3 +73,4 @@ docker compose -f docker-compose.prod.yml up -d
 | http://localhost:3000/api/v1/health | API up |
 | http://localhost:8080/healthz | Frontend Nginx up |
 | `docker compose ps` | Tous services healthy |
+trigger CD
