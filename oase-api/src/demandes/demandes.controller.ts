@@ -15,7 +15,7 @@ import {
   CompleterDemandeDto,
 } from './dto/transition-demande.dto';
 
-@Controller('api/v1/demandes')
+@Controller('demandes')
 @UseGuards(JwtAuthGuard, RbacGuard)
 export class DemandesController {
   constructor(private service: DemandesService) {}

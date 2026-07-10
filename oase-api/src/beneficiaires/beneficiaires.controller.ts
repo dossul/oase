@@ -10,7 +10,7 @@ import { CreerBeneficiaireDto } from './dto/creer-beneficiaire.dto';
 import { ModifierBeneficiaireDto } from './dto/modifier-beneficiaire.dto';
 import { FiltrerBeneficiairesDto } from './dto/filtrer-beneficiaires.dto';
 
-@Controller('api/v1/beneficiaires')
+@Controller('beneficiaires')
 @UseGuards(JwtAuthGuard, RbacGuard)
 export class BeneficiairesController {
   constructor(private service: BeneficiairesService) {}

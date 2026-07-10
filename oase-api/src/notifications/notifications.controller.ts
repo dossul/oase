@@ -4,7 +4,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthUser } from '../auth/auth.service';
 import { NotificationsService, EnvoyerNotificationDto } from './notifications.service';
 
-@Controller('api/v1/notifications')
+@Controller('notifications')
 @UseGuards(JwtAuthGuard)
 export class NotificationsController {
   constructor(private service: NotificationsService) {}

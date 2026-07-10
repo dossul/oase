@@ -12,7 +12,7 @@ class DecisionDto {
   motif?: string;
 }
 
-@Controller('api/v1/demandes/:demandeId/decisions')
+@Controller('demandes/:demandeId/decisions')
 @UseGuards(JwtAuthGuard, RbacGuard)
 export class DecisionsController {
   constructor(private service: DecisionsService) {}

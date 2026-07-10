@@ -21,7 +21,7 @@ import { AuthUser } from '../auth/auth.service';
 import { PiecesJointesService, LocalUploadedFile } from './pieces-jointes.service';
 import { UploadPieceJointeDto } from './dto/upload-piece-jointe.dto';
 
-@Controller('api/v1/demandes/:demandeId/pieces-jointes')
+@Controller('demandes/:demandeId/pieces-jointes')
 @UseGuards(JwtAuthGuard, RbacGuard)
 export class PiecesJointesController {
   constructor(private service: PiecesJointesService) {}

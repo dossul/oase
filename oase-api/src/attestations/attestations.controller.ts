@@ -5,7 +5,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/generated';
 import { AttestationsService } from './attestations.service';
 
-@Controller('api/v1/attestations')
+@Controller('attestations')
 export class AttestationsController {
   constructor(private service: AttestationsService) {}
 

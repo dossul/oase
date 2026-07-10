@@ -10,7 +10,7 @@ import { CreerUtilisateurDto } from './dto/creer-utilisateur.dto';
 import { ModifierUtilisateurDto } from './dto/modifier-utilisateur.dto';
 import { FiltrerUtilisateursDto } from './dto/filtrer-utilisateurs.dto';
 
-@Controller('api/v1/utilisateurs')
+@Controller('utilisateurs')
 @UseGuards(JwtAuthGuard, RbacGuard)
 export class UtilisateursController {
   constructor(private service: UtilisateursService) {}

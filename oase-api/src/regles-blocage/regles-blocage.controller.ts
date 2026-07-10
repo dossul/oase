@@ -5,7 +5,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/generated';
 import { ReglesBlocageService } from './regles-blocage.service';
 
-@Controller('api/v1/demandes/:demandeId/blocages')
+@Controller('demandes/:demandeId/blocages')
 @UseGuards(JwtAuthGuard, RbacGuard)
 export class ReglesBlocageController {
   constructor(private service: ReglesBlocageService) {}

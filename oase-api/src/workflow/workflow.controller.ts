@@ -9,7 +9,7 @@ import { WorkflowService } from './workflow.service';
 import { CreerWorkflowTemplateDto } from './dto/creer-workflow-template.dto';
 import { ValiderEtapeDto } from './dto/valider-etape.dto';
 
-@Controller('api/v1/workflow')
+@Controller('workflow')
 @UseGuards(JwtAuthGuard, RbacGuard)
 export class WorkflowController {
   constructor(private service: WorkflowService) {}
