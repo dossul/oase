@@ -50,66 +50,28 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_USER: ${{ github.actor }}
         run: |
-          cat > /tmp/deploy.sh <<'SCRIPT'
-          #!/bin/bash
-          set -e
-          echo "==> 1. Pull du code"
-          cd /opt/oase
-          if [ ! -d .git ]; then
-            git clone https://github.com/dossul/oase.git .
-          else
-            git fetch origin
-            git reset --hard origin/main
-          fi
+          echo "==> Test 1: SSH simple"
+          ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" 'echo SSH_OK; hostname; pwd'
 
-          echo "==> 2. Login GHCR"
-          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
+          echo "==> Test 2: git pull"
+          ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" 'cd /opt/oase && git fetch origin && git reset --hard origin/main 2>&1 | tail -5'
 
-          echo "==> 3. Build oase-api"
-          docker build \
-            --no-cache \
-            --tag ghcr.io/dossul/oase-api:latest \
-            --tag oase-api:latest \
-            --file deploy/api.Dockerfile \
-            .
+          echo "==> Test 3: docker build API"
+          ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" 'cd /opt/oase && docker build --no-cache -t oase-api:latest -f deploy/api.Dockerfile . 2>&1 | tail -5'
 
-          echo "==> 4. Build oase-frontend"
-          docker build \
-            --no-cache \
-            --tag ghcr.io/dossul/oase-frontend:latest \
-            --tag oase-frontend:latest \
-            --file deploy/frontend.Dockerfile \
-            .
+          echo "==> Test 4: docker build frontend"
+          ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" 'cd /opt/oase && docker build --no-cache -t oase-frontend:latest -f deploy/frontend.Dockerfile . 2>&1 | tail -5'
 
-          echo "==> 5. Push vers GHCR"
-          docker push ghcr.io/dossul/oase-api:latest
-          docker push ghcr.io/dossul/oase-frontend:latest
+          echo "==> Test 5: restart stack"
+          ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" 'cd /opt/oase && docker compose -f deploy/docker-compose.local-prod.yml up -d --force-recreate 2>&1 | tail -10'
 
-          echo "==> 6. Restart stack (images locales)"
-          docker compose -f deploy/docker-compose.local-prod.yml up -d --force-recreate
+          echo "==> Test 6: mysql wait + migrate"
+          ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" 'for i in $(seq 1 30); do docker exec oase-db mysqladmin ping -h localhost >/dev/null 2>&1 && break; sleep 2; done && docker exec oase-api npx prisma migrate deploy 2>&1 | tail -5'
 
-          echo "==> 7. Attente MySQL (max 60s)"
-          for i in $(seq 1 30); do
-            if docker exec oase-db mysqladmin ping -h localhost >/dev/null 2>&1; then
-              echo "MySQL OK"
-              break
-            fi
-            sleep 2
-          done
+          echo "==> Test 7: status"
+          ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" 'docker ps --format "table {{.Names}}\t{{.Status}}" | grep oase'
 
-          echo "==> 8. Migrations Prisma"
-          docker exec oase-api npx prisma migrate deploy
-
-          echo "==> 9. Nettoyage"
-          docker image prune -f
-
-          echo "==> 10. Statut final"
-          docker ps --format 'table {{.Names}}\t{{.Status}}' | grep oase
-          echo "==> OK deploy termine"
-          SCRIPT
-          chmod +x /tmp/deploy.sh
-          scp -i ~/.ssh/id_test -o StrictHostKeyChecking=no /tmp/deploy.sh "$VPS_USER@$VPS_HOST:/tmp/deploy.sh"
-          ssh -i ~/.ssh/id_test -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "GITHUB_TOKEN='$GITHUB_TOKEN' GH_USER='$GH_USER' bash /tmp/deploy.sh"
+          echo "==> TOUT OK"
 
       - name: Smoke test
         run: |
