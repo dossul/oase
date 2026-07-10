@@ -105,7 +105,6 @@ jobs:
             docker ps --format 'table {{.Names}}\t{{.Status}}' | grep oase
 
             echo "==> OK deploy termine"
-          command_timeout: 20m
 
       - name: Smoke test
         run: |
