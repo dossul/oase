@@ -2,8 +2,6 @@ name: CD - Build & Deploy
 
 # Declenche sur push main apres merge
 # Strategie : on pull le code et on build DIRECTEMENT sur le VPS.
-# Plus fiable que de builder dans GitHub Actions (runner ephemere
-# qui pose probleme avec buildkit cache).
 on:
   push:
     branches: [main]
@@ -21,11 +19,9 @@ concurrency:
 env:
   REGISTRY: ghcr.io
   IMAGE_OWNER: dossul
+  VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
 
 jobs:
-  # ============================================================
-  # BUILD + PUSH sur le VPS directement
-  # ============================================================
   build-and-deploy:
     name: Build & deploy on VPS
     runs-on: ubuntu-22.04
@@ -37,74 +33,83 @@ jobs:
       packages: write
 
     steps:
-      - name: Deploy via SSH (build on VPS)
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          command_timeout: 20m
-          debug: true
-          script: |
-            set -e
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          # Ecrit la cle avec saut de ligne final
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          echo "==> Test SSH"
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'echo OK' && echo "SSH OK" || echo "SSH FAIL"
 
-            echo "==> 1. Pull du code"
-            cd /opt/oase
-            # Si pas de repo git sur le VPS, on utilise git clone
-            if [ ! -d .git ]; then
-              git clone https://github.com/${{ github.repository }}.git .
-            else
-              git fetch origin
-              git reset --hard origin/main
+      - name: Deploy script
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > /tmp/deploy.sh <<'SCRIPT'
+          #!/bin/bash
+          set -e
+          echo "==> 1. Pull du code"
+          cd /opt/oase
+          if [ ! -d .git ]; then
+            git clone https://github.com/dossul/oase.git .
+          else
+            git fetch origin
+            git reset --hard origin/main
+          fi
+
+          echo "==> 2. Login GHCR (depuis le VPS)"
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+          echo "==> 3. Build oase-api"
+          docker build \
+            --no-cache \
+            --tag ghcr.io/dossul/oase-api:latest \
+            --tag oase-api:latest \
+            --file deploy/api.Dockerfile \
+            .
+
+          echo "==> 4. Build oase-frontend"
+          docker build \
+            --no-cache \
+            --tag ghcr.io/dossul/oase-frontend:latest \
+            --tag oase-frontend:latest \
+            --file deploy/frontend.Dockerfile \
+            .
+
+          echo "==> 5. Push vers GHCR"
+          docker push ghcr.io/dossul/oase-api:latest
+          docker push ghcr.io/dossul/oase-frontend:latest
+
+          echo "==> 6. Pull + restart stack"
+          cd /opt/oase
+          docker compose -f deploy/docker-compose.local-prod.yml up -d --force-recreate
+
+          echo "==> 7. Attente MySQL (max 60s)"
+          for i in $(seq 1 30); do
+            if docker exec oase-db mysqladmin ping -h localhost >/dev/null 2>&1; then
+              echo "MySQL OK"
+              break
             fi
+            sleep 2
+          done
 
-            echo "==> 2. Login GHCR (depuis le VPS)"
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          echo "==> 8. Migrations Prisma"
+          docker exec oase-api npx prisma migrate deploy
 
-            echo "==> 3. Build oase-api"
-            docker build \
-              --no-cache \
-              --tag ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-api:latest \
-              --tag oase-api:latest \
-              --file deploy/api.Dockerfile \
-              .
+          echo "==> 9. Nettoyage"
+          docker image prune -f
 
-            echo "==> 4. Build oase-frontend"
-            docker build \
-              --no-cache \
-              --tag ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-frontend:latest \
-              --tag oase-frontend:latest \
-              --file deploy/frontend.Dockerfile \
-              .
-
-            echo "==> 5. Push vers GHCR"
-            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-api:latest
-            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-frontend:latest
-
-            echo "==> 6. Pull + restart stack (compose prod utilise les images GHCR)"
-            cd /opt/oase
-            docker compose -f deploy/docker-compose.prod.yml pull || true
-            docker compose -f deploy/docker-compose.local-prod.yml up -d --force-recreate
-
-            echo "==> 7. Attente MySQL (max 60s)"
-            for i in $(seq 1 30); do
-              if docker exec oase-db mysqladmin ping -h localhost >/dev/null 2>&1; then
-                echo "MySQL OK"
-                break
-              fi
-              sleep 2
-            done
-
-            echo "==> 8. Migrations Prisma"
-            docker exec oase-api npx prisma migrate deploy
-
-            echo "==> 9. Nettoyage"
-            docker image prune -f
-
-            echo "==> 10. Statut final"
-            docker ps --format 'table {{.Names}}\t{{.Status}}' | grep oase
-
-            echo "==> OK deploy termine"
+          echo "==> 10. Statut final"
+          docker ps --format 'table {{.Names}}\t{{.Status}}' | grep oase
+          SCRIPT
+          chmod +x /tmp/deploy.sh
+          scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no /tmp/deploy.sh $VPS_USER@$VPS_HOST:/tmp/deploy.sh
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST 'bash /tmp/deploy.sh'
 
       - name: Smoke test
         run: |
