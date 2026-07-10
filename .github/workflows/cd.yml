@@ -1,0 +1,147 @@
+name: CD - Build & Deploy
+
+# Declenche sur push main apres merge
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'oase-api/**'
+      - 'maquette/**'
+      - 'deploy/**'
+      - '.github/workflows/cd.yml'
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deployer apres build ?'
+        required: false
+        default: 'true'
+
+# Evite les deploiements concurrents sur la meme ref
+concurrency:
+  group: deploy-oase
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_OWNER: dossul
+
+jobs:
+  # ============================================================
+  # 1. BUILD DES IMAGES + PUSH GHCR
+  # ============================================================
+  build:
+    name: Build & push images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        include:
+          - name: api
+            context: .
+            dockerfile: deploy/api.Dockerfile
+            image: oase-api
+          - name: frontend
+            context: .
+            dockerfile: deploy/frontend.Dockerfile
+            image: oase-frontend
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.image }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=${{ matrix.image }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: Build & push ${{ matrix.image }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+  # ============================================================
+  # 2. DEPLOY SUR LE VPS (apres build OK)
+  # ============================================================
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == 'true')
+    environment:
+      name: production
+      url: https://oase.ulia.site
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            echo "==> Pull des dernieres images"
+            cd /opt/oase
+            docker compose -f docker-compose.prod.yml pull
+
+            echo "==> Restart stack"
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            echo "==> Attente MySQL (max 90s)"
+            for i in $(seq 1 45); do
+              if docker compose -f docker-compose.prod.yml exec -T oase-db mysqladmin ping -h localhost >/dev/null 2>&1; then
+                echo "MySQL OK"
+                break
+              fi
+              sleep 2
+            done
+
+            echo "==> Migrations Prisma"
+            docker compose -f docker-compose.prod.yml exec -T oase-api npx prisma migrate deploy
+
+            echo "==> Nettoyage images orphelines"
+            docker image prune -f
+
+            echo "==> Statut final"
+            docker compose -f docker-compose.prod.yml ps
+            echo "==> OK deploy termine"
+          command_timeout: 10m
+
+      - name: Smoke test
+        run: |
+          echo "==> Test API health"
+          sleep 10
+          curl -fsS --max-time 10 https://api.oase.ulia.site/api/v1/health || echo "WARN: API pas encore prete"
+          echo ""
+          echo "==> Test frontend"
+          curl -fsSI --max-time 10 https://oase.ulia.site/ | head -3

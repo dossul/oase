@@ -1,0 +1,36 @@
+# OASE - Config Traefik additionnelle pour le frontend
+# Charge par Traefik via provider "file" (dynamic dir)
+#
+# Ce fichier contourne un bug Traefik ou le filtre docker provider
+# ne detecte pas les labels du conteneur oase-frontend.
+# Il definit manuellement le router + service pour oase.ulia.site.
+
+http:
+  routers:
+    oase-front:
+      rule: "Host(`oase.ulia.site`)"
+      entrypoints:
+        - websecure
+      service: oase-front-svc
+      tls:
+        certResolver: letsencrypt
+
+    oase-front-http:
+      rule: "Host(`oase.ulia.site`)"
+      entrypoints:
+        - web
+      middlewares:
+        - oase-front-redirect
+
+  services:
+    oase-front-svc:
+      loadBalancer:
+        servers:
+          - url: "http://oase-web:80"
+        passHostHeader: true
+
+  middlewares:
+    oase-front-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true

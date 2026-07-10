@@ -1,0 +1,110 @@
+# Compose PROD (VPS Hostinger)
+# Usage : docker compose -f docker-compose.prod.yml pull && up -d
+#
+# - Images pull depuis GHCR (ghcr.io/dossul/oase-api, ghcr.io/dossul/oase-frontend)
+# - Routage via Traefik existant (labels)
+# - HTTPS automatique (Let's Encrypt via Traefik)
+#
+# Domaines :
+#   - https://oase.ulia.site      -> frontend
+#   - https://api.oase.ulia.site  -> API
+#
+# Prerequis :
+#   1. /opt/oase/.env edite avec les vraies valeurs
+#   2. DNS *.oase.ulia.site pointe vers 147.93.85.22
+#   3. Traefik detecte automatiquement les labels
+
+services:
+  oase-db:
+    image: mysql:8.0
+    container_name: oase-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - oase_db_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-connections=200
+      - --innodb-buffer-pool-size=256M
+    # PAS de ports exposes (uniquement accessible via le reseau oase-net)
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - oase-net
+
+  oase-api:
+    image: ghcr.io/dossul/oase-api:latest
+    container_name: oase-api
+    restart: unless-stopped
+    depends_on:
+      oase-db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      LOG_LEVEL: ${LOG_LEVEL}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.oase-api.rule=Host(`api.oase.ulia.site`)"
+      - "traefik.http.routers.oase-api.entrypoints=websecure"
+      - "traefik.http.routers.oase-api.tls=true"
+      - "traefik.http.routers.oase-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.oase-api.loadbalancer.server.port=3000"
+      - "traefik.http.routers.oase-api-http.rule=Host(`api.oase.ulia.site`)"
+      - "traefik.http.routers.oase-api-http.entrypoints=web"
+      - "traefik.http.routers.oase-api-http.middlewares=oase-redirect"
+      - "traefik.http.middlewares.oase-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.oase-redirect.redirectscheme.permanent=true"
+    networks:
+      - oase-net
+      - proxy-network
+
+  oase-frontend:
+    image: ghcr.io/dossul/oase-frontend:latest
+    container_name: oase-frontend
+    restart: unless-stopped
+    depends_on:
+      - oase-api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.oase-front.rule=Host(`oase.ulia.site`)"
+      - "traefik.http.routers.oase-front.entrypoints=websecure"
+      - "traefik.http.routers.oase-front.tls=true"
+      - "traefik.http.routers.oase-front.tls.certresolver=letsencrypt"
+      - "traefik.http.services.oase-front.loadbalancer.server.port=80"
+      - "traefik.http.routers.oase-front-http.rule=Host(`oase.ulia.site`)"
+      - "traefik.http.routers.oase-front-http.entrypoints=web"
+      - "traefik.http.routers.oase-front-http.middlewares=oase-redirect"
+    networks:
+      - oase-net
+      - proxy-network
+
+networks:
+  oase-net:
+    name: oase-net
+    driver: bridge
+  proxy-network:
+    name: proxy-network
+    external: true
+
+volumes:
+  oase_db_data:
+    name: oase_db_data

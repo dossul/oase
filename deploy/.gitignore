@@ -1,0 +1,6 @@
+# Ne PAS commit les vrais secrets
+.env
+.env.local
+.env.production
+*.pem
+*.key
