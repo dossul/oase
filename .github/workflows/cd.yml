@@ -49,11 +49,19 @@ jobs:
 
       - name: Build oase-api
         run: |
+          echo "==> Working dir: $(pwd)"
+          echo "==> Workspace: $GITHUB_WORKSPACE"
+          echo "==> Files in root:"
+          ls -la
+          echo "==> oase-api content:"
+          ls -la oase-api/ 2>&1 | head -5
+          echo "==> Building..."
           docker build \
             --no-cache \
+            --progress=plain \
             --tag oase-api:build \
             --file deploy/api.Dockerfile \
-            .
+            . 2>&1 | tail -40
 
       - name: Push oase-api
         run: |
