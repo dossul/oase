@@ -36,19 +36,6 @@ jobs:
       contents: read
       packages: write
 
-    strategy:
-      matrix:
-        include:
-          - name: api
-            context: .
-            dockerfile: deploy/api.Dockerfile
-            image: oase-api
-          - name: frontend
-            context: .
-            dockerfile: deploy/frontend.Dockerfile
-            image: oase-frontend
-      fail-fast: false
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,28 +50,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.image }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix=
-            type=raw,value=latest,enable={{is_default_branch}}
-          labels: |
-            org.opencontainers.image.title=${{ matrix.image }}
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-
-      - name: Build & push ${{ matrix.image }}
+      - name: Build & push oase-api
         uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
+          context: ${{ github.workspace }}
+          file: ${{ github.workspace }}/deploy/api.Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-api:latest
+          provenance: false
+
+      - name: Build & push oase-frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}
+          file: ${{ github.workspace }}/deploy/frontend.Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-frontend:latest
           provenance: false
 
   # ============================================================
