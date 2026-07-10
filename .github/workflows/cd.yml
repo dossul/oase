@@ -16,7 +16,6 @@ on:
         required: false
         default: 'true'
 
-# Evite les deploiements concurrents sur la meme ref
 concurrency:
   group: deploy-oase
   cancel-in-progress: false
@@ -26,12 +25,9 @@ env:
   IMAGE_OWNER: dossul
 
 jobs:
-  # ============================================================
-  # 1. BUILD DES IMAGES + PUSH GHCR
-  # ============================================================
   build:
     name: Build & push images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
@@ -40,6 +36,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Nettoyer le cache Docker avant pour eliminer tout cache stale
+      - name: Clean Docker cache
+        run: |
+          docker system prune -af || true
+          docker builder prune -af || true
+
       - name: Login GHCR
         uses: docker/login-action@v3
         with:
@@ -47,46 +49,29 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build oase-api
+      - name: Build & push oase-api
         run: |
-          echo "==> Working dir: $(pwd)"
-          echo "==> Workspace: $GITHUB_WORKSPACE"
-          echo "==> Files in root:"
-          ls -la
-          echo "==> oase-api content:"
-          ls -la oase-api/ 2>&1 | head -5
-          echo "==> Building..."
           docker build \
             --no-cache \
-            --progress=plain \
-            --tag oase-api:build \
+            --pull \
+            --tag ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-api:latest \
             --file deploy/api.Dockerfile \
-            . 2>&1 | tail -40
-
-      - name: Push oase-api
-        run: |
-          docker tag oase-api:build ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-api:latest
+            .
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-api:latest
 
-      - name: Build oase-frontend
+      - name: Build & push oase-frontend
         run: |
           docker build \
             --no-cache \
-            --tag oase-frontend:build \
+            --pull \
+            --tag ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-frontend:latest \
             --file deploy/frontend.Dockerfile \
             .
-
-      - name: Push oase-frontend
-        run: |
-          docker tag oase-frontend:build ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-frontend:latest
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/oase-frontend:latest
 
-  # ============================================================
-  # 2. DEPLOY SUR LE VPS (apres build OK)
-  # ============================================================
   deploy:
     name: Deploy to VPS
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == 'true')
     environment:
@@ -102,38 +87,23 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -e
-            echo "==> Pull des dernieres images"
             cd /opt/oase
             docker compose -f docker-compose.prod.yml pull
-
-            echo "==> Restart stack"
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
-
-            echo "==> Attente MySQL (max 90s)"
             for i in $(seq 1 45); do
               if docker compose -f docker-compose.prod.yml exec -T oase-db mysqladmin ping -h localhost >/dev/null 2>&1; then
-                echo "MySQL OK"
                 break
               fi
               sleep 2
             done
-
-            echo "==> Migrations Prisma"
             docker compose -f docker-compose.prod.yml exec -T oase-api npx prisma migrate deploy
-
-            echo "==> Nettoyage images orphelines"
             docker image prune -f
-
-            echo "==> Statut final"
             docker compose -f docker-compose.prod.yml ps
-            echo "==> OK deploy termine"
           command_timeout: 10m
 
       - name: Smoke test
         run: |
-          echo "==> Test API health"
           sleep 10
           curl -fsS --max-time 10 https://api.oase.ulia.site/api/v1/health || echo "WARN: API pas encore prete"
           echo ""
-          echo "==> Test frontend"
           curl -fsSI --max-time 10 https://oase.ulia.site/ | head -3
