@@ -89,7 +89,7 @@ const ROLES = [
   { code: 'instructeur',      libelle: 'Instructeur',                   description: 'Instruction des demandes' },
   { code: 'validateur',       libelle: 'Validateur',                    description: 'Validation finale des décisions' },
   { code: 'controleur',       libelle: 'Contrôleur',                    description: 'Audits et contrôles' },
-  { code: 'beneficiaire',     libelle: 'Bénéficiaire',                  description: 'Dépôt et suivi des demandes' },
+  { code: 'beneficiaire',     libelle: 'Contribuable',                  description: 'Dépôt et suivi des demandes d\'exonération fiscale' },
   { code: 'visiteur',         libelle: 'Visiteur',                      description: 'Accès lecture restreint' },
   { code: 'system',           libelle: 'Compte système',                description: 'Compte technique pour imports et jobs' },
 ];
@@ -138,8 +138,8 @@ const USERS = [
   { id: U.validateur,       nom: 'AKAKPO',     prenom: 'Yawa',          email: 'validateur@gouv.tg',       role: 'validateur',       institutionId: I.mef,    secteurAffecte: null },
   { id: U.controleur,       nom: 'KPETO',      prenom: 'Mawuena',       email: 'controleur@gouv.tg',       role: 'controleur',       institutionId: I.mef,    secteurAffecte: null },
 
-  // Beneficiaire (compte utilisateur pour le beneficiaire)
-  { id: U.beneficiaire,     nom: 'N\'GUESSAN', prenom: 'Kossiwa',       email: 'beneficiaire@gouv.tg',     role: 'beneficiaire',     institutionId: I.mef,    secteurAffecte: null },
+  // Contribuable (compte utilisateur - anciennement beneficiaire)
+  { id: U.beneficiaire,     nom: 'N\'GUESSAN', prenom: 'Kossiwa',       email: 'contribuable@gouv.tg',     role: 'beneficiaire',     institutionId: I.mef,    secteurAffecte: null },
 
   // Visiteur + system
   { id: U.visiteur,         nom: 'Public',      prenom: 'Visiteur',      email: 'visiteur@gouv.tg',         role: 'visiteur',         institutionId: I.mef,    secteurAffecte: null },
@@ -392,6 +392,7 @@ async function main() {
        ON DUPLICATE KEY UPDATE
          nom = VALUES(nom),
          prenom = VALUES(prenom),
+         email = VALUES(email),
          password_hash = VALUES(password_hash),
          role = VALUES(role),
          institution_id = VALUES(institution_id),
@@ -439,7 +440,17 @@ async function main() {
   console.log('--- Seed termine avec succes ---');
   console.log('');
   console.log('COMPTES DE TEST (mdp: Oase@2026!) :');
-  USERS.forEach(u => console.log(`  ${u.role.padEnd(20)} - ${u.email}`));
+  const ROLE_LABELS = {
+    'admin': 'Admin', 'agent_cddi': 'Agent CDDI', 'agent_ci': 'Agent CI',
+    'agent_dgbf': 'Agent DGBF', 'agent_dgtcp': 'Agent DGTCP', 'agent_ministere': 'Agent Ministere',
+    'agent_agence': 'Agent Agence', 'agent_otr': 'Agent OTR', 'receveur': 'Receveur',
+    'instructeur': 'Instructeur', 'validateur': 'Validateur', 'controleur': 'Controleur',
+    'beneficiaire': 'Contribuable', 'visiteur': 'Visiteur', 'system': 'Systeme',
+  };
+  USERS.forEach(u => {
+    const label = ROLE_LABELS[u.role] || u.role;
+    console.log(`  ${label.padEnd(20)} - ${u.email}`);
+  });
 
   await connection.end();
 }
