@@ -168,12 +168,27 @@ export class AuthService {
   }
 
   private async issueTokenPair(user: any, ip: string, ua: string) {
+    // OASE [BUG #6] fix : normaliser le rôle avant de l'injecter dans le JWT,
+    // dans la réponse API et dans l'audit. La migration 002 (refactor
+    // BENEFICIAIRE → CONTRIBUABLE) n'est pas encore appliquée sur toutes les
+    // bases (cf. TODO BUGS.md "Deployer migration 002 sur la base prod").
+    // Tant qu'elle ne l'est pas, la DB peut renvoyer l'ancien code 'beneficiaire'
+    // pour le user, ce qui :
+    //   1. Casse le mapping frontend `DEFAULT_ROUTE_BY_ROLE['contribuable']`
+    //      (sauve in extremis par le fallback `?? '/portail/dashboard'`)
+    //   2. Court-circuite les checks de sécurité type
+    //      `user.role === 'contribuable'` dans demandes.service.ts
+    // Cette normalisation est une défense en profondeur : elle garantit que
+    // TOUT le code aval voit la valeur canonique, même si la DB n'est pas
+    // migrée. A supprimer une fois la migration 002 appliquée partout.
+    const normalizedRole = this.normalizeRole(user.role);
+
     const payload: AuthUser = {
       id: user.id,
       email: user.email,
       nom: user.nom,
       prenom: user.prenom,
-      role: user.role,
+      role: normalizedRole,
       institutionId: user.institutionId,
       institution: user.institutions.nom,
       mfaActive: user.mfaActive,
@@ -209,7 +224,7 @@ export class AuthService {
       entite: 'utilisateurs',
       entiteId: user.id,
       utilisateurId: user.id,
-      roleAuMoment: user.role,
+      roleAuMoment: normalizedRole,
       institution: user.institutions.nom,
       ip,
     });
@@ -224,6 +239,18 @@ export class AuthService {
 
   private hashToken(raw: string) {
     return createHash('sha256').update(raw).digest('hex');
+  }
+
+  /**
+   * Normalise un code rôle DB vers sa forme canonique frontend.
+   * Mapping legacy pour absorber le retard de migration 002
+   * (refactor BENEFICIAIRE → CONTRIBUABLE) sur les bases non-migrées.
+   * A supprimer une fois la migration appliquée sur tous les envs.
+   */
+  private normalizeRole(role: string | null | undefined): string {
+    if (!role) return '';
+    if (role === 'beneficiaire') return 'contribuable';
+    return role;
   }
 
   private parseDuration(duration: string): number {

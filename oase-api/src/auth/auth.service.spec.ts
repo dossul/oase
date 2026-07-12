@@ -166,6 +166,57 @@ describe('AuthService', () => {
         expect.objectContaining({ action: 'LOGIN_SUCCES' }),
       );
     });
+
+    // OASE [BUG #6] fix : le code legacy 'beneficiaire' doit être normalisé
+    // en 'contribuable' dans le payload retourné, le JWT et l'audit, même si
+    // la DB n'a pas encore reçu la migration 002. Ce test bloque la régression.
+    it('normalise le rôle legacy "beneficiaire" → "contribuable" (BUG #6)', async () => {
+      bcryptMock.compare.mockResolvedValue(true as never);
+      (prisma.utilisateur.findUnique as jest.Mock).mockResolvedValue(
+        mockUser({ email: 'contribuable@gouv.tg', role: 'beneficiaire' }),
+      );
+      (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
+      (prisma.utilisateur.update as jest.Mock).mockResolvedValue({});
+
+      const result = await service.login(
+        { email: 'contribuable@gouv.tg', password: 'good' },
+        '127.0.0.1',
+        'jest',
+      );
+      const pair = result as { user: { role: string } };
+      expect(pair.user.role).toBe('contribuable');
+
+      // L'audit log doit aussi avoir la valeur normalisée
+      expect(audit.createEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'LOGIN_SUCCES',
+          roleAuMoment: 'contribuable',
+        }),
+      );
+
+      // Le JWT doit aussi être signé avec la valeur normalisée
+      expect(jwt.sign).toHaveBeenCalledWith(
+        expect.objectContaining({ role: 'contribuable' }),
+        expect.any(Object),
+      );
+    });
+
+    it('laisse les rôles canoniques inchangés (admin, agent_otr, ...)', async () => {
+      bcryptMock.compare.mockResolvedValue(true as never);
+      (prisma.utilisateur.findUnique as jest.Mock).mockResolvedValue(
+        mockUser({ role: 'admin' }),
+      );
+      (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
+      (prisma.utilisateur.update as jest.Mock).mockResolvedValue({});
+
+      const result = await service.login(
+        { email: 'admin@gouv.tg', password: 'good' },
+        '127.0.0.1',
+        'jest',
+      );
+      const pair = result as { user: { role: string } };
+      expect(pair.user.role).toBe('admin');
+    });
   });
 
   describe('verifyMfa', () => {
