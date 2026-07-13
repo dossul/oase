@@ -1,11 +1,15 @@
-import { IsUUID, IsString, IsOptional, IsNumber, IsBoolean, IsDateString, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsDateString, Min, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export class CreerDemandeDto {
-  @IsUUID()
+  @IsString()
+  @Matches(UUID_REGEX, { message: 'baseJuridiqueVersionId doit etre un UUID au format 8-4-4-4-12' })
   baseJuridiqueVersionId: string;
 
-  @IsUUID()
+  @IsString()
+  @Matches(UUID_REGEX, { message: 'contribuableId doit etre un UUID au format 8-4-4-4-12' })
   contribuableId: string;
 
   @IsNumber()
