@@ -36,7 +36,7 @@ describe('ScopeService', () => {
   describe('buildWhereClause', () => {
     it('contribuable ne voit que ses propres demandes', async () => {
       const where = await service.buildWhereClause(user(Role.CONTRIBUABLE), 'demande');
-      expect(where).toEqual({ contribuable: { utilisateurId: 'user-1' } });
+      expect(where).toEqual({ contribuables: { userId: 'user-1' } });
     });
 
     it('admin_si a acces a toutes les demandes', async () => {
@@ -60,7 +60,7 @@ describe('ScopeService', () => {
 
     it('contribuable ne voit que son propre profil', async () => {
       const where = await service.buildWhereClause(user(Role.CONTRIBUABLE), 'contribuable');
-      expect(where).toEqual({ utilisateurId: 'user-1' });
+      expect(where).toEqual({ userId: 'user-1' });
     });
   });
 
@@ -68,7 +68,7 @@ describe('ScopeService', () => {
     it('autorise un contribuable a voir sa propre demande', async () => {
       mockPrisma.demande.findUnique.mockResolvedValue({
         id: 'dem-1',
-        contribuable: { utilisateurId: 'user-1' },
+        contribuables: { userId: 'user-1' },
         statutCode: 'soumis',
       });
       const allowed = await service.isAllowed(user(Role.CONTRIBUABLE), 'demande', 'dem-1');
@@ -78,7 +78,7 @@ describe('ScopeService', () => {
     it('interdit un contribuable de voir une demande tierce', async () => {
       mockPrisma.demande.findUnique.mockResolvedValue({
         id: 'dem-2',
-        contribuable: { utilisateurId: 'user-2' },
+        contribuables: { userId: 'user-2' },
         statutCode: 'soumis',
       });
       const allowed = await service.isAllowed(user(Role.CONTRIBUABLE), 'demande', 'dem-2');

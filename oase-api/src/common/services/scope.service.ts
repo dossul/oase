@@ -81,7 +81,7 @@ export class ScopeService {
   private async buildDemandeScope(user: AuthUser, role: Role): Promise<ScopedWhere> {
     switch (role) {
       case Role.CONTRIBUABLE:
-        return { contribuable: { utilisateurId: user.id } };
+        return { contribuables: { userId: user.id } };
       case Role.AGENT_CI:
         return {
           baseJuridiqueVersion: { baseJuridique: { organeGestionCode: ORGANE_CI } },
@@ -145,7 +145,7 @@ export class ScopeService {
 
   private async buildContribuableScope(user: AuthUser, role: Role): Promise<ScopedWhere> {
     if (role === Role.CONTRIBUABLE) {
-      return { utilisateurId: user.id };
+      return { userId: user.id };
     }
     return {};
   }
@@ -159,7 +159,7 @@ export class ScopeService {
 
   private async buildConventionScope(user: AuthUser, role: Role): Promise<ScopedWhere> {
     if (role === Role.CONTRIBUABLE) {
-      return { contribuable: { utilisateurId: user.id } };
+      return { contribuables: { userId: user.id } };
     }
     return {};
   }
@@ -183,8 +183,8 @@ export class ScopeService {
     if (Object.keys(where).length === 0) return true;
 
     const conditions: boolean[] = [];
-    if (where.contribuable?.utilisateurId) {
-      conditions.push(demande.contribuableUtilisateurId === user.id || demande.contribuable?.utilisateurId === user.id);
+    if (where.contribuables?.userId) {
+      conditions.push(demande.contribuables?.userId === user.id);
     }
     if (where.statutCode?.not) {
       conditions.push(demande.statutCode !== where.statutCode.not);
@@ -201,7 +201,7 @@ export class ScopeService {
 
   private async contribuableMatchesScope(contribuable: any, user: AuthUser): Promise<boolean> {
     if (user.role === Role.CONTRIBUABLE) {
-      return contribuable.utilisateurId === user.id;
+      return contribuable.userId === user.id;
     }
     return true;
   }
