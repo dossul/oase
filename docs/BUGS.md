@@ -187,6 +187,177 @@ est le même (lookup dans `DEFAULT_ROUTE_BY_ROLE`), donc la vérif API sur
 
 ---
 
+### Session BUG #7 - 2026-07-13 20:30 UTC - Flow demande d'exonération complet cassé
+
+**Severite** : 🔴 **CRITIQUE** (le cœur métier P1 est inutilisable : un contribuable ne peut ni lister, ni créer, ni soumettre une demande)
+**Workflow** : W2 (Portail contribuable) — test TC-P1-01 (dépôt d'une nouvelle demande)
+**Compte** : `contribuable@gouv.tg` / `Oase@2026!`
+**Decouverte** : Session recette API-only (browser Playwright MCP figé) — appelée après le refactor contribuable (#1/#2/#6)
+
+#### Reproduction (avant fix)
+
+```powershell
+$login = Invoke-RestMethod -Method POST -Uri "https://api.oase.ulia.site/api/v1/auth/login" -Body (@{email="contribuable@gouv.tg";password="Oase@2026!"} | ConvertTo-Json) -ContentType "application/json"
+$h = @{Authorization="Bearer $($login.access_token)"}
+
+# Liste MES demandes
+Invoke-RestMethod -Method GET -Uri "https://api.oase.ulia.site/api/v1/demandes" -Headers $h
+# → HTTP 500 "Internal server error" (BUG #7.1 + #7.2)
+
+# Creer une nouvelle demande
+Invoke-RestMethod -Method POST -Uri "https://api.oase.ulia.site/api/v1/demandes" -Headers $h -Body (@{baseJuridiqueVersionId="b1000001-0000-0000-0000-000000000001";contribuableId="c0000001-0000-0000-0000-000000000001";montantFcfa=1000000;secteur="agriculture"} | ConvertTo-Json) -ContentType "application/json"
+# → HTTP 400 "baseJuridiqueVersionId must be a UUID, contribuableId must be a UUID" (BUG #7.3)
+```
+
+#### Diagnostic : 3 bugs combines qui se masquaient l'un l'autre
+
+##### BUG #7.1 — Scope service : `contribuable` (singulier) au lieu de `contribuables` (pluriel relation Prisma) + `utilisateurId` au lieu de `userId` (champ réel du modèle `Contribuable`)
+
+**Cause racine** : Dans `oase-api/src/common/services/scope.service.ts`, le code utilisait la **forme singulière** (`contribuable`) au lieu de la forme plurielle de la relation Prisma (`contribuables`). Et le champ `utilisateurId` qui n'existe pas (le modèle `Contribuable` a `userId`, `@map("user_id")`).
+
+**Message Prisma capturé en prod** :
+```
+Invalid `prisma.demande.count()` invocation:
+where: { contribuable: { utilisateurId: "a000000d-..." } }
+Unknown argument `contribuable`. Did you mean `contribuables`?
+```
+
+**Lignes corrigées** (6 endroits dans `scope.service.ts`) :
+- L84 (buildDemandeScope) : `{ contribuable: { utilisateurId } }` → `{ contribuables: { userId } }`
+- L148 (buildContribuableScope) : `{ utilisateurId }` → `{ userId }`
+- L162 (buildConventionScope) : `{ contribuable: { utilisateurId } }` → `{ contribuables: { userId } }`
+- L186-187 (demandeMatchesScope) : `where.contribuable?.utilisateurId` et `demande.contribuable?.utilisateurId` → `where.contribuables?.userId` et `demande.contribuables?.userId`
+- L204 (contribuableMatchesScope) : `contribuable.utilisateurId` → `contribuable.userId`
+
+##### BUG #7.2 — Migration Prisma 002 incomplète : TABLES renommées mais pas les COLONNES
+
+**Cause racine** : La migration `002_rename_beneficiaire_to_contribuable` a renommé les tables (`beneficiaires` → `contribuables`) mais **a oublié de renommer les colonnes** (`beneficiaire_id`, `type_beneficiaire_code`, etc.). Le `schema.prisma` attend `contribuable_id` / `type_contribuable_code` mais la DB prod a encore l'ancien nom.
+
+**Vérification en prod** :
+```sql
+SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA='oase' AND COLUMN_NAME LIKE '%beneficiaire%';
+-- AVANT fix :
+-- actes                       | beneficiaire_id
+-- agrement_contribuables      | beneficiaire_id
+-- base_juridique_versions     | type_beneficiaire_cible
+-- contribuable_historique_fiscal | beneficiaire_id
+-- contribuables               | type_beneficiaire_code
+-- conventions                 | beneficiaire_id
+-- demandes                    | beneficiaire_id          ← CRITIQUE pour flow demande
+-- quotas                      | beneficiaire_id
+-- reporting_aggregats         | type_beneficiaire_code
+-- 9 colonnes, 11 index, 1 FK unique key à renommer
+```
+
+**Fix appliqué** : Nouvelle migration `oase-api/prisma/migrations/002b_rename_columns_beneficiaire_to_contribuable/migration.sql` :
+- 9 colonnes renommées (`beneficiaire_id` → `contribuable_id`, `type_beneficiaire_*` → `type_contribuable_*`)
+- 11 index renommés (`idx_beneficiaire_id` → `idx_contribuable_id`, `ft_beneficiaires` → `ft_contribuables`, etc.)
+- 1 FK unique key renommée (`uk_agrement_beneficiaire` → `uk_agrement_contribuable`)
+- **Idempotente** : 2 procédures stockées `rename_col_if_old_exists()` et `rename_index_if_exists()` permettent de rejouer sans erreur
+- Gère la nullabilité par colonne (CHAR(36) NOT NULL pour `demandes.contribuable_id`, NULL pour `quotas.contribuable_id` à cause de la FK SET NULL)
+- Trace insérée dans `_prisma_migrations` pour que Prisma ne la re-applique pas
+
+**Vérification finale** : `colonnes_beneficiaire=0, index_beneficiaire=0, fk_beneficiaire=0`
+
+##### BUG #7.3 — `@IsUUID()` de class-validator rejette les UUIDs "exotiques" du seed
+
+**Cause racine** : Le seed OASE utilise des UUIDs déterministes lisibles au format `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` (ex: `a000000d-0000-0000-0000-00000000000d`) qui ne sont **pas des UUIDs v4 valides** (le digit de version à la position 13 doit être 4, le digit de variant à la position 17 doit être 8/9/a/b). Le `@IsUUID()` de `class-validator@0.14` (basé sur `validator.js`) rejette ces UUIDs.
+
+**Message d'erreur** : `{"message":["baseJuridiqueVersionId must be a UUID","contribuableId must be a UUID"]}`
+
+**Fix appliqué** : Remplacement de `@IsUUID()` par `@Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)` dans :
+- `oase-api/src/demandes/dto/creer-demande.dto.ts` (lignes 5, 8)
+- `oase-api/src/workflow/dto/creer-workflow-template.dto.ts` (ligne 47)
+
+**Justification sécurité** : Le format reste validé (36 chars hex avec tirets aux bons endroits). La DB valide quand même le type `CHAR(36)`. Pas de risque d'injection.
+
+#### BUG #7.4 (découvert pendant le fix) — `isAllowed` charge la demande SANS la relation `contribuables`
+
+**Symptôme** : POST /demandes marche (crée la demande), mais GET /demandes/{id} et POST /soumettre renvoient 403 "PERIMETRE_NON_AUTORISE".
+
+**Cause racine** : Dans `scope.service.ts` ligne 61, `prisma.demande.findUnique({ where: { id } })` ne charge pas la relation `contribuables`. Donc `demande.contribuables` est `undefined`, et la condition `demande.contribuables?.userId === user.id` est toujours `false`.
+
+**Fix** : Ajout de `include: { contribuables: true }` dans le findUnique.
+
+```diff
+- const demande = await this.prisma.demande.findUnique({ where: { id: resourceId } });
++ const demande = await this.prisma.demande.findUnique({
++   where: { id: resourceId },
++   include: { contribuables: true },
++ });
+```
+
+#### Fix bonus — Liage user ↔ entreprise
+
+Découverte pendant le test : le seed crée 4 entreprises dans `contribuables` mais **ne lie aucune à un utilisateur** (`user_id = NULL`). Du coup le user `contribuable@gouv.tg` ne peut rien créer (la création vérifie `userId === user.id`).
+
+**Fix opérationnel** : Liaison manuelle de l'entreprise SCT (c0000001) au user contribuable (a000000d) via SQL :
+```sql
+UPDATE contribuables SET user_id = 'a000000d-0000-0000-0000-00000000000d' WHERE id = 'c0000001-0000-0000-0000-000000000001';
+```
+
+**À corriger dans le seed** : ajouter une propriété `userId` à au moins un des 4 `CONTRIBUABLES` du seed et lier au user `contribuable@gouv.tg`. Lot suivant.
+
+#### Vérification — règle des 3 vérifications
+
+| # | Type | Outil | Résultat |
+|---|---|---|:---:|
+| **V1** | Tests unitaires | `npx jest src/common/services/scope.service.spec.ts` | ✅ 7/7 PASS (assertions mises à jour : `contribuables`/`userId`) |
+| **V2** | TypeScript compile | `npx tsc --noEmit` (build Docker) | ✅ 0 erreur |
+| **V3** | Test E2E API (post-rebuild) | PowerShell `Invoke-RestMethod` | ✅ **FLOW COMPLET OK** : login → list → create (`DEM-2026-00002`) → detail → submit (transition `brouillon` → `soumis`) |
+
+#### Captures du flow E2E réussi (V3)
+
+```
+=== ETAPE 1: LOGIN ===
+Login OK
+  role recu      = contribuable
+  id             = a000000d-0000-0000-0000-00000000000d
+
+=== ETAPE 2: GET /demandes (lister MES demandes) ===
+OK - 1 demandes, 1 total
+  DEM-2026-00001 | statut=brouillon | contribuable=Societe Cotonniere du Togo (SCT)
+
+=== ETAPE 3: POST /demandes (creer brouillon) ===
+OK - Demande creee
+  id         = 31264523-7efc-11f1-955b-0242ac180002
+  reference  = DEM-2026-00002
+  statut     = brouillon
+  montant    = 50000000
+
+=== ETAPE 4: GET /demandes/31264523-7efc-11f1-955b-0242ac180002 (detail) ===
+OK - Detail recupere
+  reference = DEM-2026-00002, statut = brouillon
+
+=== ETAPE 5: POST /demandes/{id}/soumettre (transition brouillon -> soumis) ===
+OK - Demande soumise
+  statut = soumis, dateDepot = 2026-07-13T20:48:25.033Z
+```
+
+#### Commits de la session
+
+| Hash | Sujet |
+|---|---|
+| `b720c69` | refactor(oase-api): beneficiaire → contribuable (module + Prisma + role enum) |
+| `c4bb5c6` | fix(deploy): healthcheck frontend IPv4 force (1er essai, insuﬀisant) |
+| `7867ba1` | fix(deploy): healthcheck frontend via curl+0.0.0.0 (le bon) |
+| `16007ea` | fix(oase-api): BUG #7 flow demande - scope service + migration colonnes |
+| `d1d4fdf` | fix(oase-api): BUG #7.3 - relax UUID validator (creer-demande.dto) |
+| `ebb20ca` | fix(oase-api): BUG #7.3 part 2 - UUID validator (workflow template) |
+| `56f2d86` | fix(oase-api): isAllowed charge la relation contribuables |
+
+#### Actions de suivi
+
+- [ ] **Seed v5** : ajouter `userId` à au moins un `CONTRIBUABLES` du seed pour que le test E2E soit reproductible sans fix SQL manuel
+- [ ] **Refactoriser les UUIDs** : regénérer tous les UUIDs du seed en v4 valides (pour pouvoir réutiliser `@IsUUID()` proprement, sinon garder `@Matches`)
+- [ ] **Plan de recette** : ajouter TC-P1-01 complet (login → list → create → submit) dans `docs/tests/04_PLAN_RECETTE_EXONERATION.md` avec les 3 vérifications
+- [ ] **BUG #6 cleanup** : retirer `normalizeRole()` de `auth.service.ts` maintenant que BUG #7.2 (migration 002b) couvre le cas
+
+**Statut** : ✅ **FIXED & VERIFIE** le 2026-07-13 20:50 UTC. Le flow P1 (TC-P1-01) est opérationnel end-to-end via API.
+
+---
+
 ### Refactoring BENEFICIAIRE → CONTRIBUABLE - LIVRE (2026-07-11)
 
 **Statut** : ✅ COMPLET
