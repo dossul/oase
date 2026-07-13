@@ -58,7 +58,10 @@ export class ScopeService {
     try {
       switch (resource) {
         case 'demande':
-          const demande = await this.prisma.demande.findUnique({ where: { id: resourceId } });
+          const demande = await this.prisma.demande.findUnique({
+            where: { id: resourceId },
+            include: { contribuables: true },
+          });
           if (!demande) return false;
           return this.demandeMatchesScope(demande, user);
         case 'contribuable':
