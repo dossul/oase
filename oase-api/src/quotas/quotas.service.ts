@@ -13,16 +13,16 @@ export class QuotasService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  async lister(baseJuridiqueVersionId?: string, beneficiaireId?: string) {
+  async lister(baseJuridiqueVersionId?: string, contribuableId?: string) {
     const where: Record<string, unknown> = {};
     if (baseJuridiqueVersionId) where.baseJuridiqueVersionId = baseJuridiqueVersionId;
-    if (beneficiaireId) where.beneficiaireId = beneficiaireId;
+    if (contribuableId) where.contribuableId = contribuableId;
 
     return this.prisma.quota.findMany({
       where,
       include: {
         baseJuridiqueVersions: { include: { basesJuridiques: true } },
-        beneficiaires: true,
+        contribuables: true,
         quotaMouvements: { orderBy: { createdAt: 'desc' as const }, take: 5 },
       },
       orderBy: { createdAt: 'desc' as const },
@@ -34,7 +34,7 @@ export class QuotasService {
       where: { id },
       include: {
         baseJuridiqueVersions: { include: { basesJuridiques: true } },
-        beneficiaires: true,
+        contribuables: true,
         quotaMouvements: { orderBy: { createdAt: 'desc' as const } },
       },
     });
@@ -47,7 +47,7 @@ export class QuotasService {
     const existant = await this.prisma.quota.findFirst({
       where: {
         baseJuridiqueVersionId: dto.baseJuridiqueVersionId,
-        beneficiaireId: dto.beneficiaireId ?? null,
+        contribuableId: dto.contribuableId ?? null,
         conventionId: dto.conventionId ?? null,
         exerciceAnnuel: dto.exerciceAnnuel ?? null,
         typeQuotaCode: dto.typeQuotaCode,
@@ -58,7 +58,7 @@ export class QuotasService {
     const quota = await this.prisma.quota.create({
       data: {
         baseJuridiqueVersionId: dto.baseJuridiqueVersionId,
-        beneficiaireId: dto.beneficiaireId,
+        contribuableId: dto.contribuableId,
         conventionId: dto.conventionId,
         exerciceAnnuel: dto.exerciceAnnuel,
         typeQuotaCode: dto.typeQuotaCode,
@@ -131,7 +131,7 @@ export class QuotasService {
       alerteSeuilPct: number;
       alerte80Envoyee: boolean;
       alerte100Envoyee: boolean;
-      beneficiaireId: string | null;
+      contribuableId: string | null;
     },
     consomme: bigint,
     utilisateurId: string,

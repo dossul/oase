@@ -129,7 +129,7 @@ export class AnomaliesService {
 
     const demandes = await this.prisma.demande.findMany({
       where: { statutCode: 'en_instruction' },
-      include: { beneficiaires: true, baseJuridiqueVersions: true },
+      include: { contribuables: true, baseJuridiqueVersions: true },
     });
 
     for (const demande of demandes) {
@@ -138,7 +138,7 @@ export class AnomaliesService {
         const quota = await this.prisma.quota.findFirst({
           where: {
             baseJuridiqueVersionId: demande.baseJuridiqueVersionId,
-            beneficiaireId: demande.beneficiaireId,
+            contribuableId: demande.contribuableId,
           },
         });
         if (quota && quota.consomme >= quota.total) {

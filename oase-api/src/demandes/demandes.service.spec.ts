@@ -16,7 +16,7 @@ const mockPrisma = {
     update: jest.fn(),
     groupBy: jest.fn(),
   },
-  beneficiaire: {
+  contribuable: {
     findFirst: jest.fn(),
   },
 } as any;
@@ -58,23 +58,23 @@ describe('DemandesService', () => {
     }) as any;
 
   it('devrait creer une demande en brouillon', async () => {
-    mockPrisma.beneficiaire.findFirst.mockResolvedValue({ id: 'b-1', userId: 'u-1' });
+    mockPrisma.contribuable.findFirst.mockResolvedValue({ id: 'b-1', userId: 'u-1' });
     mockPrisma.demande.count.mockResolvedValue(0);
     mockPrisma.demande.create.mockResolvedValue({
       id: 'd-1',
       reference: 'DEM-2026-00001',
       statutCode: 'brouillon',
       baseJuridiqueVersionId: 'bjv-1',
-      beneficiaireId: 'b-1',
+      contribuableId: 'b-1',
       montantFcfa: BigInt(1000000),
-      beneficiaires: null,
+      contribuables: null,
       baseJuridiqueVersions: null,
       utilisateurs: null,
     });
 
-    const result = await service.creer(user(Role.BENEFICIAIRE), {
+    const result = await service.creer(user(Role.CONTRIBUABLE), {
       baseJuridiqueVersionId: 'bjv-1',
-      beneficiaireId: 'b-1',
+      contribuableId: 'b-1',
       montantFcfa: 1000000,
     } as any);
 
@@ -87,7 +87,7 @@ describe('DemandesService', () => {
       id: 'd-1',
       statutCode: 'brouillon',
       montantFcfa: BigInt(1000000),
-      beneficiaires: null,
+      contribuables: null,
       baseJuridiqueVersions: null,
       utilisateurs: null,
     });
@@ -96,16 +96,16 @@ describe('DemandesService', () => {
       statutCode: 'soumis',
       dateDepot: new Date(),
       montantFcfa: BigInt(1000000),
-      beneficiaires: null,
+      contribuables: null,
       baseJuridiqueVersions: null,
       utilisateurs: null,
     });
 
-    const result = await service.transition(user(Role.BENEFICIAIRE), 'd-1', 'soumettre');
+    const result = await service.transition(user(Role.CONTRIBUABLE), 'd-1', 'soumettre');
     expect(result.statutCode).toBe('soumis');
   });
 
   it('devrait interdire une transition invalide', async () => {
-    await expect(service.transition(user(Role.BENEFICIAIRE), 'd-1', 'approuver' as any)).rejects.toThrow();
+    await expect(service.transition(user(Role.CONTRIBUABLE), 'd-1', 'approuver' as any)).rejects.toThrow();
   });
 });

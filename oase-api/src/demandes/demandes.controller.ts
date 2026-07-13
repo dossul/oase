@@ -21,14 +21,14 @@ export class DemandesController {
   constructor(private service: DemandesService) {}
 
   @Post()
-  @Roles(Role.BENEFICIAIRE, Role.ADMIN_SI)
+  @Roles(Role.CONTRIBUABLE, Role.ADMIN_SI)
   creer(@CurrentUser() user: AuthUser, @Body() dto: CreerDemandeDto) {
     return this.service.creer(user, dto);
   }
 
   @Get()
   @Roles(
-    Role.BENEFICIAIRE,
+    Role.CONTRIBUABLE,
     Role.AGENT_CI,
     Role.AGENT_CDDI,
     Role.AGENT_DGBF,
@@ -54,7 +54,7 @@ export class DemandesController {
 
   @Get(':id')
   @Roles(
-    Role.BENEFICIAIRE,
+    Role.CONTRIBUABLE,
     Role.AGENT_CI,
     Role.AGENT_CDDI,
     Role.AGENT_DGBF,
@@ -73,13 +73,13 @@ export class DemandesController {
   }
 
   @Patch(':id')
-  @Roles(Role.BENEFICIAIRE, Role.ADMIN_SI)
+  @Roles(Role.CONTRIBUABLE, Role.ADMIN_SI)
   modifier(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: CreerDemandeDto) {
     return this.service.creer(user, dto);
   }
 
   @Post(':id/soumettre')
-  @Roles(Role.BENEFICIAIRE, Role.ADMIN_SI)
+  @Roles(Role.CONTRIBUABLE, Role.ADMIN_SI)
   soumettre(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.service.transition(user, id, 'soumettre');
   }
@@ -109,7 +109,7 @@ export class DemandesController {
   }
 
   @Post(':id/completer')
-  @Roles(Role.BENEFICIAIRE, Role.ADMIN_SI)
+  @Roles(Role.CONTRIBUABLE, Role.ADMIN_SI)
   completer(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: CompleterDemandeDto) {
     return this.service.transition(user, id, 'completer', dto);
   }

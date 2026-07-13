@@ -7,7 +7,7 @@ export class CreerConventionDto {
 
   @IsString()
   @Length(1, 36)
-  beneficiaireId: string;
+  contribuableId: string;
 
   @IsOptional()
   @IsString()

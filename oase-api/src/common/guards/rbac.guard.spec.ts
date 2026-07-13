@@ -25,7 +25,7 @@ describe('RbacGuard', () => {
   it('autorise si aucun role requis', () => {
     class TestController {}
     const handler = jest.fn();
-    const ctx = createContext({ role: Role.BENEFICIAIRE }, handler, TestController);
+    const ctx = createContext({ role: Role.CONTRIBUABLE }, handler, TestController);
     expect(guard.canActivate(ctx)).toBe(true);
   });
 
@@ -41,7 +41,7 @@ describe('RbacGuard', () => {
     class TestController {}
     const handler = jest.fn();
     SetMetadata(ROLES_KEY, [Role.ADMIN_SI])(handler);
-    const ctx = createContext({ role: Role.BENEFICIAIRE }, handler, TestController);
+    const ctx = createContext({ role: Role.CONTRIBUABLE }, handler, TestController);
     expect(() => guard.canActivate(ctx)).toThrow(ForbiddenException);
   });
 });

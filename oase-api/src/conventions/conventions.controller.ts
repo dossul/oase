@@ -14,8 +14,8 @@ export class ConventionsController {
 
   @Get()
   @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_CI, Role.AGENT_DGMG)
-  async lister(@Query('beneficiaireId') beneficiaireId?: string) {
-    return this.service.lister(beneficiaireId);
+  async lister(@Query('contribuableId') contribuableId?: string) {
+    return this.service.lister(contribuableId);
   }
 
   @Get(':id')

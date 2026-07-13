@@ -74,7 +74,7 @@ describe('AnomaliesService', () => {
         id: 'd-1',
         statutCode: 'en_instruction',
         baseJuridiqueVersionId: 'bjv-1',
-        beneficiaireId: 'b-1',
+        contribuableId: 'b-1',
       },
     ]);
     quota.findFirst.mockResolvedValue({

@@ -1,19 +1,26 @@
-# ===== Build =====
+# ============================================================
+# OASE Frontend - Dockerfile
+# ============================================================
+# Build context : racine du repo (ou /opt/oase sur le VPS)
+# Build cmd     : docker build -f deploy/frontend.Dockerfile -t oase-frontend .
+# ============================================================
+
+# ===== Stage 1 : Build =====
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY maquette/package*.json ./
 RUN npm ci
 
-COPY . .
+COPY maquette/ ./
 RUN npm run build
 
-# ===== Runtime =====
+# ===== Stage 2 : Runtime =====
 FROM nginx:1.27-alpine AS runner
 
 # Nginx config custom
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Static files
 COPY --from=builder /app/dist /usr/share/nginx/html

@@ -12,7 +12,7 @@ import { AuditModule } from './audit/audit.module';
 import { ConnecteursModule } from './connecteurs/connecteurs.module';
 import { CommonModule } from './common/common.module';
 import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
-import { BeneficiairesModule } from './beneficiaires/beneficiaires.module';
+import { ContribuablesModule } from './contribuables/contribuables.module';
 import { DemandesModule } from './demandes/demandes.module';
 import { PiecesJointesModule } from './pieces-jointes/pieces-jointes.module';
 import { WorkflowModule } from './workflow/workflow.module';
@@ -54,7 +54,7 @@ import { JobsModule } from './jobs/jobs.module';
     AuthModule,
     ConnecteursModule,
     UtilisateursModule,
-    BeneficiairesModule,
+    ContribuablesModule,
     DemandesModule,
     PiecesJointesModule,
     WorkflowModule,

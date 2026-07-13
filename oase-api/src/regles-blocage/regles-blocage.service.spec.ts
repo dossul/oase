@@ -33,7 +33,7 @@ describe('ReglesBlocageService', () => {
   it('devrait detecter une dette fiscale active', async () => {
     mockPrisma.demande.findUnique.mockResolvedValue({
       id: 'd-1',
-      beneficiaires: { nif: 'NIF001' },
+      contribuables: { nif: 'NIF001' },
       piecesJointes: [
         { rangCode: 'premier', estValide: true },
         { rangCode: 'second', estValide: true },
@@ -55,7 +55,7 @@ describe('ReglesBlocageService', () => {
   it('devrait detecter des pieces manquantes', async () => {
     mockPrisma.demande.findUnique.mockResolvedValue({
       id: 'd-1',
-      beneficiaires: { nif: 'NIF001' },
+      contribuables: { nif: 'NIF001' },
       piecesJointes: [],
       anomalies: [],
       quotaConsomme: BigInt(0),

@@ -6,7 +6,7 @@ export class CreerDemandeDto {
   baseJuridiqueVersionId: string;
 
   @IsUUID()
-  beneficiaireId: string;
+  contribuableId: string;
 
   @IsNumber()
   @Type(() => Number)

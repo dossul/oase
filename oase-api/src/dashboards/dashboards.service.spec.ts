@@ -10,11 +10,11 @@ describe('DashboardsService', () => {
     groupBy: jest.fn(),
     findMany: jest.fn(),
   };
-  const beneficiaire = {
+  const contribuable = {
     count: jest.fn(),
   };
 
-  const prisma: Record<string, unknown> = { demande, beneficiaire };
+  const prisma: Record<string, unknown> = { demande, contribuable };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -47,12 +47,12 @@ describe('DashboardsService', () => {
         decisions: [{ typeCode: 'accord' }],
       },
     ]);
-    beneficiaire.count.mockResolvedValue(5);
+    contribuable.count.mockResolvedValue(5);
 
     const result = await service.kpisP5();
 
     expect(result.montantTotalAccorde).toBe('800000');
     expect(result.montantParImpot).toHaveLength(1);
-    expect(result.nombreBeneficiaires).toBe(5);
+    expect(result.nombreContribuables).toBe(5);
   });
 });

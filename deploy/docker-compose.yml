@@ -1,5 +1,6 @@
-# Compose dev (locale, sans Traefik, build local)
-# Usage : docker compose up -d --build
+# Compose dev (utilise le source local)
+# Usage (depuis la racine du repo) :
+#   docker compose -f deploy/docker-compose.yml up -d --build
 #
 # Acces :
 #   - Frontend : http://localhost:8080
@@ -54,8 +55,8 @@ services:
 
   oase-frontend:
     build:
-      context: ../maquette
-      dockerfile: ../deploy/frontend.Dockerfile
+      context: ..
+      dockerfile: deploy/frontend.Dockerfile
     container_name: oase-frontend-dev
     restart: unless-stopped
     depends_on:

@@ -5,7 +5,7 @@ import { Role } from '../enums/generated';
 
 export type ResourceType =
   | 'demande'
-  | 'beneficiaire'
+  | 'contribuable'
   | 'convention'
   | 'audit_log'
   | 'utilisateur'
@@ -34,8 +34,8 @@ export class ScopeService {
     switch (resource) {
       case 'demande':
         return this.buildDemandeScope(user, role);
-      case 'beneficiaire':
-        return this.buildBeneficiaireScope(user, role);
+      case 'contribuable':
+        return this.buildContribuableScope(user, role);
       case 'base_juridique':
         return this.buildBaseJuridiqueScope(user, role);
       case 'convention':
@@ -61,10 +61,10 @@ export class ScopeService {
           const demande = await this.prisma.demande.findUnique({ where: { id: resourceId } });
           if (!demande) return false;
           return this.demandeMatchesScope(demande, user);
-        case 'beneficiaire':
-          const beneficiaire = await this.prisma.beneficiaire.findUnique({ where: { id: resourceId } });
-          if (!beneficiaire) return false;
-          return this.beneficiaireMatchesScope(beneficiaire, user);
+        case 'contribuable':
+          const contribuable = await this.prisma.contribuable.findUnique({ where: { id: resourceId } });
+          if (!contribuable) return false;
+          return this.contribuableMatchesScope(contribuable, user);
         case 'utilisateur':
           if (user.role === Role.ADMIN_SI || user.role === Role.AUDITEUR) return true;
           return resourceId === user.id;
@@ -80,8 +80,8 @@ export class ScopeService {
 
   private async buildDemandeScope(user: AuthUser, role: Role): Promise<ScopedWhere> {
     switch (role) {
-      case Role.BENEFICIAIRE:
-        return { beneficiaire: { utilisateurId: user.id } };
+      case Role.CONTRIBUABLE:
+        return { contribuable: { utilisateurId: user.id } };
       case Role.AGENT_CI:
         return {
           baseJuridiqueVersion: { baseJuridique: { organeGestionCode: ORGANE_CI } },
@@ -143,29 +143,29 @@ export class ScopeService {
     }
   }
 
-  private async buildBeneficiaireScope(user: AuthUser, role: Role): Promise<ScopedWhere> {
-    if (role === Role.BENEFICIAIRE) {
+  private async buildContribuableScope(user: AuthUser, role: Role): Promise<ScopedWhere> {
+    if (role === Role.CONTRIBUABLE) {
       return { utilisateurId: user.id };
     }
     return {};
   }
 
   private async buildBaseJuridiqueScope(user: AuthUser, role: Role): Promise<ScopedWhere> {
-    if (role === Role.BENEFICIAIRE) {
+    if (role === Role.CONTRIBUABLE) {
       return { estActive: true, conformiteDirectiveUemoa: { not: 'non' } };
     }
     return {};
   }
 
   private async buildConventionScope(user: AuthUser, role: Role): Promise<ScopedWhere> {
-    if (role === Role.BENEFICIAIRE) {
-      return { beneficiaire: { utilisateurId: user.id } };
+    if (role === Role.CONTRIBUABLE) {
+      return { contribuable: { utilisateurId: user.id } };
     }
     return {};
   }
 
   private async buildAuditLogScope(user: AuthUser, role: Role): Promise<ScopedWhere> {
-    if (role === Role.BENEFICIAIRE) {
+    if (role === Role.CONTRIBUABLE) {
       return { utilisateurId: user.id };
     }
     return {};
@@ -183,8 +183,8 @@ export class ScopeService {
     if (Object.keys(where).length === 0) return true;
 
     const conditions: boolean[] = [];
-    if (where.beneficiaire?.utilisateurId) {
-      conditions.push(demande.beneficiaireUtilisateurId === user.id || demande.beneficiaire?.utilisateurId === user.id);
+    if (where.contribuable?.utilisateurId) {
+      conditions.push(demande.contribuableUtilisateurId === user.id || demande.contribuable?.utilisateurId === user.id);
     }
     if (where.statutCode?.not) {
       conditions.push(demande.statutCode !== where.statutCode.not);
@@ -199,9 +199,9 @@ export class ScopeService {
     return conditions.length === 0 || conditions.some(Boolean);
   }
 
-  private async beneficiaireMatchesScope(beneficiaire: any, user: AuthUser): Promise<boolean> {
-    if (user.role === Role.BENEFICIAIRE) {
-      return beneficiaire.utilisateurId === user.id;
+  private async contribuableMatchesScope(contribuable: any, user: AuthUser): Promise<boolean> {
+    if (user.role === Role.CONTRIBUABLE) {
+      return contribuable.utilisateurId === user.id;
     }
     return true;
   }

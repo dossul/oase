@@ -18,7 +18,7 @@ export class DecisionsService {
   async approuver(user: AuthUser, demandeId: string, pin: string, motif?: string) {
     const demande = await this.prisma.demande.findUnique({
       where: { id: demandeId },
-      include: { beneficiaires: true },
+      include: { contribuables: true },
     });
     if (!demande) throw new NotFoundException({ code: 'DEMANDE_INEXISTANTE' });
     if (demande.statutCode !== 'en_instruction') {
@@ -68,7 +68,7 @@ export class DecisionsService {
   async rejeter(user: AuthUser, demandeId: string, pin: string, motif: string) {
     const demande = await this.prisma.demande.findUnique({
       where: { id: demandeId },
-      include: { beneficiaires: true },
+      include: { contribuables: true },
     });
     if (!demande) throw new NotFoundException({ code: 'DEMANDE_INEXISTANTE' });
 
@@ -129,7 +129,7 @@ export class DecisionsService {
         decisionId: decision.id,
         typeCode: type,
         reference: ref,
-        beneficiaireId: demande.beneficiaireId,
+        contribuableId: demande.contribuableId,
         montantFcfa: demande.montantFcfa,
         dateEffet: new Date(),
         documentUrl: `actes/${ref}.pdf`,

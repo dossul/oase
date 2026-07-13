@@ -14,7 +14,7 @@ export class FiltrerDemandesDto {
 
   @IsString()
   @IsOptional()
-  beneficiaireId?: string;
+  contribuableId?: string;
 
   @IsString()
   @IsOptional()

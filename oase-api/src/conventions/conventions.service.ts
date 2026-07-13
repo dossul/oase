@@ -12,14 +12,14 @@ export class ConventionsService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  async lister(beneficiaireId?: string) {
+  async lister(contribuableId?: string) {
     const where: Record<string, unknown> = {};
-    if (beneficiaireId) where.beneficiaireId = beneficiaireId;
+    if (contribuableId) where.contribuableId = contribuableId;
 
     return this.prisma.convention.findMany({
       where,
       include: {
-        beneficiaires: true,
+        contribuables: true,
         baseJuridiqueVersions: { include: { basesJuridiques: true } },
         conventionEngagements: true,
       },
@@ -31,7 +31,7 @@ export class ConventionsService {
     const convention = await this.prisma.convention.findUnique({
       where: { id },
       include: {
-        beneficiaires: true,
+        contribuables: true,
         baseJuridiqueVersions: { include: { basesJuridiques: true } },
         conventionEngagements: true,
       },
@@ -49,7 +49,7 @@ export class ConventionsService {
     const convention = await this.prisma.convention.create({
       data: {
         reference: dto.reference,
-        beneficiaireId: dto.beneficiaireId,
+        contribuableId: dto.contribuableId,
         baseJuridiqueVersionId: dto.baseJuridiqueVersionId,
         accordSiegeId: dto.accordSiegeId,
         regimeCode: dto.regimeCode,
@@ -112,7 +112,7 @@ export class ConventionsService {
         statutCode: 'active',
         dateFin: { lte: dans30Jours },
       },
-      include: { beneficiaires: true },
+      include: { contribuables: true },
     });
 
     for (const convention of conventions) {

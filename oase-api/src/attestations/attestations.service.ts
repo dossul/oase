@@ -13,7 +13,7 @@ export class AttestationsService {
   async generer(acteId: string) {
     const acte = await this.prisma.acte.findUnique({
       where: { id: acteId },
-      include: { demandes: { include: { beneficiaires: true } }, decisions: true },
+      include: { demandes: { include: { contribuables: true } }, decisions: true },
     });
     if (!acte) throw new NotFoundException({ code: 'ACTE_INEXISTANT' });
 
@@ -22,7 +22,7 @@ export class AttestationsService {
       ref: reference,
       acte: acte.reference,
       demande: acte.demandes.reference,
-      beneficiaire: acte.demandes.beneficiaires.nif,
+      contribuable: acte.demandes.contribuables.nif,
       hash: acte.hashDocument,
     };
     const qrHash = createHash('sha256').update(JSON.stringify(qrPayload)).digest('hex');
@@ -67,7 +67,7 @@ export class AttestationsService {
       `Reference: ${reference}`,
       `Acte: ${acte.reference}`,
       `Demande: ${acte.demandes.reference}`,
-      `Beneficiaire NIF: ${acte.demandes.beneficiaires.nif}`,
+      `Contribuable NIF: ${acte.demandes.contribuables.nif}`,
       `Date d'effet: ${acte.dateEffet.toISOString()}`,
       `Hash QR: ${qrPayload.hash}`,
       'Cette attestation est verifiable via le QR code ou sur /api/v1/attestations/verifier/{qrHash}',

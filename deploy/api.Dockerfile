@@ -1,22 +1,29 @@
-# ===== Build =====
+# ============================================================
+# OASE API - Dockerfile
+# ============================================================
+# Build context : racine du repo (ou /opt/oase sur le VPS)
+# Build cmd     : docker build -f deploy/api.Dockerfile -t oase-api .
+# ============================================================
+
+# ===== Stage 1 : Build =====
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Dépendances (cache layer)
-COPY package*.json ./
-COPY prisma ./prisma
+# Dependances
+COPY oase-api/package*.json ./
+COPY oase-api/prisma ./prisma
 RUN npm ci
 
 # Code source
-COPY tsconfig*.json nest-cli.json ./
-COPY src ./src
+COPY oase-api/tsconfig*.json oase-api/nest-cli.json ./
+COPY oase-api/src ./src
 
 # Build
 RUN npx prisma generate
 RUN npm run build
 
-# ===== Runtime =====
+# ===== Stage 2 : Runtime =====
 FROM node:20-alpine AS runner
 
 WORKDIR /app
@@ -30,7 +37,7 @@ RUN apk add --no-cache curl tini
 # User non-root
 RUN addgroup -S oase && adduser -S oase -G oase
 
-# Code + dépendances prod
+# Code + dependances prod
 COPY --from=builder --chown=oase:oase /app/node_modules ./node_modules
 COPY --from=builder --chown=oase:oase /app/dist ./dist
 COPY --from=builder --chown=oase:oase /app/prisma ./prisma

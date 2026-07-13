@@ -27,7 +27,7 @@ export class PiecesJointesController {
   constructor(private service: PiecesJointesService) {}
 
   @Post()
-  @Roles(Role.BENEFICIAIRE, Role.ADMIN_SI)
+  @Roles(Role.CONTRIBUABLE, Role.ADMIN_SI)
   @UseInterceptors(FileInterceptor('file'))
   upload(
     @CurrentUser() user: AuthUser,
@@ -41,7 +41,7 @@ export class PiecesJointesController {
 
   @Get()
   @Roles(
-    Role.BENEFICIAIRE,
+    Role.CONTRIBUABLE,
     Role.AGENT_CI,
     Role.AGENT_CDDI,
     Role.AGENT_DGBF,

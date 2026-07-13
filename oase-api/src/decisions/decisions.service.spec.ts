@@ -51,8 +51,8 @@ describe('DecisionsService', () => {
       id: 'd-1',
       statutCode: 'en_instruction',
       reference: 'D-1',
-      beneficiaireId: 'b-1',
-      beneficiaires: { id: 'b-1' },
+      contribuableId: 'b-1',
+      contribuables: { id: 'b-1' },
       montantFcfa: BigInt(1000),
     });
     mockRegles.estBloque.mockResolvedValue({ bloque: false, blocages: [] });
@@ -70,8 +70,8 @@ describe('DecisionsService', () => {
       id: 'd-1',
       statutCode: 'en_instruction',
       reference: 'D-1',
-      beneficiaireId: 'b-1',
-      beneficiaires: { id: 'b-1' },
+      contribuableId: 'b-1',
+      contribuables: { id: 'b-1' },
       montantFcfa: BigInt(1000),
     });
     mockAuth.verifyPin.mockResolvedValue(true);

@@ -16,7 +16,7 @@ model AccordSiege {
   estActif              Boolean @map("est_actif")                @default(true)
   createdAt             DateTime @map("created_at")               @default(now())
   refTypesAccordSiege RefTypeAccordSiege @relation(fields: [typeInstitutionCode], references: [code], onUpdate: NoAction, map: "accords_siege_ibfk_1")
-  beneficiaires          Beneficiaire[]
+  contribuables          Contribuable[]
   conventions            Convention[]
 
   @@index([typeInstitutionCode], map: "idx_type_institution_code")
@@ -29,7 +29,7 @@ model Acte {
   decisionId       String? @map("decision_id")        @db.Char(36)
   typeCode         String @map("type_code")         @db.VarChar(50)
   reference         String         @unique(map: "reference") @db.VarChar(50)
-  beneficiaireId   String @map("beneficiaire_id")         @db.Char(36)
+  contribuableId   String @map("contribuable_id")         @db.Char(36)
   montantFcfa      BigInt? @map("montant_fcfa")
   dateEffet        DateTime @map("date_effet")       @db.Date
   documentUrl      String @map("document_url")         @db.VarChar(500)
@@ -43,10 +43,10 @@ model Acte {
   demandes          Demande       @relation(fields: [demandeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "actes_ibfk_1")
   decisions         Decision?     @relation(fields: [decisionId], references: [id], onUpdate: NoAction, map: "actes_ibfk_2")
   refTypesActe    RefTypeActe @relation(fields: [typeCode], references: [code], onUpdate: NoAction, map: "actes_ibfk_3")
-  beneficiaires     Beneficiaire  @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "actes_ibfk_4")
+  contribuables     Contribuable  @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "actes_ibfk_4")
 
   @@index([demandeId, typeCode], map: "idx_actes_demande_type")
-  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([contribuableId], map: "idx_contribuable_id")
   @@index([decisionId], map: "idx_decision_id")
   @@index([demandeId], map: "idx_demande_id")
   @@index([qrCodeHash], map: "idx_qr_code_hash")
@@ -55,26 +55,26 @@ model Acte {
   @@map("actes")
 }
 
-model AgrementBeneficiaire {
+model AgrementContribuable {
   id              String        @id @default(dbgenerated("(uuid())")) @db.Char(36)
   agrementId     String @map("agrement_id")        @db.Char(36)
-  beneficiaireId String @map("beneficiaire_id")        @db.Char(36)
+  contribuableId String @map("contribuable_id")        @db.Char(36)
   role            String?       @db.VarChar(50)
   createdAt      DateTime @map("created_at")      @default(now())
   agrements       Agrement     @relation(fields: [agrementId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_beneficiaires_ibfk_1")
-  beneficiaires   Beneficiaire @relation(fields: [beneficiaireId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_beneficiaires_ibfk_2")
+  contribuables   Contribuable @relation(fields: [contribuableId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_beneficiaires_ibfk_2")
 
-  @@unique([agrementId, beneficiaireId], map: "uk_agrement_beneficiaire")
+  @@unique([agrementId, contribuableId], map: "uk_agrement_contribuable")
   @@index([agrementId], map: "idx_agrement_id")
-  @@index([beneficiaireId], map: "idx_beneficiaire_id")
-  @@map("agrement_beneficiaires")
+  @@index([contribuableId], map: "idx_contribuable_id")
+  @@map("agrement_contribuables")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Agrement {
   id                        String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
   reference                 String                   @unique(map: "reference") @db.VarChar(30)
-  beneficiaireId           String @map("beneficiaire_id")                   @db.Char(36)
+  contribuableId           String @map("contribuable_id")                   @db.Char(36)
   typeAgrementCode        String @map("type_agrement_code")                   @db.VarChar(50)
   baseJuridiqueVersionId String? @map("base_juridique_version_id")                  @db.Char(36)
   regimeCode               String? @map("regime_code")                  @db.VarChar(50)
@@ -87,15 +87,15 @@ model Agrement {
   hashDocument             String? @map("hash_document")                  @db.Char(64)
   createdAt                DateTime @map("created_at")                 @default(now())
   updatedAt                DateTime @map("updated_at")                 @default(now())
-  agrementBeneficiaires    AgrementBeneficiaire[]
-  beneficiaires             Beneficiaire            @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "agrements_ibfk_1")
+  agrementContribuables    AgrementContribuable[]
+  contribuables             Contribuable            @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "agrements_ibfk_1")
   refTypesAgrement        RefTypeAgrement       @relation(fields: [typeAgrementCode], references: [code], onUpdate: NoAction, map: "agrements_ibfk_2")
   baseJuridiqueVersions   BaseJuridiqueVersion? @relation(fields: [baseJuridiqueVersionId], references: [id], onUpdate: NoAction, map: "agrements_ibfk_3")
   refRegimesConvention    RefRegimeConvention?  @relation(fields: [regimeCode], references: [code], onUpdate: NoAction, map: "agrements_ibfk_4")
   refStatutsConvention    RefStatutConvention   @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "agrements_ibfk_5")
 
   @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
-  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([contribuableId], map: "idx_contribuable_id")
   @@index([statutCode], map: "idx_statut_code")
   @@index([typeAgrementCode], map: "idx_type_agrement_code")
   @@index([regimeCode], map: "regime_code")
@@ -241,7 +241,7 @@ model BaseJuridiqueVersion {
   modeInstructionCode      String @map("mode_instruction_code")                     @default("manuel") @db.VarChar(50)
   objectifType              String? @map("objectif_type")                    @db.VarChar(50)
   brancheActivite           String? @map("branche_activite")                    @db.VarChar(100)
-  typeBeneficiaireCible    String? @map("type_beneficiaire_cible")                    @db.VarChar(100)
+  typeContribuableCible    String? @map("type_contribuable_cible")                    @db.VarChar(100)
   estDepenseFiscale2024   Boolean @map("est_depense_fiscale_2024")                    @default(false)
   estEvaluee2024           Boolean @map("est_evaluee_2024")                    @default(false)
   donneesDisponibles        Boolean @map("donnees_disponibles")                    @default(false)
@@ -302,31 +302,31 @@ model BaseJuridique {
   @@map("bases_juridiques")
 }
 
-model BeneficiaireHistoriqueFiscal {
+model ContribuableHistoriqueFiscal {
   id                 String             @id @default(dbgenerated("(uuid())")) @db.Char(36)
-  beneficiaireId    String @map("beneficiaire_id")             @db.Char(36)
+  contribuableId    String @map("contribuable_id")             @db.Char(36)
   statutFiscalCode String @map("statut_fiscal_code")             @db.VarChar(50)
   dateDebut         DateTime @map("date_debut")           @db.Date
   dateFin           DateTime? @map("date_fin")          @db.Date
   source             String?            @db.VarChar(100)
   connecteurCode    String? @map("connecteur_code")            @db.VarChar(50)
   createdAt         DateTime @map("created_at")           @default(now())
-  beneficiaires      Beneficiaire      @relation(fields: [beneficiaireId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "beneficiaire_historique_fiscal_ibfk_1")
+  contribuables      Contribuable      @relation(fields: [contribuableId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "beneficiaire_historique_fiscal_ibfk_1")
   refStatutsFiscal RefStatutFiscal @relation(fields: [statutFiscalCode], references: [code], onUpdate: NoAction, map: "beneficiaire_historique_fiscal_ibfk_2")
   connecteurs        Connecteur?       @relation(fields: [connecteurCode], references: [codeSysteme], onUpdate: NoAction, map: "fk_histofiscal_connecteur")
 
   @@index([connecteurCode], map: "fk_histofiscal_connecteur")
-  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([contribuableId], map: "idx_contribuable_id")
   @@index([statutFiscalCode], map: "idx_statut_fiscal_code")
-  @@map("beneficiaire_historique_fiscal")
+  @@map("contribuable_historique_fiscal")
 }
 
-model Beneficiaire {
+model Contribuable {
   id                             String                           @id @default(dbgenerated("(uuid())")) @db.Char(36)
   raisonSociale                 String @map("raison_sociale")                           @db.VarChar(200)
   nif                            String                           @unique(map: "nif") @db.VarChar(20)
   rccm                           String?                          @db.VarChar(30)
-  typeBeneficiaireCode         String @map("type_beneficiaire_code")                           @db.VarChar(50)
+  typeContribuableCode         String @map("type_contribuable_code")                           @db.VarChar(50)
   statutFiscalCode             String @map("statut_fiscal_code")                           @default("inconnu") @db.VarChar(50)
   secteur                        String?                          @db.VarChar(100)
   region                         String?                          @db.VarChar(100)
@@ -338,11 +338,11 @@ model Beneficiaire {
   createdAt                     DateTime @map("created_at")                         @default(now())
   updatedAt                     DateTime @map("updated_at")                         @default(now())
   actes                          Acte[]
-  agrementBeneficiaires         AgrementBeneficiaire[]
+  agrementContribuables         AgrementContribuable[]
   agrements                      Agrement[]
-  beneficiaireHistoriqueFiscal BeneficiaireHistoriqueFiscal[]
+  contribuableHistoriqueFiscal ContribuableHistoriqueFiscal[]
   accordsSiege                  AccordSiege?                   @relation(fields: [accordSiegeId], references: [id], onUpdate: NoAction, map: "beneficiaires_ibfk_1")
-  refTypesBeneficiaire         RefTypeBeneficiaire           @relation(fields: [typeBeneficiaireCode], references: [code], onUpdate: NoAction, map: "beneficiaires_ibfk_2")
+  refTypesContribuable         RefTypeContribuable           @relation(fields: [typeContribuableCode], references: [code], onUpdate: NoAction, map: "beneficiaires_ibfk_2")
   refStatutsFiscal             RefStatutFiscal               @relation(fields: [statutFiscalCode], references: [code], onUpdate: NoAction, map: "beneficiaires_ibfk_3")
   utilisateurs                   Utilisateur?                    @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "beneficiaires_ibfk_4")
   conventions                    Convention[]
@@ -352,9 +352,9 @@ model Beneficiaire {
   @@index([accordSiegeId], map: "idx_accord_siege_id")
   @@index([nif], map: "idx_nif")
   @@index([statutFiscalCode], map: "idx_statut_fiscal_code")
-  @@index([typeBeneficiaireCode], map: "idx_type_beneficiaire_code")
-  @@fulltext([raisonSociale], map: "ft_beneficiaires")
-  @@map("beneficiaires")
+  @@index([typeContribuableCode], map: "idx_type_contribuable_code")
+  @@fulltext([raisonSociale], map: "ft_contribuables")
+  @@map("contribuables")
 }
 
 model CodeAdditionnel {
@@ -412,7 +412,7 @@ model Connecteur {
   failureThreshold              Int @map("failure_threshold")                              @default(3)
   createdAt                     DateTime @map("created_at")                         @default(now())
   updatedAt                     DateTime @map("updated_at")                         @default(now())
-  beneficiaireHistoriqueFiscal BeneficiaireHistoriqueFiscal[]
+  contribuableHistoriqueFiscal ContribuableHistoriqueFiscal[]
   connecteurLogs                ConnecteurLog[]
   institutions                   Institution?                    @relation(fields: [institutionId], references: [id], onUpdate: NoAction, map: "connecteurs_ibfk_1")
   refStatutsConnecteur         RefStatutConnecteur           @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "connecteurs_ibfk_2")
@@ -444,7 +444,7 @@ model ConventionEngagement {
 model Convention {
   id                        String                   @id @default(dbgenerated("(uuid())")) @db.Char(36)
   reference                 String                   @unique(map: "reference") @db.VarChar(30)
-  beneficiaireId           String @map("beneficiaire_id")                   @db.Char(36)
+  contribuableId           String @map("contribuable_id")                   @db.Char(36)
   baseJuridiqueVersionId String? @map("base_juridique_version_id")                  @db.Char(36)
   accordSiegeId           String? @map("accord_siege_id")                  @db.Char(36)
   regimeCode               String @map("regime_code")                   @db.VarChar(50)
@@ -460,7 +460,7 @@ model Convention {
   updatedAt                DateTime @map("updated_at")                 @default(now())
   anomalies                 Anomalie[]
   conventionEngagements    ConventionEngagement[]
-  beneficiaires             Beneficiaire            @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "conventions_ibfk_1")
+  contribuables             Contribuable            @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "conventions_ibfk_1")
   baseJuridiqueVersions   BaseJuridiqueVersion? @relation(fields: [baseJuridiqueVersionId], references: [id], onUpdate: NoAction, map: "conventions_ibfk_2")
   accordsSiege             AccordSiege?           @relation(fields: [accordSiegeId], references: [id], onUpdate: NoAction, map: "conventions_ibfk_3")
   refRegimesConvention    RefRegimeConvention   @relation(fields: [regimeCode], references: [code], onUpdate: NoAction, map: "conventions_ibfk_4")
@@ -470,7 +470,7 @@ model Convention {
 
   @@index([accordSiegeId], map: "idx_accord_siege_id")
   @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
-  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([contribuableId], map: "idx_contribuable_id")
   @@index([dateFin], map: "idx_date_fin")
   @@index([statutCode], map: "idx_statut_code")
   @@index([regimeCode], map: "regime_code")
@@ -598,7 +598,7 @@ model Demande {
   id                         String                      @id @default(dbgenerated("(uuid())")) @db.Char(36)
   reference                  String                      @unique(map: "reference") @db.VarChar(20)
   baseJuridiqueVersionId  String @map("base_juridique_version_id")                      @db.Char(36)
-  beneficiaireId            String @map("beneficiaire_id")                      @db.Char(36)
+  contribuableId            String @map("contribuable_id")                      @db.Char(36)
   conventionId              String? @map("convention_id")                     @db.Char(36)
   instructeurId             String? @map("instructeur_id")                     @db.Char(36)
   statutCode                String @map("statut_code")                      @default("brouillon") @db.VarChar(50)
@@ -626,7 +626,7 @@ model Demande {
   demandeSyncExterne       DemandeSyncExterne[]
   demandeWorkflowInstances DemandeWorkflowInstance?
   baseJuridiqueVersions    BaseJuridiqueVersion     @relation(fields: [baseJuridiqueVersionId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_1")
-  beneficiaires              Beneficiaire               @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_2")
+  contribuables              Contribuable               @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_2")
   conventions                Convention?                @relation(fields: [conventionId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_3")
   utilisateurs               Utilisateur?               @relation(fields: [instructeurId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_4")
   refStatutsDemande        RefStatutDemande         @relation(fields: [statutCode], references: [code], onUpdate: NoAction, map: "demandes_ibfk_5")
@@ -636,12 +636,12 @@ model Demande {
   quotaMouvements           QuotaMouvement[]
 
   @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
-  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([contribuableId], map: "idx_contribuable_id")
   @@index([conventionId], map: "idx_convention_id")
   @@index([createdAt], map: "idx_created_at")
   @@index([dateArchivage], map: "idx_date_archivage")
   @@index([dateEcheance], map: "idx_date_echeance")
-  @@index([beneficiaireId, statutCode], map: "idx_demandes_beneficiaire_statut")
+  @@index([contribuableId, statutCode], map: "idx_demandes_contribuable_statut")
   @@index([statutCode, createdAt], map: "idx_demandes_statut_created")
   @@index([instructeurId], map: "idx_instructeur_id")
   @@index([reference], map: "idx_reference")
@@ -917,7 +917,7 @@ model QuotaMouvement {
 model Quota {
   id                        String                  @id @default(dbgenerated("(uuid())")) @db.Char(36)
   baseJuridiqueVersionId String @map("base_juridique_version_id")                  @db.Char(36)
-  beneficiaireId           String? @map("beneficiaire_id")                 @db.Char(36)
+  contribuableId           String? @map("contribuable_id")                 @db.Char(36)
   conventionId             String? @map("convention_id")                 @db.Char(36)
   exerciceAnnuel           Int? @map("exercice_annuel")
   typeQuotaCode           String @map("type_quota_code")                  @db.VarChar(50)
@@ -931,13 +931,13 @@ model Quota {
   updatedAt                DateTime @map("updated_at")                @default(now())
   quotaMouvements          QuotaMouvement[]
   baseJuridiqueVersions   BaseJuridiqueVersion @relation(fields: [baseJuridiqueVersionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "quotas_ibfk_1")
-  beneficiaires             Beneficiaire?          @relation(fields: [beneficiaireId], references: [id], onUpdate: NoAction, map: "quotas_ibfk_2")
+  contribuables             Contribuable?          @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "quotas_ibfk_2")
   conventions               Convention?            @relation(fields: [conventionId], references: [id], onUpdate: NoAction, map: "quotas_ibfk_3")
   refTypesQuota           RefTypeQuota         @relation(fields: [typeQuotaCode], references: [code], onUpdate: NoAction, map: "quotas_ibfk_4")
   refUnitesQuota          RefUniteQuota        @relation(fields: [uniteCode], references: [code], onUpdate: NoAction, map: "quotas_ibfk_5")
 
   @@index([baseJuridiqueVersionId], map: "idx_base_juridique_version_id")
-  @@index([beneficiaireId], map: "idx_beneficiaire_id")
+  @@index([contribuableId], map: "idx_contribuable_id")
   @@index([conventionId], map: "idx_convention_id")
   @@index([exerciceAnnuel], map: "idx_exercice_annuel")
   @@index([typeQuotaCode], map: "idx_type_quota_code")
@@ -1209,8 +1209,8 @@ model RefStatutFiscal {
   couleur                        String?                          @db.VarChar(7)
   estActif                      Boolean @map("est_actif")                          @default(true)
   createdAt                     DateTime @map("created_at")                         @default(now())
-  beneficiaireHistoriqueFiscal BeneficiaireHistoriqueFiscal[]
-  beneficiaires                  Beneficiaire[]
+  contribuableHistoriqueFiscal ContribuableHistoriqueFiscal[]
+  contribuables                  Contribuable[]
   @@map("ref_statuts_fiscal")
 }
 
@@ -1274,7 +1274,7 @@ model RefTypeAgrement {
   @@map("ref_types_agrement")
 }
 
-model RefTypeBeneficiaire {
+model RefTypeContribuable {
   code                String                @id @db.VarChar(50)
   libelle             String                @db.VarChar(200)
   description         String?               @db.Text
@@ -1282,9 +1282,9 @@ model RefTypeBeneficiaire {
   couleur             String?               @db.VarChar(7)
   estActif           Boolean @map("est_actif")               @default(true)
   createdAt          DateTime @map("created_at")              @default(now())
-  beneficiaires       Beneficiaire[]
+  contribuables       Contribuable[]
   reportingAggregats ReportingAggregat[]
-  @@map("ref_types_beneficiaire")
+  @@map("ref_types_contribuable")
 }
 
 model RefTypeDecision {
@@ -1454,7 +1454,7 @@ model ReportingAggregat {
   typeTexte1                  String? @map("type_texte_1")                 @db.VarChar(100)
   impotConcerne                String? @map("impot_concerne")                 @db.VarChar(100)
   natureMesureCode            String? @map("nature_mesure_code")                 @db.VarChar(50)
-  typeBeneficiaireCode        String? @map("type_beneficiaire_code")                 @db.VarChar(50)
+  typeContribuableCode        String? @map("type_contribuable_code")                 @db.VarChar(50)
   regimeCode                   String? @map("regime_code")                 @db.VarChar(50)
   region                        String?                 @db.VarChar(100)
   secteur                       String?                 @db.VarChar(100)
@@ -1469,7 +1469,7 @@ model ReportingAggregat {
   dateCalcul                   DateTime @map("date_calcul")                @default(now())
   createdAt                    DateTime @map("created_at")                @default(now())
   refNaturesMesure            RefNatureMesure?     @relation(fields: [natureMesureCode], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_1")
-  refTypesBeneficiaire        RefTypeBeneficiaire? @relation(fields: [typeBeneficiaireCode], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_2")
+  refTypesContribuable        RefTypeContribuable? @relation(fields: [typeContribuableCode], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_2")
   refRegimesConvention        RefRegimeConvention? @relation(fields: [regimeCode], references: [code], onUpdate: NoAction, map: "reporting_aggregats_ibfk_3")
 
   @@index([estAnonymise], map: "idx_est_anonymise")
@@ -1478,7 +1478,7 @@ model ReportingAggregat {
   @@index([periodeAnnee, periodeMois], map: "idx_periode")
   @@index([typeTexte1], map: "idx_type_texte_1")
   @@index([regimeCode], map: "regime_code")
-  @@index([typeBeneficiaireCode], map: "type_beneficiaire_code")
+  @@index([typeContribuableCode], map: "type_contribuable_code")
   @@map("reporting_aggregats")
 }
 
@@ -1588,7 +1588,7 @@ model Utilisateur {
   anomalies                Anomalie[]
   auditLogs               AuditLog[]
   baseJuridiqueDocuments BaseJuridiqueDocument[]
-  beneficiaires            Beneficiaire?
+  contribuables            Contribuable?
   decisions                Decision[]
   demandeComplements      DemandeComplement[]
   demandeWorkflowEtapes  DemandeWorkflowEtape[]

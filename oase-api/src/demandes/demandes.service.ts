@@ -18,24 +18,24 @@ export class DemandesService {
   ) {}
 
   async creer(user: AuthUser, dto: CreerDemandeDto) {
-    const beneficiaire = await this.prisma.beneficiaire.findFirst({
-      where: user.role === 'beneficiaire' ? { id: dto.beneficiaireId, userId: user.id } : { id: dto.beneficiaireId },
+    const contribuable = await this.prisma.contribuable.findFirst({
+      where: user.role === 'contribuable' ? { id: dto.contribuableId, userId: user.id } : { id: dto.contribuableId },
     });
-    if (!beneficiaire) throw new NotFoundException({ code: 'BENEFICIAIRE_INEXISTANT' });
+    if (!contribuable) throw new NotFoundException({ code: 'CONTRIBUABLE_INEXISTANT' });
 
     const reference = await this.generateReference();
     const demande = await this.prisma.demande.create({
       data: {
         reference,
         baseJuridiqueVersionId: dto.baseJuridiqueVersionId,
-        beneficiaireId: dto.beneficiaireId,
+        contribuableId: dto.contribuableId,
         montantFcfa: BigInt(dto.montantFcfa),
         secteur: dto.secteur,
         dateEcheance: dto.dateEcheance ? new Date(dto.dateEcheance) : null,
         estUrgente: dto.estUrgente ?? false,
         statutCode: StatutDemande.BROUILLON,
       },
-      include: { beneficiaires: true, baseJuridiqueVersions: true },
+      include: { contribuables: true, baseJuridiqueVersions: true },
     });
 
     await this.audit.createEntry({
@@ -53,7 +53,7 @@ export class DemandesService {
     const scope = await this.scope.buildWhereClause(user, 'demande');
     const where: any = { ...scope };
     if (dto.statutCode) where.statutCode = dto.statutCode;
-    if (dto.beneficiaireId) where.beneficiaireId = dto.beneficiaireId;
+    if (dto.contribuableId) where.contribuableId = dto.contribuableId;
     if (dto.baseJuridiqueVersionId) where.baseJuridiqueVersionId = dto.baseJuridiqueVersionId;
     if (dto.instructeurId) where.instructeurId = dto.instructeurId;
     if (dto.secteur) where.secteur = dto.secteur;
@@ -71,7 +71,7 @@ export class DemandesService {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { beneficiaires: true, baseJuridiqueVersions: true, utilisateurs: true },
+        include: { contribuables: true, baseJuridiqueVersions: true, utilisateurs: true },
       }),
       this.prisma.demande.count({ where }),
     ]);
@@ -88,7 +88,7 @@ export class DemandesService {
 
     const demande = await this.prisma.demande.findUnique({
       where: { id },
-      include: { beneficiaires: true, baseJuridiqueVersions: true, utilisateurs: true },
+      include: { contribuables: true, baseJuridiqueVersions: true, utilisateurs: true },
     });
     if (!demande) throw new NotFoundException({ code: 'DEMANDE_INEXISTANTE' });
     return this.toResponse(demande);
@@ -110,7 +110,7 @@ export class DemandesService {
     const updated = await this.prisma.demande.update({
       where: { id },
       data: updateData,
-      include: { beneficiaires: true, baseJuridiqueVersions: true, utilisateurs: true },
+      include: { contribuables: true, baseJuridiqueVersions: true, utilisateurs: true },
     });
 
     await this.audit.createEntry({
@@ -150,12 +150,12 @@ export class DemandesService {
       reference: demande.reference,
       statutCode: demande.statutCode,
       baseJuridiqueVersionId: demande.baseJuridiqueVersionId,
-      beneficiaireId: demande.beneficiaireId,
-      beneficiaire: demande.beneficiaires
+      contribuableId: demande.contribuableId,
+      contribuable: demande.contribuables
         ? {
-            id: demande.beneficiaires.id,
-            raisonSociale: demande.beneficiaires.raisonSociale,
-            nif: demande.beneficiaires.nif,
+            id: demande.contribuables.id,
+            raisonSociale: demande.contribuables.raisonSociale,
+            nif: demande.contribuables.nif,
           }
         : null,
       instructeurId: demande.instructeurId,

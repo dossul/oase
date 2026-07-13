@@ -51,7 +51,7 @@ export class DashboardsService {
       montantParImpot[impot] = (montantParImpot[impot] ?? 0n) + montant;
     }
 
-    const nombreBeneficiaires = await this.prisma.beneficiaire.count({});
+    const nombreContribuables = await this.prisma.contribuable.count({});
 
     return {
       montantTotalAccorde: montantTotalAccorde.toString(),
@@ -59,7 +59,7 @@ export class DashboardsService {
         impot,
         montant: montant.toString(),
       })),
-      nombreBeneficiaires,
+      nombreContribuables,
     };
   }
 

@@ -20,13 +20,13 @@ export class ReglesBlocageService {
   async evaluer(demandeId: string): Promise<Blocage[]> {
     const demande = await this.prisma.demande.findUnique({
       where: { id: demandeId },
-      include: { beneficiaires: true, piecesJointes: true, anomalies: true, quotaMouvements: true },
+      include: { contribuables: true, piecesJointes: true, anomalies: true, quotaMouvements: true },
     });
     if (!demande) return [{ code: 'bloc-inconnu', bloque: true, libelle: 'Demande introuvable', gravite: 'critique' }];
 
     const resultats: Blocage[] = [];
 
-    const dette = await this.evaluerDetteFiscale(demande.beneficiaires.nif);
+    const dette = await this.evaluerDetteFiscale(demande.contribuables.nif);
     resultats.push(dette);
 
     const anomalies = await this.evaluerAnomalies(demandeId);

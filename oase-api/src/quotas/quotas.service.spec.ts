@@ -67,7 +67,7 @@ describe('QuotasService', () => {
       alerteSeuilPct: 80,
       alerte80Envoyee: false,
       alerte100Envoyee: false,
-      beneficiaireId: null,
+      contribuableId: null,
     });
 
     await expect(
@@ -83,7 +83,7 @@ describe('QuotasService', () => {
       alerteSeuilPct: 80,
       alerte80Envoyee: false,
       alerte100Envoyee: false,
-      beneficiaireId: null,
+      contribuableId: null,
     });
     quota.update.mockResolvedValue({});
     quotaMouvement.create.mockResolvedValue({ id: 'm-1' });

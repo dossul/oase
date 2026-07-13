@@ -44,7 +44,7 @@ describe('PiecesJointesService', () => {
     mockPrisma.demande.findUnique.mockResolvedValue({ id: 'd-1' });
     await expect(
       service.upload(
-        user(Role.BENEFICIAIRE),
+        user(Role.CONTRIBUABLE),
         'd-1',
         {
           fieldname: 'file',
@@ -74,7 +74,7 @@ describe('PiecesJointesService', () => {
     }));
 
     const result = await service.upload(
-      user(Role.BENEFICIAIRE),
+      user(Role.CONTRIBUABLE),
       'd-1',
       {
         fieldname: 'file',

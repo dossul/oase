@@ -19,7 +19,7 @@ CREATE TABLE `actes` (
     `decision_id` CHAR(36) NULL,
     `type_code` VARCHAR(50) NOT NULL,
     `reference` VARCHAR(50) NOT NULL,
-    `beneficiaire_id` CHAR(36) NOT NULL,
+    `contribuable_id` CHAR(36) NOT NULL,
     `montant_fcfa` BIGINT NULL,
     `date_effet` DATE NOT NULL,
     `document_url` VARCHAR(500) NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE `actes` (
 
     UNIQUE INDEX `reference`(`reference`),
     INDEX `idx_actes_demande_type`(`demande_id`, `type_code`),
-    INDEX `idx_beneficiaire_id`(`beneficiaire_id`),
+    INDEX `idx_contribuable_id`(`contribuable_id`),
     INDEX `idx_decision_id`(`decision_id`),
     INDEX `idx_demande_id`(`demande_id`),
     INDEX `idx_qr_code_hash`(`qr_code_hash`),
@@ -43,16 +43,16 @@ CREATE TABLE `actes` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 -- CreateTable
-CREATE TABLE `agrement_beneficiaires` (
+CREATE TABLE `agrement_contribuables` (
     `id` CHAR(36) NOT NULL DEFAULT (uuid()),
     `agrement_id` CHAR(36) NOT NULL,
-    `beneficiaire_id` CHAR(36) NOT NULL,
+    `contribuable_id` CHAR(36) NOT NULL,
     `role` VARCHAR(50) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `idx_agrement_id`(`agrement_id`),
-    INDEX `idx_beneficiaire_id`(`beneficiaire_id`),
-    UNIQUE INDEX `uk_agrement_beneficiaire`(`agrement_id`, `beneficiaire_id`),
+    INDEX `idx_contribuable_id`(`contribuable_id`),
+    UNIQUE INDEX `uk_agrement_contribuable`(`agrement_id`, `contribuable_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
@@ -60,7 +60,7 @@ CREATE TABLE `agrement_beneficiaires` (
 CREATE TABLE `agrements` (
     `id` CHAR(36) NOT NULL DEFAULT (uuid()),
     `reference` VARCHAR(30) NOT NULL,
-    `beneficiaire_id` CHAR(36) NOT NULL,
+    `contribuable_id` CHAR(36) NOT NULL,
     `type_agrement_code` VARCHAR(50) NOT NULL,
     `base_juridique_version_id` CHAR(36) NULL,
     `regime_code` VARCHAR(50) NULL,
@@ -76,7 +76,7 @@ CREATE TABLE `agrements` (
 
     UNIQUE INDEX `reference`(`reference`),
     INDEX `idx_base_juridique_version_id`(`base_juridique_version_id`),
-    INDEX `idx_beneficiaire_id`(`beneficiaire_id`),
+    INDEX `idx_contribuable_id`(`contribuable_id`),
     INDEX `idx_statut_code`(`statut_code`),
     INDEX `idx_type_agrement_code`(`type_agrement_code`),
     INDEX `regime_code`(`regime_code`),
@@ -212,7 +212,7 @@ CREATE TABLE `base_juridique_versions` (
     `mode_instruction_code` VARCHAR(50) NOT NULL DEFAULT 'manuel',
     `objectif_type` VARCHAR(50) NULL,
     `branche_activite` VARCHAR(100) NULL,
-    `type_beneficiaire_cible` VARCHAR(100) NULL,
+    `type_contribuable_cible` VARCHAR(100) NULL,
     `est_depense_fiscale_2024` BOOLEAN NOT NULL DEFAULT false,
     `est_evaluee_2024` BOOLEAN NOT NULL DEFAULT false,
     `donnees_disponibles` BOOLEAN NOT NULL DEFAULT false,
@@ -262,9 +262,9 @@ CREATE TABLE `bases_juridiques` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 -- CreateTable
-CREATE TABLE `beneficiaire_historique_fiscal` (
+CREATE TABLE `contribuable_historique_fiscal` (
     `id` CHAR(36) NOT NULL DEFAULT (uuid()),
-    `beneficiaire_id` CHAR(36) NOT NULL,
+    `contribuable_id` CHAR(36) NOT NULL,
     `statut_fiscal_code` VARCHAR(50) NOT NULL,
     `date_debut` DATE NOT NULL,
     `date_fin` DATE NULL,
@@ -273,18 +273,18 @@ CREATE TABLE `beneficiaire_historique_fiscal` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `fk_histofiscal_connecteur`(`connecteur_code`),
-    INDEX `idx_beneficiaire_id`(`beneficiaire_id`),
+    INDEX `idx_contribuable_id`(`contribuable_id`),
     INDEX `idx_statut_fiscal_code`(`statut_fiscal_code`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 -- CreateTable
-CREATE TABLE `beneficiaires` (
+CREATE TABLE `contribuables` (
     `id` CHAR(36) NOT NULL DEFAULT (uuid()),
     `raison_sociale` VARCHAR(200) NOT NULL,
     `nif` VARCHAR(20) NOT NULL,
     `rccm` VARCHAR(30) NULL,
-    `type_beneficiaire_code` VARCHAR(50) NOT NULL,
+    `type_contribuable_code` VARCHAR(50) NOT NULL,
     `statut_fiscal_code` VARCHAR(50) NOT NULL DEFAULT 'inconnu',
     `secteur` VARCHAR(100) NULL,
     `region` VARCHAR(100) NULL,
@@ -301,8 +301,8 @@ CREATE TABLE `beneficiaires` (
     INDEX `idx_accord_siege_id`(`accord_siege_id`),
     INDEX `idx_nif`(`nif`),
     INDEX `idx_statut_fiscal_code`(`statut_fiscal_code`),
-    INDEX `idx_type_beneficiaire_code`(`type_beneficiaire_code`),
-    FULLTEXT INDEX `ft_beneficiaires`(`raison_sociale`),
+    INDEX `idx_type_contribuable_code`(`type_contribuable_code`),
+    FULLTEXT INDEX `ft_contribuables`(`raison_sociale`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
@@ -389,7 +389,7 @@ CREATE TABLE `convention_engagements` (
 CREATE TABLE `conventions` (
     `id` CHAR(36) NOT NULL DEFAULT (uuid()),
     `reference` VARCHAR(30) NOT NULL,
-    `beneficiaire_id` CHAR(36) NOT NULL,
+    `contribuable_id` CHAR(36) NOT NULL,
     `base_juridique_version_id` CHAR(36) NULL,
     `accord_siege_id` CHAR(36) NULL,
     `regime_code` VARCHAR(50) NOT NULL,
@@ -407,7 +407,7 @@ CREATE TABLE `conventions` (
     UNIQUE INDEX `reference`(`reference`),
     INDEX `idx_accord_siege_id`(`accord_siege_id`),
     INDEX `idx_base_juridique_version_id`(`base_juridique_version_id`),
-    INDEX `idx_beneficiaire_id`(`beneficiaire_id`),
+    INDEX `idx_contribuable_id`(`contribuable_id`),
     INDEX `idx_date_fin`(`date_fin`),
     INDEX `idx_statut_code`(`statut_code`),
     INDEX `regime_code`(`regime_code`),
@@ -524,7 +524,7 @@ CREATE TABLE `demandes` (
     `id` CHAR(36) NOT NULL DEFAULT (uuid()),
     `reference` VARCHAR(20) NOT NULL,
     `base_juridique_version_id` CHAR(36) NOT NULL,
-    `beneficiaire_id` CHAR(36) NOT NULL,
+    `contribuable_id` CHAR(36) NOT NULL,
     `convention_id` CHAR(36) NULL,
     `instructeur_id` CHAR(36) NULL,
     `statut_code` VARCHAR(50) NOT NULL DEFAULT 'brouillon',
@@ -546,12 +546,12 @@ CREATE TABLE `demandes` (
 
     UNIQUE INDEX `reference`(`reference`),
     INDEX `idx_base_juridique_version_id`(`base_juridique_version_id`),
-    INDEX `idx_beneficiaire_id`(`beneficiaire_id`),
+    INDEX `idx_contribuable_id`(`contribuable_id`),
     INDEX `idx_convention_id`(`convention_id`),
     INDEX `idx_created_at`(`created_at`),
     INDEX `idx_date_archivage`(`date_archivage`),
     INDEX `idx_date_echeance`(`date_echeance`),
-    INDEX `idx_demandes_beneficiaire_statut`(`beneficiaire_id`, `statut_code`),
+    INDEX `idx_demandes_contribuable_statut`(`contribuable_id`, `statut_code`),
     INDEX `idx_demandes_statut_created`(`statut_code`, `created_at`),
     INDEX `idx_instructeur_id`(`instructeur_id`),
     INDEX `idx_reference`(`reference`),
@@ -810,7 +810,7 @@ CREATE TABLE `quota_mouvements` (
 CREATE TABLE `quotas` (
     `id` CHAR(36) NOT NULL DEFAULT (uuid()),
     `base_juridique_version_id` CHAR(36) NOT NULL,
-    `beneficiaire_id` CHAR(36) NULL,
+    `contribuable_id` CHAR(36) NULL,
     `convention_id` CHAR(36) NULL,
     `exercice_annuel` INTEGER NULL,
     `type_quota_code` VARCHAR(50) NOT NULL,
@@ -824,7 +824,7 @@ CREATE TABLE `quotas` (
     `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `idx_base_juridique_version_id`(`base_juridique_version_id`),
-    INDEX `idx_beneficiaire_id`(`beneficiaire_id`),
+    INDEX `idx_contribuable_id`(`contribuable_id`),
     INDEX `idx_convention_id`(`convention_id`),
     INDEX `idx_exercice_annuel`(`exercice_annuel`),
     INDEX `idx_type_quota_code`(`type_quota_code`),
@@ -1172,7 +1172,7 @@ CREATE TABLE `ref_types_agrement` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 -- CreateTable
-CREATE TABLE `ref_types_beneficiaire` (
+CREATE TABLE `ref_types_contribuable` (
     `code` VARCHAR(50) NOT NULL,
     `libelle` VARCHAR(200) NOT NULL,
     `description` TEXT NULL,
@@ -1358,7 +1358,7 @@ CREATE TABLE `reporting_aggregats` (
     `type_texte_1` VARCHAR(100) NULL,
     `impot_concerne` VARCHAR(100) NULL,
     `nature_mesure_code` VARCHAR(50) NULL,
-    `type_beneficiaire_code` VARCHAR(50) NULL,
+    `type_contribuable_code` VARCHAR(50) NULL,
     `regime_code` VARCHAR(50) NULL,
     `region` VARCHAR(100) NULL,
     `secteur` VARCHAR(100) NULL,
@@ -1379,7 +1379,7 @@ CREATE TABLE `reporting_aggregats` (
     INDEX `idx_periode`(`periode_annee`, `periode_mois`),
     INDEX `idx_type_texte_1`(`type_texte_1`),
     INDEX `regime_code`(`regime_code`),
-    INDEX `type_beneficiaire_code`(`type_beneficiaire_code`),
+    INDEX `type_contribuable_code`(`type_contribuable_code`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
@@ -1567,16 +1567,16 @@ ALTER TABLE `actes` ADD CONSTRAINT `actes_ibfk_2` FOREIGN KEY (`decision_id`) RE
 ALTER TABLE `actes` ADD CONSTRAINT `actes_ibfk_3` FOREIGN KEY (`type_code`) REFERENCES `ref_types_acte`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `actes` ADD CONSTRAINT `actes_ibfk_4` FOREIGN KEY (`beneficiaire_id`) REFERENCES `beneficiaires`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `actes` ADD CONSTRAINT `actes_ibfk_4` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `agrement_beneficiaires` ADD CONSTRAINT `agrement_beneficiaires_ibfk_1` FOREIGN KEY (`agrement_id`) REFERENCES `agrements`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE `agrement_contribuables` ADD CONSTRAINT `agrement_beneficiaires_ibfk_1` FOREIGN KEY (`agrement_id`) REFERENCES `agrements`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `agrement_beneficiaires` ADD CONSTRAINT `agrement_beneficiaires_ibfk_2` FOREIGN KEY (`beneficiaire_id`) REFERENCES `beneficiaires`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE `agrement_contribuables` ADD CONSTRAINT `agrement_beneficiaires_ibfk_2` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `agrements` ADD CONSTRAINT `agrements_ibfk_1` FOREIGN KEY (`beneficiaire_id`) REFERENCES `beneficiaires`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `agrements` ADD CONSTRAINT `agrements_ibfk_1` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `agrements` ADD CONSTRAINT `agrements_ibfk_2` FOREIGN KEY (`type_agrement_code`) REFERENCES `ref_types_agrement`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
@@ -1651,25 +1651,25 @@ ALTER TABLE `base_juridique_versions` ADD CONSTRAINT `base_juridique_versions_ib
 ALTER TABLE `base_juridique_versions` ADD CONSTRAINT `base_juridique_versions_ibfk_5` FOREIGN KEY (`mode_instruction_code`) REFERENCES `ref_modes_instruction`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `beneficiaire_historique_fiscal` ADD CONSTRAINT `beneficiaire_historique_fiscal_ibfk_1` FOREIGN KEY (`beneficiaire_id`) REFERENCES `beneficiaires`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE `contribuable_historique_fiscal` ADD CONSTRAINT `beneficiaire_historique_fiscal_ibfk_1` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `beneficiaire_historique_fiscal` ADD CONSTRAINT `beneficiaire_historique_fiscal_ibfk_2` FOREIGN KEY (`statut_fiscal_code`) REFERENCES `ref_statuts_fiscal`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `contribuable_historique_fiscal` ADD CONSTRAINT `beneficiaire_historique_fiscal_ibfk_2` FOREIGN KEY (`statut_fiscal_code`) REFERENCES `ref_statuts_fiscal`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `beneficiaire_historique_fiscal` ADD CONSTRAINT `fk_histofiscal_connecteur` FOREIGN KEY (`connecteur_code`) REFERENCES `connecteurs`(`code_systeme`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `contribuable_historique_fiscal` ADD CONSTRAINT `fk_histofiscal_connecteur` FOREIGN KEY (`connecteur_code`) REFERENCES `connecteurs`(`code_systeme`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `beneficiaires` ADD CONSTRAINT `beneficiaires_ibfk_1` FOREIGN KEY (`accord_siege_id`) REFERENCES `accords_siege`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `contribuables` ADD CONSTRAINT `beneficiaires_ibfk_1` FOREIGN KEY (`accord_siege_id`) REFERENCES `accords_siege`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `beneficiaires` ADD CONSTRAINT `beneficiaires_ibfk_2` FOREIGN KEY (`type_beneficiaire_code`) REFERENCES `ref_types_beneficiaire`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `contribuables` ADD CONSTRAINT `beneficiaires_ibfk_2` FOREIGN KEY (`type_contribuable_code`) REFERENCES `ref_types_contribuable`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `beneficiaires` ADD CONSTRAINT `beneficiaires_ibfk_3` FOREIGN KEY (`statut_fiscal_code`) REFERENCES `ref_statuts_fiscal`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `contribuables` ADD CONSTRAINT `beneficiaires_ibfk_3` FOREIGN KEY (`statut_fiscal_code`) REFERENCES `ref_statuts_fiscal`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `beneficiaires` ADD CONSTRAINT `beneficiaires_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `utilisateurs`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `contribuables` ADD CONSTRAINT `beneficiaires_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `utilisateurs`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `codes_additionnels` ADD CONSTRAINT `codes_additionnels_ibfk_1` FOREIGN KEY (`base_juridique_version_id`) REFERENCES `base_juridique_versions`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -1690,7 +1690,7 @@ ALTER TABLE `connecteurs` ADD CONSTRAINT `connecteurs_ibfk_2` FOREIGN KEY (`stat
 ALTER TABLE `convention_engagements` ADD CONSTRAINT `convention_engagements_ibfk_1` FOREIGN KEY (`convention_id`) REFERENCES `conventions`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `conventions` ADD CONSTRAINT `conventions_ibfk_1` FOREIGN KEY (`beneficiaire_id`) REFERENCES `beneficiaires`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `conventions` ADD CONSTRAINT `conventions_ibfk_1` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `conventions` ADD CONSTRAINT `conventions_ibfk_2` FOREIGN KEY (`base_juridique_version_id`) REFERENCES `base_juridique_versions`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
@@ -1753,7 +1753,7 @@ ALTER TABLE `demande_workflow_instances` ADD CONSTRAINT `demande_workflow_instan
 ALTER TABLE `demandes` ADD CONSTRAINT `demandes_ibfk_1` FOREIGN KEY (`base_juridique_version_id`) REFERENCES `base_juridique_versions`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `demandes` ADD CONSTRAINT `demandes_ibfk_2` FOREIGN KEY (`beneficiaire_id`) REFERENCES `beneficiaires`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `demandes` ADD CONSTRAINT `demandes_ibfk_2` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `demandes` ADD CONSTRAINT `demandes_ibfk_3` FOREIGN KEY (`convention_id`) REFERENCES `conventions`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
@@ -1858,7 +1858,7 @@ ALTER TABLE `quota_mouvements` ADD CONSTRAINT `quota_mouvements_ibfk_3` FOREIGN 
 ALTER TABLE `quotas` ADD CONSTRAINT `quotas_ibfk_1` FOREIGN KEY (`base_juridique_version_id`) REFERENCES `base_juridique_versions`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `quotas` ADD CONSTRAINT `quotas_ibfk_2` FOREIGN KEY (`beneficiaire_id`) REFERENCES `beneficiaires`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `quotas` ADD CONSTRAINT `quotas_ibfk_2` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `quotas` ADD CONSTRAINT `quotas_ibfk_3` FOREIGN KEY (`convention_id`) REFERENCES `conventions`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
@@ -1882,7 +1882,7 @@ ALTER TABLE `regles_anomalie` ADD CONSTRAINT `regles_anomalie_ibfk_2` FOREIGN KE
 ALTER TABLE `reporting_aggregats` ADD CONSTRAINT `reporting_aggregats_ibfk_1` FOREIGN KEY (`nature_mesure_code`) REFERENCES `ref_natures_mesure`(`code`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `reporting_aggregats` ADD CONSTRAINT `reporting_aggregats_ibfk_2` FOREIGN KEY (`type_beneficiaire_code`) REFERENCES `ref_types_beneficiaire`(`code`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `reporting_aggregats` ADD CONSTRAINT `reporting_aggregats_ibfk_2` FOREIGN KEY (`type_contribuable_code`) REFERENCES `ref_types_contribuable`(`code`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `reporting_aggregats` ADD CONSTRAINT `reporting_aggregats_ibfk_3` FOREIGN KEY (`regime_code`) REFERENCES `ref_regimes_convention`(`code`) ON DELETE SET NULL ON UPDATE NO ACTION;

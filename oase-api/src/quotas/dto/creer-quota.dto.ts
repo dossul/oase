@@ -8,7 +8,7 @@ export class CreerQuotaDto {
   @IsOptional()
   @IsString()
   @Length(1, 36)
-  beneficiaireId?: string;
+  contribuableId?: string;
 
   @IsOptional()
   @IsString()

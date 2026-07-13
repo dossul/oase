@@ -6,7 +6,7 @@ import { Role } from '../common/enums/generated';
 const mockPrisma = {
   notification: { create: jest.fn(), findMany: jest.fn(), findFirst: jest.fn(), update: jest.fn() },
   demande: { findUnique: jest.fn() },
-  beneficiaire: { findUnique: jest.fn() },
+  contribuable: { findUnique: jest.fn() },
 } as any;
 
 describe('NotificationsService', () => {
@@ -46,8 +46,8 @@ describe('NotificationsService', () => {
   });
 
   it('devrait notifier les destinataires d une transition', async () => {
-    mockPrisma.demande.findUnique.mockResolvedValue({ id: 'd-1', beneficiaireId: 'b-1', instructeurId: 'u-2' });
-    mockPrisma.beneficiaire.findUnique.mockResolvedValue({ id: 'b-1', userId: 'u-1' });
+    mockPrisma.demande.findUnique.mockResolvedValue({ id: 'd-1', contribuableId: 'b-1', instructeurId: 'u-2' });
+    mockPrisma.contribuable.findUnique.mockResolvedValue({ id: 'b-1', userId: 'u-1' });
     mockPrisma.notification.create.mockResolvedValue({ id: 'n-1' });
 
     const result = await service.notifierTransition(user(Role.AGENT_CI), 'd-1', 'soumettre', 'soumis');

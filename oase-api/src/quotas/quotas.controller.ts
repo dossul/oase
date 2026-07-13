@@ -17,9 +17,9 @@ export class QuotasController {
   @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_CI, Role.AGENT_DGMG)
   async lister(
     @Query('baseJuridiqueVersionId') baseJuridiqueVersionId?: string,
-    @Query('beneficiaireId') beneficiaireId?: string,
+    @Query('contribuableId') contribuableId?: string,
   ) {
-    return this.service.lister(baseJuridiqueVersionId, beneficiaireId);
+    return this.service.lister(baseJuridiqueVersionId, contribuableId);
   }
 
   @Get(':id')

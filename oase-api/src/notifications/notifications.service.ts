@@ -75,15 +75,15 @@ export class NotificationsService {
   private async trouverDestinataires(demandeId: string): Promise<string[]> {
     const demande = await this.prisma.demande.findUnique({
       where: { id: demandeId },
-      select: { beneficiaireId: true, instructeurId: true },
+      select: { contribuableId: true, instructeurId: true },
     });
     if (!demande) return [];
     const ids: string[] = [];
-    const beneficiaire = await this.prisma.beneficiaire.findUnique({
-      where: { id: demande.beneficiaireId },
+    const contribuable = await this.prisma.contribuable.findUnique({
+      where: { id: demande.contribuableId },
       select: { userId: true },
     });
-    if (beneficiaire?.userId) ids.push(beneficiaire.userId);
+    if (contribuable?.userId) ids.push(contribuable.userId);
     if (demande.instructeurId) ids.push(demande.instructeurId);
     return [...new Set(ids)];
   }

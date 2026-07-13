@@ -92,7 +92,7 @@ export enum Role {
   DECIDEUR = 'decideur',
   AGENT_DGTCP = 'agent_dgtcp',
   AUDITEUR = 'auditeur',
-  BENEFICIAIRE = 'beneficiaire',
+  CONTRIBUABLE = 'contribuable',
   AGENT_MAE = 'agent_mae',
   AGENT_DGMG = 'agent_dgmg',
   AGENT_MINISTERE = 'agent_ministere',
@@ -203,7 +203,7 @@ export enum TypeAgrement {
   AUTRE = 'autre',
 }
 
-export enum TypeBeneficiaire {
+export enum TypeContribuable {
   ENTREPRISE_PRIVEE = 'entreprise_privee',
   ORGANISME_PUBLIC = 'organisme_public',
   ONG = 'ong',
@@ -286,7 +286,7 @@ export enum TypeParametre {
 
 export enum TypeQuota {
   GLOBAL_MESURE = 'global_mesure',
-  PAR_BENEFICIAIRE = 'par_beneficiaire',
+  PAR_CONTRIBUABLE = 'par_beneficiaire',
   PAR_CONVENTION = 'par_convention',
   ANNUEL = 'annuel',
 }
@@ -386,7 +386,7 @@ export const REF_LABELS: Record<string, Record<string, string>> = {
     decideur: 'Décideur UPF / MEF',
     agent_dgtcp: 'Agent DGTCP / GUDEF',
     auditeur: 'Auditeur / Contrôle',
-    beneficiaire: 'Bénéficiaire',
+    contribuable: 'Contribuable',
     agent_mae: 'Agent MAE',
     agent_dgmg: 'Agent DGMG',
     agent_ministere: 'Agent Ministère sectoriel',
@@ -482,7 +482,7 @@ export const REF_LABELS: Record<string, Record<string, string>> = {
     agrement_hydrocarbures: 'Agrément hydrocarbures',
     autre: 'Autre agrément',
   },
-  TypeBeneficiaire: {
+  TypeContribuable: {
     entreprise_privee: 'Entreprise privee',
     organisme_public: 'Organisme public',
     ong: 'ONG',
@@ -557,7 +557,7 @@ export const REF_LABELS: Record<string, Record<string, string>> = {
   },
   TypeQuota: {
     global_mesure: 'Global par mesure',
-    par_beneficiaire: 'Par beneficiaire',
+    par_beneficiaire: 'Par contribuable',
     par_convention: 'Par convention',
     annuel: 'Annuel',
   },

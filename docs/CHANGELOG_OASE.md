@@ -4,6 +4,106 @@ Toutes les evolutions notables du deploiement et de l'infrastructure OASE.
 
 ---
 
+## 2026-07-12 - V3.5.2 — BUG #6 fix : normalisation rôle `beneficiaire → contribuable`
+
+### Résumé
+
+BUG #6 découvert pendant la recette P1 : l'API `POST /auth/login` retournait `"role": "beneficiaire"` (legacy) au lieu de `"contribuable"` car la migration 002 (refactor BENEFICIAIRE → CONTRIBUABLE) n'a pas été appliquée sur la base prod. Le frontend était sauvé par son fallback, mais les checks backend type `user.role === 'contribuable'` dans `demandes.service.ts` étaient court-circuités.
+
+### Fichiers modifiés (2)
+
+| Fichier | Type | Détail |
+|---|---|---|
+| `oase-api/src/auth/auth.service.ts` | Edit | Méthode privée `normalizeRole()` (mapping `beneficiaire → contribuable`) + application dans `issueTokenPair()` (payload, JWT, audit) |
+| `oase-api/src/auth/auth.service.spec.ts` | Edit | + 2 tests : `normalise le rôle legacy "beneficiaire" → "contribuable" (BUG #6)` + `laisse les rôles canoniques inchangés (admin, agent_otr, ...)` |
+
+### Validation — règle des 3 vérifications
+
+| # | Type | Outil | Résultat |
+|---|---|---|:---:|
+| **V1** | Tests unitaires | `npx jest src/auth/auth.service.spec.ts` | ✅ 23/23 PASS (dont 2 nouveaux) |
+| **V2** | TypeScript compile | `npx tsc --noEmit` | ✅ 0 erreur |
+| **V3** | Test live API (post-rebuild) | `curl POST /api/v1/auth/login` (à faire après redeploy) | ⏳ En attente — le rebuild backend n'a pas été lancé dans cette session |
+
+### Documentation mise à jour
+
+- `docs/BUGS.md` : BUG #6 ✅ FIXED (défense en profondeur)
+- `docs/tests/04_PLAN_RECETTE_EXONERATION.md` : TC-AUTH-01 P1 = PASS avec note sur la défense en profondeur
+
+### Solution opérationnelle (TODO)
+
+- [ ] Rebuild backend : `cd oase-api && npm run build`
+- [ ] Redéployer container API sur VPS
+- [ ] Vérifier via curl : `POST /api/v1/auth/login` doit retourner `"role": "contribuable"`
+- [ ] Appliquer la migration 002 sur la DB prod pour恢复正常完全
+- [ ] Retirer `normalizeRole()` (devenu inutile)
+
+### Prochaines étapes
+
+- Une fois BUG #6 déployé en prod, **reprendre TC-P1-01** (dépôt d'une nouvelle demande par le contribuable)
+- Le browser Playwright sera à relancer (freeze rencontré dans la session précédente)
+
+---
+
+## 2026-07-12 - V3.5.1 — Correction 3 bugs frontend bloquants (admin)
+
+### Résumé
+
+Trois bugs critiques qui empêchaient l'admin (P7) d'utiliser l'application en prod ont été identifiés par Ulrich le 2026-07-11 puis corrigés et déployés le 2026-07-12 :
+
+- **BUG #2** : Pas de redirection après login (admin) → URL bloquée sur `/login`
+- **BUG #4** : Sidebar affichait le menu contribuable au lieu du menu admin
+- **BUG #5** : Navigation manuelle vers `/portail/dashboard` renvoyait vers `/login` malgré token valide
+
+### Cause racine commune
+
+Le routing et la sidebar étaient pilotés par `route.meta.role` (rôle attendu de la route) au lieu de `auth.user.role` (rôle réel de l'utilisateur connecté). L'admin étant par défaut sur des routes d'autres personas, il voyait le mauvais menu et se faisait renvoyer en boucle vers `/login`.
+
+### Fichiers modifiés (4)
+
+| Fichier | Type | Détail |
+|---|---|---|
+| `maquette/src/composables/useDefaultRoute.ts` | **NOUVEAU** (45 lignes) | Helper `getDefaultRouteForRole(role)` + `isAdminRole(role)` — source de vérité partagée pour le mapping rôle → dashboard |
+| `maquette/src/views/auth/LoginView.vue` | Edit (l. 133) | `router.push('/')` → `router.push(getDefaultRouteForRole(res.user.role))` |
+| `maquette/src/plugins/router.ts` | Edit (l. 14, 137-155) | Route `/` = composant vide + `beforeEach` dynamique + override admin sur `meta.role` |
+| `maquette/src/layouts/AppLayout.vue` | Edit (l. 295-332) | `currentNavItems` piloté par `auth.user.role` (admin → menu admin toujours) |
+
+### Validation — règle des 3 vérifications
+
+| # | Type | Outil | Résultat |
+|---|---|---|:---:|
+| **V1** | Live E2E prod | Playwright MCP sur `https://oase.ulia.site` | ✅ URL = `/admin/utilisateurs`, sidebar = 14 items admin |
+| **V2** | Bundle prod servi | `curl` + `grep` sur `index-C1vEtjNU.js` | ✅ Marqueurs `{path:"/",component:{template:"<div></div>"}}`, `isAdminRole`, `getDefaultRouteForRole` tous présents |
+| **V3** | API backend | `curl POST /api/v1/auth/login` (admin + agent_otr) | ✅ 200 + rôle cohérent (`admin`, `agent_otr`) |
+
+### Documentation mise à jour
+
+- `docs/BUGS.md` : section détaillée "BUG #2 / #4 / #5 — Routing & sidebar admin" + 3 entrées individuelles marquées ✅ FIXED
+- `docs/tests/04_PLAN_RECETTE_EXONERATION.md` v1.1 :
+  - Nouvelle section §0 "KPI de recette" avec règle des 3 vérifications
+  - 3 nouveaux cas de test (TC-AUTH-05, TC-AUTH-06, TC-AUTH-07) avec leurs V1/V2/V3 documentées
+  - Table de synthèse : 4/4 cas TC-AUTH en PASS (contre 1/4 hier)
+  - Checklist de sortie : 3 cases cochées
+
+### Déploiement
+
+- `docker build --no-cache -t oase-frontend:latest` (~2 min, vue-tsc à 105% CPU)
+- `docker compose -f docker-compose.local-prod.yml up -d --force-recreate oase-frontend`
+- HTTP 200 sur `https://oase.ulia.site/` confirmé
+
+### Rétrocompatibilité
+
+- Non-admin (contribuable → `/portail/dashboard`, agent_otr → `/backoffice/dashboard`, etc.) : **comportement inchangé**
+- Admin : seul cas nouveau (override complet sur `meta.role`)
+- Helper `getDefaultRouteForRole` accepte `Role` typé + fallback `/portail/dashboard` si rôle inconnu
+
+### Prochaines étapes
+
+- Reprendre la recette métier (TC-P1-* à TC-P7-*) en repartant du flux instruction P2 (premier workflow pas encore testé)
+- Mettre à jour `matrice_couverture.md` : 3 exigences F-01/NF-08 (admin) passent de 🔄 à ✅
+
+---
+
 ## 2026-07-10 - Mise en place complete de l'infra Docker
 
 ### Phase 1 - Preparation (~22h00 UTC)

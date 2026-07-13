@@ -88,11 +88,21 @@
 
 | Catégorie | Total | ✅ Couvert | 🔄 Partiel | ❌ Non couvert |
 |---|---:|---:|---:|---:|
-| Fonctionnelles | 42 | 14 | 15 | 13 |
-| Non-fonctionnelles | 12 | 2 | 3 | 7 |
-| **Total** | **54** | **16** | **18** | **20** |
+| Fonctionnelles | 42 | 17 | 12 | 13 |
+| Non-fonctionnelles | 12 | 3 | 2 | 7 |
+| **Total** | **54** | **20** | **14** | **20** |
 
-**Taux de couverture :** 29.6% complètement couvert · 33.3% partiellement couvert · 37.0% non couvert
+**Taux de couverture :** 37.0% complètement couvert · 25.9% partiellement couvert · 37.0% non couvert
+
+### Mise à jour 2026-07-12 (V3.5.1)
+
+Avec la résolution des BUG #2 / #4 / #5, les exigences suivantes évoluent :
+
+- **F-01** (Auth email + mdp) : 🔄 → ✅ *PASS pour tous les rôles y compris admin* (TC-AUTH-05)
+- **NF-08** (RBAC + RLS) : 🔄 → ✅ *Override admin sur les routes cross-persona vérifié* (TC-AUTH-07)
+- Nouvelle exigence implicite *"Sidebar pilotée par rôle utilisateur"* : ✅ couvert par TC-AUTH-06 (auparavant implicite, jamais testé pour l'admin)
+
+Voir `docs/BUGS.md` section "BUG #2 / #4 / #5" et `docs/tests/04_PLAN_RECETTE_EXONERATION.md` §0 + TC-AUTH-05/06/07.
 
 > Objectif MVP : 100% des exigences critiques (F-01 à F-23, NF-05 à NF-08) couvertes avant déploiement production.
 

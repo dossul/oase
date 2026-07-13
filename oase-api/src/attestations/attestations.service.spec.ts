@@ -24,7 +24,7 @@ describe('AttestationsService', () => {
       reference: 'ACTE-1',
       hashDocument: 'hash-doc',
       dateEffet: new Date(),
-      demandes: { reference: 'D-1', beneficiaires: { nif: 'NIF001' } },
+      demandes: { reference: 'D-1', contribuables: { nif: 'NIF001' } },
       decisions: { id: 'd-1' },
     });
     mockPrisma.acte.update.mockResolvedValue({ id: 'a-1', qrCodeHash: 'updated-hash' });

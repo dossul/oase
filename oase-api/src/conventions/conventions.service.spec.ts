@@ -40,7 +40,7 @@ describe('ConventionsService', () => {
     const result = await service.creer(
       {
         reference: 'CONV-2024-001',
-        beneficiaireId: 'b-1',
+        contribuableId: 'b-1',
         regimeCode: 'zfi',
         dateDebut: '2024-01-01',
         dateFin: '2025-01-01',
@@ -59,7 +59,7 @@ describe('ConventionsService', () => {
       service.creer(
         {
           reference: 'CONV-2024-001',
-          beneficiaireId: 'b-1',
+          contribuableId: 'b-1',
           regimeCode: 'zfi',
           dateDebut: '2024-01-01',
           dateFin: '2025-01-01',

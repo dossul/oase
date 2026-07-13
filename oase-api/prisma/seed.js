@@ -6,7 +6,7 @@
  * - 4 institutions (UPF, DGBF, OTR, Ministère Industrie)
  * - 15 utilisateurs (1 par rôle, emails gouv.tg)
  * - 5 bases juridiques avec version active (SCD2)
- * - 4 bénéficiaires (entreprises togolaises)
+ * - 4 contribuables (entreprises togolaises)
  * - 6 demandes
  *
  * Le script est idempotent (UUID fixes + upsert SQL).
@@ -40,7 +40,7 @@ const U = {
   instructeur:     'a000000a-0000-0000-0000-00000000000a',
   validateur:      'a000000b-0000-0000-0000-00000000000b',
   controleur:      'a000000c-0000-0000-0000-00000000000c',
-  beneficiaire:    'a000000d-0000-0000-0000-00000000000d',
+  contribuable:    'a000000d-0000-0000-0000-00000000000d',
   visiteur:        'a000000e-0000-0000-0000-00000000000e',
   system:          'a000000f-0000-0000-0000-00000000000f',
 
@@ -58,7 +58,7 @@ const U = {
   bjvTauxReduit:   'b1000004-0000-0000-0000-000000000004',
   bjvCreditImpot:  'b1000005-0000-0000-0000-000000000005',
 
-  // Bénéficiaires
+  // Contribuables
   benefA: 'c0000001-0000-0000-0000-000000000001',
   benefB: 'c0000002-0000-0000-0000-000000000002',
   benefC: 'c0000003-0000-0000-0000-000000000003',
@@ -89,7 +89,7 @@ const ROLES = [
   { code: 'instructeur',      libelle: 'Instructeur',                   description: 'Instruction des demandes' },
   { code: 'validateur',       libelle: 'Validateur',                    description: 'Validation finale des décisions' },
   { code: 'controleur',       libelle: 'Contrôleur',                    description: 'Audits et contrôles' },
-  { code: 'beneficiaire',     libelle: 'Contribuable',                  description: 'Dépôt et suivi des demandes d\'exonération fiscale' },
+  { code: 'contribuable',     libelle: 'Contribuable',                  description: 'Dépôt et suivi des demandes d\'exonération fiscale' },
   { code: 'visiteur',         libelle: 'Visiteur',                      description: 'Accès lecture restreint' },
   { code: 'system',           libelle: 'Compte système',                description: 'Compte technique pour imports et jobs' },
 ];
@@ -138,8 +138,8 @@ const USERS = [
   { id: U.validateur,       nom: 'AKAKPO',     prenom: 'Yawa',          email: 'validateur@gouv.tg',       role: 'validateur',       institutionId: I.mef,    secteurAffecte: null },
   { id: U.controleur,       nom: 'KPETO',      prenom: 'Mawuena',       email: 'controleur@gouv.tg',       role: 'controleur',       institutionId: I.mef,    secteurAffecte: null },
 
-  // Contribuable (compte utilisateur - anciennement beneficiaire)
-  { id: U.beneficiaire,     nom: 'N\'GUESSAN', prenom: 'Kossiwa',       email: 'contribuable@gouv.tg',     role: 'beneficiaire',     institutionId: I.mef,    secteurAffecte: null },
+  // Contribuable (compte utilisateur - anciennement contribuable)
+  { id: U.contribuable,     nom: 'N\'GUESSAN', prenom: 'Kossiwa',       email: 'contribuable@gouv.tg',     role: 'contribuable',     institutionId: I.mef,    secteurAffecte: null },
 
   // Visiteur + system
   { id: U.visiteur,         nom: 'Public',      prenom: 'Visiteur',      email: 'visiteur@gouv.tg',         role: 'visiteur',         institutionId: I.mef,    secteurAffecte: null },
@@ -219,14 +219,14 @@ const VERSIONS = [
 ];
 
 // ============================================================
-// BENEFICIAIRES (4, entreprises togolaises)
+// CONTRIBUABLES (4, entreprises togolaises)
 // ============================================================
-const BENEFICIAIRES = [
+const CONTRIBUABLES = [
   {
     id: U.benefA,
     raisonSociale: 'Société Cotonnière du Togo (SCT)',
     nif: 'TG-0001',
-    typeBeneficiaireCode: 'entreprise_privee',
+    typeContribuableCode: 'entreprise_privee',
     statutFiscalCode: 'conforme',
     secteur: 'agriculture',
     region: 'savanes',
@@ -236,7 +236,7 @@ const BENEFICIAIRES = [
     id: U.benefB,
     raisonSociale: 'Industries Chimiques du Togo (ICT)',
     nif: 'TG-0002',
-    typeBeneficiaireCode: 'entreprise_privee',
+    typeContribuableCode: 'entreprise_privee',
     statutFiscalCode: 'conforme',
     secteur: 'industrie',
     region: 'maritime',
@@ -246,7 +246,7 @@ const BENEFICIAIRES = [
     id: U.benefC,
     raisonSociale: 'Agro Export Togo SA',
     nif: 'TG-0003',
-    typeBeneficiaireCode: 'entreprise_privee',
+    typeContribuableCode: 'entreprise_privee',
     statutFiscalCode: 'conforme',
     secteur: 'agriculture',
     region: 'plateaux',
@@ -256,7 +256,7 @@ const BENEFICIAIRES = [
     id: U.benefD,
     raisonSociale: 'Togo Telecom SA',
     nif: 'TG-0004',
-    typeBeneficiaireCode: 'entreprise_privee',
+    typeContribuableCode: 'entreprise_privee',
     statutFiscalCode: 'dette_active',
     secteur: 'telecom',
     region: 'maritime',
@@ -284,10 +284,10 @@ async function main() {
   await connection.execute('SET FOREIGN_KEY_CHECKS=0');
   const tablesToClean = [
     'utilisateurs', 'institutions', 'base_juridique_versions', 'bases_juridiques',
-    'beneficiaires', 'demandes', 'demande_workflow_etapes', 'demande_workflow_instances',
-    'agrement_beneficiaires', 'agrements', 'actes', 'anomalies', 'audit_logs',
+    'contribuables', 'demandes', 'demande_workflow_etapes', 'demande_workflow_instances',
+    'agrement_contribuables', 'agrements', 'actes', 'anomalies', 'audit_logs',
     'pieces_jointes', 'decisions', 'conventions', 'attestations',
-    'ref_statuts_demande', 'ref_types_beneficiaire', 'ref_statuts_fiscal',
+    'ref_statuts_demande', 'ref_types_contribuable', 'ref_statuts_fiscal',
   ];
   for (const t of tablesToClean) {
     try { await connection.execute(`DELETE FROM ${t}`); }
@@ -341,15 +341,15 @@ async function main() {
     );
   }
 
-  // 4. Types beneficiaire
-  const refTypesBeneficiaire = [
+  // 4. Types contribuable
+  const refTypesContribuable = [
     ['entreprise_privee', 'Entreprise privée', 'Entreprise du secteur privé'],
     ['ong', 'ONG', 'Organisation non gouvernementale'],
     ['administration', 'Administration', 'Administration publique'],
   ];
-  for (const t of refTypesBeneficiaire) {
+  for (const t of refTypesContribuable) {
     await connection.execute(
-      `INSERT INTO ref_types_beneficiaire (code, libelle, description, est_actif, created_at)
+      `INSERT INTO ref_types_contribuable (code, libelle, description, est_actif, created_at)
        VALUES (?, ?, ?, true, NOW())
        ON DUPLICATE KEY UPDATE libelle = VALUES(libelle), description = VALUES(description), est_actif = VALUES(est_actif)`,
       t
@@ -426,16 +426,16 @@ async function main() {
   }
   console.log(`Versions: ${VERSIONS.length}`);
 
-  // 7. Bénéficiaires
-  for (const b of BENEFICIAIRES) {
+  // 7. Contribuables
+  for (const b of CONTRIBUABLES) {
     await connection.execute(
-      `INSERT INTO beneficiaires (id, raison_sociale, nif, type_beneficiaire_code, statut_fiscal_code, secteur, region, email_contact, created_at, updated_at)
+      `INSERT INTO contribuables (id, raison_sociale, nif, type_contribuable_code, statut_fiscal_code, secteur, region, email_contact, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-       ON DUPLICATE KEY UPDATE raison_sociale = VALUES(raison_sociale), type_beneficiaire_code = VALUES(type_beneficiaire_code), statut_fiscal_code = VALUES(statut_fiscal_code), secteur = VALUES(secteur), region = VALUES(region), email_contact = VALUES(email_contact)`,
-      [b.id, b.raisonSociale, b.nif, b.typeBeneficiaireCode, b.statutFiscalCode, b.secteur, b.region, b.emailContact]
+       ON DUPLICATE KEY UPDATE raison_sociale = VALUES(raison_sociale), type_contribuable_code = VALUES(type_contribuable_code), statut_fiscal_code = VALUES(statut_fiscal_code), secteur = VALUES(secteur), region = VALUES(region), email_contact = VALUES(email_contact)`,
+      [b.id, b.raisonSociale, b.nif, b.typeContribuableCode, b.statutFiscalCode, b.secteur, b.region, b.emailContact]
     );
   }
-  console.log(`Beneficiaires: ${BENEFICIAIRES.length}`);
+  console.log(`Contribuables: ${CONTRIBUABLES.length}`);
 
   console.log('--- Seed termine avec succes ---');
   console.log('');
@@ -445,7 +445,7 @@ async function main() {
     'agent_dgbf': 'Agent DGBF', 'agent_dgtcp': 'Agent DGTCP', 'agent_ministere': 'Agent Ministere',
     'agent_agence': 'Agent Agence', 'agent_otr': 'Agent OTR', 'receveur': 'Receveur',
     'instructeur': 'Instructeur', 'validateur': 'Validateur', 'controleur': 'Controleur',
-    'beneficiaire': 'Contribuable', 'visiteur': 'Visiteur', 'system': 'Systeme',
+    'contribuable': 'Contribuable', 'visiteur': 'Visiteur', 'system': 'Systeme',
   };
   USERS.forEach(u => {
     const label = ROLE_LABELS[u.role] || u.role;

@@ -47,7 +47,7 @@ export class WorkflowController {
 
   @Get('demandes/:demandeId/etapes')
   @Roles(
-    Role.BENEFICIAIRE,
+    Role.CONTRIBUABLE,
     Role.AGENT_CI,
     Role.AGENT_CDDI,
     Role.AGENT_AGENCE,

@@ -5,7 +5,7 @@ import { Role } from '../enums/generated';
 
 const mockPrisma = {
   demande: { findUnique: jest.fn() },
-  beneficiaire: { findUnique: jest.fn() },
+  contribuable: { findUnique: jest.fn() },
 } as any;
 
 describe('ScopeService', () => {
@@ -34,9 +34,9 @@ describe('ScopeService', () => {
   });
 
   describe('buildWhereClause', () => {
-    it('beneficiaire ne voit que ses propres demandes', async () => {
-      const where = await service.buildWhereClause(user(Role.BENEFICIAIRE), 'demande');
-      expect(where).toEqual({ beneficiaire: { utilisateurId: 'user-1' } });
+    it('contribuable ne voit que ses propres demandes', async () => {
+      const where = await service.buildWhereClause(user(Role.CONTRIBUABLE), 'demande');
+      expect(where).toEqual({ contribuable: { utilisateurId: 'user-1' } });
     });
 
     it('admin_si a acces a toutes les demandes', async () => {
@@ -58,30 +58,30 @@ describe('ScopeService', () => {
       expect(where.statutCode).toEqual({ not: 'brouillon' });
     });
 
-    it('beneficiaire ne voit que son propre profil', async () => {
-      const where = await service.buildWhereClause(user(Role.BENEFICIAIRE), 'beneficiaire');
+    it('contribuable ne voit que son propre profil', async () => {
+      const where = await service.buildWhereClause(user(Role.CONTRIBUABLE), 'contribuable');
       expect(where).toEqual({ utilisateurId: 'user-1' });
     });
   });
 
   describe('isAllowed', () => {
-    it('autorise un beneficiaire a voir sa propre demande', async () => {
+    it('autorise un contribuable a voir sa propre demande', async () => {
       mockPrisma.demande.findUnique.mockResolvedValue({
         id: 'dem-1',
-        beneficiaire: { utilisateurId: 'user-1' },
+        contribuable: { utilisateurId: 'user-1' },
         statutCode: 'soumis',
       });
-      const allowed = await service.isAllowed(user(Role.BENEFICIAIRE), 'demande', 'dem-1');
+      const allowed = await service.isAllowed(user(Role.CONTRIBUABLE), 'demande', 'dem-1');
       expect(allowed).toBe(true);
     });
 
-    it('interdit un beneficiaire de voir une demande tierce', async () => {
+    it('interdit un contribuable de voir une demande tierce', async () => {
       mockPrisma.demande.findUnique.mockResolvedValue({
         id: 'dem-2',
-        beneficiaire: { utilisateurId: 'user-2' },
+        contribuable: { utilisateurId: 'user-2' },
         statutCode: 'soumis',
       });
-      const allowed = await service.isAllowed(user(Role.BENEFICIAIRE), 'demande', 'dem-2');
+      const allowed = await service.isAllowed(user(Role.CONTRIBUABLE), 'demande', 'dem-2');
       expect(allowed).toBe(false);
     });
   });
