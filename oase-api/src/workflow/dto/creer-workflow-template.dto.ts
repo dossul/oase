@@ -1,5 +1,7 @@
-import { IsString, IsOptional, IsInt, Min, IsBoolean, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, IsBoolean, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export class CreerWorkflowTemplateEtapeDto {
   @IsString()
@@ -44,7 +46,8 @@ export class CreerWorkflowTemplateDto {
   @IsOptional()
   description?: string;
 
-  @IsUUID()
+  @IsString()
+  @Matches(UUID_REGEX, { message: 'baseJuridiqueVersionId doit etre un UUID au format 8-4-4-4-12' })
   @IsOptional()
   baseJuridiqueVersionId?: string;
 
