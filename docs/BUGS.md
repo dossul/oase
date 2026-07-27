@@ -505,3 +505,10 @@ Campagne de recette exhaustive (workflows, formulaires, uploads, profils, permis
 - **36/36** tests e2e API (`oase-api/e2e`)
 - **314/314** tests unitaires Jest (23 suites)
 - Builds backend/frontend propres ; chaîne d'audit `breaks: []` ; zéro erreur console sur les parcours
+
+### BUG #8.12 — Boucle 401 au boot en production (2026-07-27, déploiement) — ✅ FIXED
+
+- **Symptôme** : en prod uniquement, la page /login se rechargeait en boucle (`GET /notifications/unread-count` → 401 → `window.location.href='/login'` → reload → …), rendant la connexion impossible.
+- **Cause racine** : l'app était montée AVANT la résolution de la route initiale → App.vue rendait transitoirement le layout par défaut (AppLayout) même sur /login → appel anonyme 401 → purge + reload. Masqué en dev car le mode démo court-circuite l'appel réel.
+- **Fix** (maquette `09921f5`) : `main.ts` mount après `router.isReady()` ; AppLayout n'appelle `unread-count` que si authentifié ; `api.ts` ne purge/redirige sur 401 que si une session existait.
+- **Vérifié en ligne** : 0 appel API anonyme au boot, login UI P1 OK, sélecteur persona absent (double garde DEV + .dockerignore), bundle `index-Wj3YHmuV.js` → nouveau bundle après fix.
