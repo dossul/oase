@@ -1,4 +1,4 @@
-# Analyse Complète du MLD OASE v3
+﻿# Analyse Complète du MLD OASE v3
 
 **Date :** 17 juin 2026  
 **Version :** 3.2 (MySQL 8/9)  
@@ -22,7 +22,7 @@
 | **Référence (CRUD)** | 38 tables `ref_*` | Remplacent tous les ENUMs (types institution, statuts, natures mesure, etc.) |
 | **Identité & Sécurité** | 6 tables | Utilisateurs, sessions, tokens, permissions, authentification MFA |
 | **Référentiel Métier** | 6 tables | Institutions, accords siège, bases juridiques SCD Type 2, codes additionnels |
-| **Bénéficiaires** | 5 tables | Bénéficiaires, conventions, agréments, engagements, historique fiscal |
+| **contribuables** | 5 tables | contribuables, conventions, agréments, engagements, historique fiscal |
 | **Demandes** | 4 tables | Demandes, pièces jointes, compléments, workflow BPM |
 | **Workflow BPM** | 4 tables | Templates, étapes, transitions, instances, étapes d'instances |
 | **Décisions & Actes** | 2 tables | Décisions, actes administratifs avec QR code |
@@ -44,7 +44,7 @@
 **Liste complète :**
 - `ref_types_institution` (13 valeurs : OTR, DGBF, DGTCP...)
 - `ref_statuts_utilisateur` (actif, inactif, suspendu)
-- `ref_types_beneficiaire` (entreprise privée, ONG, institution diplomatique...)
+- `ref_types_CONTRIBUABLE` (entreprise privée, ONG, institution diplomatique...)
 - `ref_statuts_fiscal` (conforme, dette active, inconnu)
 - `ref_natures_mesure` (exonération, exemption, abattement, crédit impôt...)
 - `ref_portees_categorie` (permanente, temporaire déterminée...)
@@ -56,7 +56,7 @@
 - `ref_statuts_anomalie` (nouvelle, en examen, traitée, classée)
 - `ref_statuts_connecteur` (actif, erreur, maintenance)
 - `ref_rangs_piece` (rang 1 obligatoire, rang 2 facultatif)
-- `ref_types_quota` (global, par bénéficiaire, par convention, annuel)
+- `ref_types_quota` (global, par contribuable, par convention, annuel)
 - `ref_unites_quota` (FCFA, quantité physique, nombre d'opérations)
 - `ref_categories_anomalie` (juridique, financière, temporelle, procédurale)
 - `ref_gravites_anomalie` (critique, élevée, moyenne, faible)
@@ -210,12 +210,12 @@
 | `motif` | Raison de la demande |
 | `pieces_attendues` | Liste des documents manquants |
 | `date_demande` | Quand le complément est demandé |
-| `date_reponse` | Quand le bénéficiaire répond |
+| `date_reponse` | Quand le contribuable répond |
 | `statut_code` | en_attente, fourni, refuse |
 
 **Index stratégiques pour tracking :**
 - `idx_demandes_statut_created` — Recherche par statut + date
-- `idx_demandes_beneficiaire_statut` — Mes dashboard bénéficiaire
+- `idx_demandes_CONTRIBUABLE_statut` — Mes dashboard contribuable
 - `idx_decisions_demande_type` — Historique décisions par demande
 - `idx_actes_demande_type` — Attestations générées
 
@@ -251,7 +251,7 @@
 ### 2.6 Quotas et Historisation
 
 **Table principale :** `quotas`
-- Solde courant par base juridique / bénéficiaire / convention
+- Solde courant par base juridique / contribuable / convention
 - Alertes automatiques à 80% et 100%
 
 **Table historique :** `quota_mouvements`
@@ -284,7 +284,7 @@
 - demande_id, decision_id
 - type_code (attestation, arrete, rejet)
 - reference (numéro unique d'acte)
-- beneficiaire_id, montant_fcfa
+- CONTRIBUABLE_id, montant_fcfa
 - date_effet, document_url, hash_document
 - qr_code_hash, qr_code_image_url — Pour vérification publique
 - est_revoke, date_revocation, motif_revocation — Révocation possible
@@ -307,7 +307,7 @@
 
 **Index composites pour performance :**
 - `idx_demandes_statut_created` — Back-office filtrage
-- `idx_demandes_beneficiaire_statut` — Portail bénéficiaire
+- `idx_demandes_CONTRIBUABLE_statut` — Portail contribuable
 - `idx_pieces_jointes_demande_rang` — Validation par rang
 - `idx_decisions_demande_type` — Historique décisions
 - `idx_actes_demande_type` — Attestations
@@ -343,7 +343,7 @@
 |----------|-------------|----------|
 | ~~Médiathèque bases juridiques~~ | ✅ **LIVRÉE en v3.1** (`base_juridique_documents`) | Fait |
 | **Historique statuts demande** | Table dédiée `demande_historique_statuts` pour reporting fin (audit_logs couvre déjà le besoin légal) | Moyenne |
-| **Médias bénéficiaires permanents** | Documents hors demandes (fiches techniques, agréments précédents) | Moyenne |
+| **Médias contribuables permanents** | Documents hors demandes (fiches techniques, agréments précédents) | Moyenne |
 
 ### 5.3 ✅ Amendements Qualité v3.2 (voir `AUDIT_MLD_V3_EXPERT.md`)
 
@@ -352,7 +352,7 @@
 | **Garde unicité version active SCD2** | Colonne générée `version_courante_flag` + index unique → empêche 2 versions « courantes » pour une même mesure | 🔴 Critique |
 | **Table `ref_roles` + FK** | Normalise le RBAC (`utilisateurs.role`, `roles_permissions.role`) | 🟠 Majeur |
 | **FK `anomalies.regle_id`** | Intégrité vers `regles_anomalie.code` | 🟠 Majeur |
-| **FK `connecteur_code`** | `beneficiaire_historique_fiscal` → `connecteurs.code_systeme` | 🟡 Mineur |
+| **FK `connecteur_code`** | `CONTRIBUABLE_historique_fiscal` → `connecteurs.code_systeme` | 🟡 Mineur |
 | **Index FULLTEXT** | Recherche sur `raison_sociale` et `libelle` | 🟡 Mineur |
 
 ---
@@ -365,7 +365,7 @@
 └─────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│  institutions   │     │ bases_juridiques │     │   beneficiaires │
+│  institutions   │     │ bases_juridiques │     │   CONTRIBUABLEs │
 │  (10 seeds)     │     │  (5 seeds)       │     │   (3 seeds)     │
 └────────┬────────┘     └────────┬─────────┘     └────────┬────────┘
          │                       │                        │
@@ -501,7 +501,7 @@ SELECT 'Triggers', COUNT(*) FROM information_schema.triggers WHERE trigger_schem
 | Domaine données | Tables principales | Écrans maquette | Endpoints API | Persona |
 |-----------------|-------------------|-----------------|---------------|---------|
 | Authentification | `utilisateurs`, `sessions_utilisateur`, `refresh_tokens`, `reset_password_tokens` | A-01, A-02, A-03 | `POST /auth/login`, `/auth/mfa/verify`, `/auth/password-reset/*` | Tous |
-| Demandes (dépôt) | `demandes`, `pieces_jointes`, `bases_juridiques`, `base_juridique_versions` | B-02→B-06 | `GET/POST /demandes`, `POST /pieces-jointes/upload`, `POST /demandes/:id/soumettre` | Bénéficiaire |
+| Demandes (dépôt) | `demandes`, `pieces_jointes`, `bases_juridiques`, `base_juridique_versions` | B-02→B-06 | `GET/POST /demandes`, `POST /pieces-jointes/upload`, `POST /demandes/:id/soumettre` | contribuable |
 | Instruction | `demande_workflow_instances`, `demande_workflow_etapes`, `demande_complements` | C-02, C-03 | `POST /workflow/etapes/:id/valider`, `/demandes/:id/demander-complement` | agent_ci, agent_agence |
 | Décision/Actes | `decisions`, `actes` | C-04, E-05 | `POST /demandes/:id/approuver`, `/rejeter` | agent_ci, decideur |
 | Référentiel MRD | `bases_juridiques`, `base_juridique_versions`, `base_juridique_documents`, `codes_additionnels`, `imports_mrd` | C-05, H-05 | `GET /bases-juridiques`, `POST /bases-juridiques/import/mrd` | agent_ci, admin_si |
@@ -522,7 +522,7 @@ SELECT 'Triggers', COUNT(*) FROM information_schema.triggers WHERE trigger_schem
 
 | Code | Libellé | Espace maquette |
 |------|---------|-----------------|
-| `beneficiaire` | Bénéficiaire | P1 — Portail (B-01→B-07) |
+| `CONTRIBUABLE` | contribuable | P1 — Portail (B-01→B-07) |
 | `agent_ci` | Agent OTR — Centre des Impôts | P2 — Back-office (C-01→C-09) |
 | `agent_cddi` | Agent OTR — CDDI (Douanes) | P2 — Back-office |
 | `agent_dgbf` | Agent DGBF (visa budgétaire) | P2 — Back-office |
@@ -560,7 +560,7 @@ L'incohérence des rôles obsolètes (`agent_otr`, `agence`) a été **corrigée
 | `archive` | Neutre | `archiver()` | `archivages`, `audit_logs` |
 
 **Règles de blocage** (cf. `04` bloc-01..05) rattachées au modèle :
-- `bloc-01` dette fiscale → `beneficiaires.statut_fiscal_code = 'dette_active'`
+- `bloc-01` dette fiscale → `CONTRIBUABLEs.statut_fiscal_code = 'dette_active'`
 - `bloc-02` anomalie critique → `anomalies.gravite_code = 'critique'`
 - `bloc-03` quota dépassé → `quotas.consomme + montant > quotas.total`
 - `bloc-04` mesure expirée → `base_juridique_versions.date_abrogation < NOW()`

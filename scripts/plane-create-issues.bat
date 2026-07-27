@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 REM OASE — Création des issues Plane Phase A via API
 REM API Key: plane_api_21369749db644345abe12675acaee074
 
@@ -23,7 +23,7 @@ echo [2/6] Creation A.2 — Nettoyage conventions...
 curl -s -X POST "%BASE_URL%/workspaces/%WORKSPACE%/projects/%PROJECT_ID%/issues/" ^
   -H "X-API-Key: %API_KEY%" ^
   -H "Content-Type: application/json" ^
-  -d "{\"name\":\"A.2 — Nettoyage conventions PascalCase + @@map\",\"description\":\"Refactorer schema.prisma pour conventions Prisma idiomatiques.\n\n**Objectifs:**\n1. Modèles snake_case → PascalCase avec @@map()\n   - demandes → Demande @@map(\\\"demandes\\\")\n   - beneficiaires → Beneficiaire @@map(\\\"beneficiaires\\\")\n   - ref_roles → RefRole @@map(\\\"ref_roles\\\")\n\n2. Champs snake_case → camelCase avec @map()\n   - raison_sociale → raisonSociale @map(\\\"raison_sociale\\\")\n   - date_creation → dateCreation @map(\\\"date_creation\\\")\n\n**Critères:**\n- [ ] 85 modèles PascalCase\n- [ ] Champs camelCase avec @map\n- [ ] prisma validate OK\n- [ ] prisma generate OK\n\n**Effort:** 8h\n**Dépendance:** A.1 ✅\",\"priority\":\"urgent\",\"estimate\":8}" > nul
+  -d "{\"name\":\"A.2 — Nettoyage conventions PascalCase + @@map\",\"description\":\"Refactorer schema.prisma pour conventions Prisma idiomatiques.\n\n**Objectifs:**\n1. Modèles snake_case → PascalCase avec @@map()\n   - demandes → Demande @@map(\\\"demandes\\\")\n   - CONTRIBUABLEs → CONTRIBUABLE @@map(\\\"CONTRIBUABLEs\\\")\n   - ref_roles → RefRole @@map(\\\"ref_roles\\\")\n\n2. Champs snake_case → camelCase avec @map()\n   - raison_sociale → raisonSociale @map(\\\"raison_sociale\\\")\n   - date_creation → dateCreation @map(\\\"date_creation\\\")\n\n**Critères:**\n- [ ] 85 modèles PascalCase\n- [ ] Champs camelCase avec @map\n- [ ] prisma validate OK\n- [ ] prisma generate OK\n\n**Effort:** 8h\n**Dépendance:** A.1 ✅\",\"priority\":\"urgent\",\"estimate\":8}" > nul
 if %ERRORLEVEL% == 0 (echo ✅ A.2 créé) else (echo ❌ A.2 erreur)
 
 REM Issue A.3 - Enums TypeScript
@@ -47,7 +47,7 @@ echo [5/6] Creation A.5 — Seed demo v3.3...
 curl -s -X POST "%BASE_URL%/workspaces/%WORKSPACE%/projects/%PROJECT_ID%/issues/" ^
   -H "X-API-Key: %API_KEY%" ^
   -H "Content-Type: application/json" ^
-  -d "{\"name\":\"A.5 — Seed demo aligné v3.3 (15 rôles, bases juridiques SCD2)\",\"description\":\"Mettre à jour prisma/seed.ts avec données complètes.\n\n**Données à créer:**\n1. 15 rôles canoniques (ref_roles)\n2. 10 institutions avec types\n3. 38 tables ref_* complètes\n4. 5 bases juridiques versions SCD2:\n   - FSRV, SRD, DIT, DIS, autres\n5. 3 bénéficiaires avec NIF\n6. 5 demandes en différents statuts\n7. Workflows liés aux types\n\n**Critères:**\n- [ ] prisma db seed sans erreur\n- [ ] 85 tables peuplées\n- [ ] Audit chain vérifiable\n- [ ] Données cohérentes (FK valides)\n\n**Effort:** 8h\n**Dépendance:** A.4\",\"priority\":\"high\",\"estimate\":8}" > nul
+  -d "{\"name\":\"A.5 — Seed demo aligné v3.3 (15 rôles, bases juridiques SCD2)\",\"description\":\"Mettre à jour prisma/seed.ts avec données complètes.\n\n**Données à créer:**\n1. 15 rôles canoniques (ref_roles)\n2. 10 institutions avec types\n3. 38 tables ref_* complètes\n4. 5 bases juridiques versions SCD2:\n   - FSRV, SRD, DIT, DIS, autres\n5. 3 contribuables avec NIF\n6. 5 demandes en différents statuts\n7. Workflows liés aux types\n\n**Critères:**\n- [ ] prisma db seed sans erreur\n- [ ] 85 tables peuplées\n- [ ] Audit chain vérifiable\n- [ ] Données cohérentes (FK valides)\n\n**Effort:** 8h\n**Dépendance:** A.4\",\"priority\":\"high\",\"estimate\":8}" > nul
 if %ERRORLEVEL% == 0 (echo ✅ A.5 créé) else (echo ❌ A.5 erreur)
 
 REM Issue A.6 - Tests intégrité

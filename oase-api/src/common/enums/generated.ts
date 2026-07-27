@@ -286,7 +286,7 @@ export enum TypeParametre {
 
 export enum TypeQuota {
   GLOBAL_MESURE = 'global_mesure',
-  PAR_CONTRIBUABLE = 'par_beneficiaire',
+  PAR_CONTRIBUABLE = 'par_contribuable',
   PAR_CONVENTION = 'par_convention',
   ANNUEL = 'annuel',
 }
@@ -557,7 +557,7 @@ export const REF_LABELS: Record<string, Record<string, string>> = {
   },
   TypeQuota: {
     global_mesure: 'Global par mesure',
-    par_beneficiaire: 'Par contribuable',
+    par_contribuable: 'Par contribuable',
     par_convention: 'Par convention',
     annuel: 'Annuel',
   },

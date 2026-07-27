@@ -1,4 +1,4 @@
-# SUIVI DES LIVRABLES OASE — BACKEND & FRONTEND
+﻿# SUIVI DES LIVRABLES OASE — BACKEND & FRONTEND
 
 > **Date de rédaction :** 2026-06-16  
 > **Session :** Suite de la documentation et implémentation référentielle du backend OASE  
@@ -40,7 +40,7 @@
 | # | Issue | Fichier | Contenu | État |
 |---|-------|---------|---------|------|
 | OASE-14 | API Auth | `docs/backend/09_API_CONTRACTS.md` | Login, MFA, refresh, logout, PIN, /me | ✅ |
-| OASE-15 | API Bénéficiaire | `docs/backend/09_API_CONTRACTS.md` | CRUD profil, demandes, upload, attestations | ✅ |
+| OASE-15 | API contribuable | `docs/backend/09_API_CONTRACTS.md` | CRUD profil, demandes, upload, attestations | ✅ |
 | OASE-16 | API Instruction | `docs/backend/09_API_CONTRACTS.md` | Prise en charge, validation étape, décision, détail complet | ✅ |
 | OASE-17 | API Dashboards | `docs/backend/09_API_CONTRACTS.md` | Stats par statut, quotas, connecteurs health, anomalies | ✅ |
 | OASE-18 | API Admin | `docs/backend/09_API_CONTRACTS.md` | CRUD users, reset MFA, import MRD, API publique | ✅ |
@@ -112,7 +112,7 @@
 |---|-------|-------|------------|
 | OASE-42 | Tests E2E | Stratégie Playwright globale | `docs/tests/01_STRATEGIE_PLAYWRIGHT.md` |
 | OASE-43 | Tests E2E | Authentification et sécurité | Playwright specs |
-| OASE-44 | Tests E2E | Parcours bénéficiaire complet | Playwright specs |
+| OASE-44 | Tests E2E | Parcours contribuable complet | Playwright specs |
 | OASE-45 | Tests E2E | Instruction back-office complète | Playwright specs |
 | OASE-46 | Tests E2E | Dashboards et exports | Playwright specs |
 | OASE-47 | Tests E2E | Administration users/roles/workflows | Playwright specs |
@@ -128,7 +128,7 @@
 | Module | Fichiers à créer | Priorité |
 |--------|------------------|----------|
 | PrismaModule | `prisma.service.ts` · `prisma.module.ts` | 🔴 Haute (dépendance tous modules) |
-| BeneficiairesModule | Controller · Service · DTOs · Guards RLS | 🔴 Haute |
+| CONTRIBUABLEsModule | Controller · Service · DTOs · Guards RLS | 🔴 Haute |
 | DemandesModule | Controller · Service · DTOs · WorkflowService | 🔴 Haute |
 | StorageModule | S3 adapter · Upload interceptor | 🔴 Haute |
 | WorkflowModule | Template engine · Transition engine | 🔴 Haute |

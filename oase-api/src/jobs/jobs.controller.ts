@@ -12,13 +12,13 @@ export class JobsController {
   constructor(private readonly service: JobsService) {}
 
   @Get('heartbeat')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE)
+  @Roles(Role.ADMIN_SI)
   async heartbeat() {
     return this.service.getHeartbeat();
   }
 
   @Post('archiver')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE)
+  @Roles(Role.ADMIN_SI)
   async archiver(@Body('jours') jours: number, @CurrentUser('id') utilisateurId: string) {
     return this.service.archiverDemandesAncienne(utilisateurId, jours);
   }

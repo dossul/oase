@@ -1,4 +1,4 @@
-# OASE — Création des issues Plane Phase A
+﻿# OASE — Création des issues Plane Phase A
 # API Key: plane_api_21369749db644345abe12675acaee074
 
 $apiKey = "plane_api_21369749db644345abe12675acaee074"
@@ -50,7 +50,7 @@ Refactorer `schema.prisma` pour respecter les conventions Prisma idiomatiques.
 **Objectifs:**
 1. Renommer modèles snake_case → PascalCase
    - `demandes` → `Demande` avec `@@map("demandes")`
-   - `beneficiaires` → `Beneficiaire` avec `@@map("beneficiaires")`
+   - `CONTRIBUABLEs` → `CONTRIBUABLE` avec `@@map("CONTRIBUABLEs")`
    - `ref_roles` → `RefRole` avec `@@map("ref_roles")`
 
 2. Renommer champs:
@@ -149,7 +149,7 @@ Mettre à jour `prisma/seed.ts` avec des données complètes et cohérentes.
 4. **5 bases juridiques** avec versions SCD2:
    - FSRV, SRD, DIT, DIS, autres mesures
 
-5. **3 bénéficiaires** avec NIF valides
+5. **3 contribuables** avec NIF valides
 
 6. **5 demandes** dans différents statuts
 

@@ -7,7 +7,7 @@ import {
   ImporterBasesJuridiquesDto,
 } from './dto/creer-base-juridique.dto';
 import { FiltrerBasesJuridiquesDto } from './dto/filtrer-bases-juridiques.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../generated/prisma';
 
 interface ImportedRow {
   codeMesure: string;

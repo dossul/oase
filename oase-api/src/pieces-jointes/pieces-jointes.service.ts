@@ -127,7 +127,7 @@ export class PiecesJointesService {
       entite: 'pieces_jointes',
       entiteId: pieceId,
       utilisateurId: user.id,
-      demandeId: piece.demandeId,
+      demandeId: piece.demandeId ?? undefined,
       nouvelleValeur: { estValide, commentaireValidation: commentaire },
     });
 

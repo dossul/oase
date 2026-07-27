@@ -1,4 +1,4 @@
-# OASE — Plan Détaillé de la Suite (Phase de Réalisation)
+﻿# OASE — Plan Détaillé de la Suite (Phase de Réalisation)
 
 > **Date :** 17 juin 2026  
 > **Auteur :** Pair-programming OASE  
@@ -76,7 +76,7 @@
 | Sprint | Tâche | État |
 |--------|-------|------|
 | C1 | Auth JWT/refresh/MFA/PIN + RBAC 15 rôles + Utilisateurs | ✅ |
-| C2 | Bénéficiaires + Demandes + Storage | ✅ |
+| C2 | contribuables + Demandes + Storage | ✅ |
 | C3 | Workflow + Décisions + Actes | ✅ |
 | C4 | Attestations + Notifications | ✅ |
 
@@ -111,7 +111,7 @@
 |---|-----|------|--------|
 | E.1 | Socle | ✅ | Layout, thème, garde RBAC |
 | E.2 | Auth | ✅ | Login, MFA, reset |
-| E.3 | Portail bénéficiaire P1 | ✅ | Dashboard P1 connecté API |
+| E.3 | Portail contribuable P1 | ✅ | Dashboard P1 connecté API |
 | E.4 | Back-office P2 | ✅ | Dashboard P2 connecté API |
 | E.5 | Agences P3 + Décideurs P4 | ✅ | Dashboards conventions + KPIs |
 | E.6 | Contrôle P5 + Open Data P6 | ✅ | Dashboard audit anomalies |

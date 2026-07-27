@@ -13,25 +13,41 @@ export class ConventionsController {
   constructor(private readonly service: ConventionsService) {}
 
   @Get()
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_CI, Role.AGENT_DGMG)
+  @Roles(
+    Role.CONTRIBUABLE,
+    Role.AGENT_AGENCE,
+    Role.AGENT_MAE,
+    Role.AGENT_DGMG,
+    Role.DECIDEUR,
+    Role.AUDITEUR,
+    Role.ADMIN_SI,
+  )
   async lister(@Query('contribuableId') contribuableId?: string) {
     return this.service.lister(contribuableId);
   }
 
   @Get(':id')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_CI, Role.AGENT_DGMG)
+  @Roles(
+    Role.CONTRIBUABLE,
+    Role.AGENT_AGENCE,
+    Role.AGENT_MAE,
+    Role.AGENT_DGMG,
+    Role.DECIDEUR,
+    Role.AUDITEUR,
+    Role.ADMIN_SI,
+  )
   async trouverParId(@Param('id') id: string) {
     return this.service.trouverParId(id);
   }
 
   @Post()
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_CI)
+  @Roles(Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.ADMIN_SI)
   async creer(@Body() dto: CreerConventionDto, @CurrentUser('id') utilisateurId: string) {
     return this.service.creer(dto, utilisateurId);
   }
 
   @Patch(':id/renouveler')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_CI)
+  @Roles(Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.ADMIN_SI)
   async renouveler(
     @Param('id') id: string,
     @Body() dto: RenouvelerConventionDto,
@@ -41,7 +57,7 @@ export class ConventionsController {
   }
 
   @Post('alertes/echeance')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_CI)
+  @Roles(Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.ADMIN_SI)
   async verifierAlertesEcheance(@CurrentUser('id') utilisateurId: string) {
     return this.service.verifierAlertesEcheance(utilisateurId);
   }

@@ -1,4 +1,4 @@
-# OASE-4 — Langage Métier Commun (Ubiquitous Language)
+﻿# OASE-4 — Langage Métier Commun (Ubiquitous Language)
 
 > **Issue Plane :** OASE-4 (Produire langage métier commun)  
 > **Date :** 2026-06-16  
@@ -17,7 +17,7 @@
 
 ### `Demande`
 - **Nom métier :** Dossier de demande d'exonération
-- **Définition :** Formulaire numérique soumis par un bénéficiaire pour obtenir l'application d'une mesure d'exonération fiscale ou douanière. Passe par un circuit d'approbation avant de générer une attestation ou un arrêté.
+- **Définition :** Formulaire numérique soumis par un contribuable pour obtenir l'application d'une mesure d'exonération fiscale ou douanière. Passe par un circuit d'approbation avant de générer une attestation ou un arrêté.
 - **Table SQL :** `demandes`
 - **Attributs canoniques :**
 
@@ -26,7 +26,7 @@
 | `id` | UUID PK | `string` | UUID v4 |
 | `reference` | VARCHAR(20) UNIQUE | `string` | `OASE-YYYY-NNNNNN` |
 | `type` | ENUM | `ExoType` | voir §2.1 |
-| `beneficiaire_id` | UUID FK | `string` | → `beneficiaires` |
+| `CONTRIBUABLE_id` | UUID FK | `string` | → `CONTRIBUABLEs` |
 | `nif` | VARCHAR(20) | `string` | `TG-XXX-YYYY-X` |
 | `rccm` | VARCHAR(30) | `string` | `TG-LOM-YYYY-X-NNNN` |
 | `statut` | ENUM | `StatutDemande` | voir §2.2 |
@@ -44,10 +44,10 @@
 
 ---
 
-### `Beneficiaire`
-- **Nom métier :** Opérateur économique / Bénéficiaire de l'exonération
+### `CONTRIBUABLE`
+- **Nom métier :** Opérateur économique / contribuable de l'exonération
 - **Définition :** Entreprise, organisme public, ONG ou institution diplomatique ayant déposé ou susceptible de déposer une demande d'exonération.
-- **Table SQL :** `beneficiaires`
+- **Table SQL :** `CONTRIBUABLEs`
 
 | Attribut | Type SQL | Remarque |
 |---|---|---|
@@ -56,7 +56,7 @@
 | `nif` | VARCHAR(20) UNIQUE | Numéro d'Identification Fiscale |
 | `rccm` | VARCHAR(30) | Registre du Commerce |
 | `secteur` | VARCHAR(100) | Branche d'activité |
-| `type_beneficiaire` | ENUM | voir §2.3 |
+| `type_CONTRIBUABLE` | ENUM | voir §2.3 |
 | `statut_fiscal` | ENUM | `conforme`, `dette_active`, `inconnu` |
 | `region` | VARCHAR(100) | Région du Togo |
 | `created_at` | TIMESTAMP | — |
@@ -97,7 +97,7 @@
 |---|---|---|---|
 | `id` | UUID PK | `string` | — |
 | `reference` | VARCHAR(30) UNIQUE | `string` | — |
-| `beneficiaire_id` | UUID FK | `string` | — |
+| `CONTRIBUABLE_id` | UUID FK | `string` | — |
 | `regime` | VARCHAR(50) | `string` | `ZFI`, `ZES`, `Code Investissements` |
 | `statut` | ENUM | `Convention['statut']` | `active`, `suspendue`, `resiliee`, `expiree` |
 | `date_debut` | DATE | `string` | — |
@@ -215,7 +215,7 @@
 | `rejete` | Rejeté | Rouge | Refusé avec motif |
 | `expire` | Expiré | Neutre | Date d'échéance dépassée |
 
-### 2.3 `TypeBeneficiaire`
+### 2.3 `TypeCONTRIBUABLE`
 
 | Valeur | Description |
 |---|---|
@@ -259,7 +259,7 @@
 
 | Valeur code | Persona | Institution |
 |---|---|---|
-| `beneficiaire` | P1 — Opérateur économique | Entreprise privée |
+| `CONTRIBUABLE` | P1 — Opérateur économique | Entreprise privée |
 | `agent_ci` | P2 — OTR Centre des Impôts | OTR — Impôts internes |
 | `agent_cddi` | P2 — OTR CDDI (douanes) | OTR — Douanes |
 | `agent_dgbf` | P2 — Régie financière (budget) | DGBF / MEF |
@@ -308,7 +308,7 @@
 | Pièce de second rang | — | Document d'évaluation (business plan, emplois projetés) |
 | Attestation d'exonération | — | Acte officiel généré après approbation (PDF + QR Code) |
 | Arrêté d'exonération | — | Acte ministériel pour grandes conventions |
-| Récépissé | — | Preuve de dépôt horodatée remise au bénéficiaire à la soumission |
+| Récépissé | — | Preuve de dépôt horodatée remise au contribuable à la soumission |
 | Quota | — | Volume autorisé d'exonération (douanière = valeur en FCFA ou unité) |
 | Dépense fiscale/PIB | — | Ratio de référence OASE : ~3% PIB, ~18-20% recettes |
 
@@ -339,14 +339,14 @@
 ### 5.1 Base de données (SQL)
 - Tables : `snake_case` pluriel → `demandes`, `bases_juridiques`, `audit_logs`
 - Clés primaires : `id` UUID
-- Clés étrangères : `{table_singulier}_id` → `beneficiaire_id`, `instructeur_id`
+- Clés étrangères : `{table_singulier}_id` → `CONTRIBUABLE_id`, `instructeur_id`
 - Timestamps : `created_at`, `updated_at`, `deleted_at` (soft delete)
 - Booléens : préfixe `est_` ou `is_` → `est_active`, `est_depense_fiscale`
 - Enums : `snake_case` → `en_cours`, `zone_franche`
 
 ### 5.2 API REST (Laravel)
 - Routes : `kebab-case` → `GET /api/demandes`, `POST /api/demandes/{id}/approuver`
-- Ressources : `PascalCase` → `DemandeResource`, `BeneficiaireResource`
+- Ressources : `PascalCase` → `DemandeResource`, `CONTRIBUABLEResource`
 - Actions non-CRUD : verbe-objet → `/approuver`, `/rejeter`, `/soumettre`, `/notifier-otr`
 - Réponses : `camelCase` dans JSON → `dateDepot`, `montantFCFA`
 
@@ -365,7 +365,7 @@
 |---|---|---|---|
 | `StatutDemande` | `maquette/src/types/index.ts` | 1 | `type StatutDemande = 'en_cours' \| ...` |
 | `ExoType` | `maquette/src/types/index.ts` | 2 | `type ExoType = 'douaniere' \| ...` |
-| `Role` | `maquette/src/types/index.ts` | 3-16 | `type Role = 'beneficiaire' \| ...` |
+| `Role` | `maquette/src/types/index.ts` | 3-16 | `type Role = 'CONTRIBUABLE' \| ...` |
 | `Demande` | `maquette/src/types/index.ts` | 48-65 | `interface Demande { ... }` |
 | `Convention` | `maquette/src/types/index.ts` | 109-120 | `interface Convention { ... }` |
 | `AuditLog` | `maquette/src/types/index.ts` | 122-133 | `interface AuditLog { ... }` |

@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise');
 const tables = [
   'ref_types_institution',
   'ref_statuts_utilisateur',
-  'ref_types_beneficiaire',
+  'ref_types_contribuable',
   'ref_statuts_fiscal',
   'ref_statuts_demande'
 ];

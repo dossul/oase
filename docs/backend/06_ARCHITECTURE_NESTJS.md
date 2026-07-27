@@ -1,4 +1,4 @@
-# OASE-9 — Architecture backend NestJS
+﻿# OASE-9 — Architecture backend NestJS
 
 > **Issue Plane :** OASE-9  
 > **Date :** 2026-06-16  
@@ -113,10 +113,10 @@ oase-backend/
 │   ├── institutions/
 │   │   └── ...
 │   │
-│   ├── beneficiaires/
-│   │   ├── beneficiaires.module.ts
-│   │   ├── beneficiaires.controller.ts
-│   │   ├── beneficiaires.service.ts
+│   ├── CONTRIBUABLEs/
+│   │   ├── CONTRIBUABLEs.module.ts
+│   │   ├── CONTRIBUABLEs.controller.ts
+│   │   ├── CONTRIBUABLEs.service.ts
 │   │   └── dto/
 │   │
 │   ├── bases-juridiques/

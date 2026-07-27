@@ -1,4 +1,4 @@
-# OASE-53 — Matrice de couverture exigences → tests
+﻿# OASE-53 — Matrice de couverture exigences → tests
 
 > **Issue Plane :** OASE-53  
 > **Date :** 2026-06-16  
@@ -25,23 +25,23 @@
 | F-03 | PIN de signature avant approbation | CdC §3.1 | `instruction.spec.ts` approuver | ✅ |
 | F-04 | Refresh token rotation | CdC §3.1 | `auth.spec.ts` refresh | 🔄 |
 | F-05 | Blacklist révocation token | CdC §3.1 | `auth.spec.ts` logout | 🔄 |
-| F-06 | Profil bénéficiaire (NIF, RCCM, type) | CdC §3.2 | `beneficiaire.spec.ts` | ✅ |
-| F-07 | Statut fiscal temps réel (E-TAX) | CdC §3.2 | `beneficiaire.spec.ts` statut badge | 🔄 |
-| F-08 | Dépôt demande en 3 étapes | CdC §3.3 | `beneficiaire.spec.ts` soumission | ✅ |
-| F-09 | Sélection base juridique MRD | CdC §3.3 | `beneficiaire.spec.ts` step1 | ✅ |
-| F-10 | Upload pièces jointes (PDF/JPG/PNG ≤10MB) | CdC §3.3 | `beneficiaire.spec.ts` upload | ✅ |
+| F-06 | Profil contribuable (NIF, RCCM, type) | CdC §3.2 | `CONTRIBUABLE.spec.ts` | ✅ |
+| F-07 | Statut fiscal temps réel (E-TAX) | CdC §3.2 | `CONTRIBUABLE.spec.ts` statut badge | 🔄 |
+| F-08 | Dépôt demande en 3 étapes | CdC §3.3 | `CONTRIBUABLE.spec.ts` soumission | ✅ |
+| F-09 | Sélection base juridique MRD | CdC §3.3 | `CONTRIBUABLE.spec.ts` step1 | ✅ |
+| F-10 | Upload pièces jointes (PDF/JPG/PNG ≤10MB) | CdC §3.3 | `CONTRIBUABLE.spec.ts` upload | ✅ |
 | F-11 | Brouillon auto-sauvegardé | CdC §3.3 | — | ❌ |
-| F-12 | Soumission avec garde-fous (dette, quota, pièces) | CdC §3.3 | `beneficiaire.spec.ts` guards | 🔄 |
-| F-13 | Suivi état demande (stepper workflow) | CdC §3.4 | `beneficiaire.spec.ts` détail | ✅ |
+| F-12 | Soumission avec garde-fous (dette, quota, pièces) | CdC §3.3 | `CONTRIBUABLE.spec.ts` guards | 🔄 |
+| F-13 | Suivi état demande (stepper workflow) | CdC §3.4 | `CONTRIBUABLE.spec.ts` détail | ✅ |
 | F-14 | Notification email changement statut | CdC §3.4 | — (mock email) | ❌ |
-| F-15 | Réponse à complément | CdC §3.5 | `beneficiaire.spec.ts` complément | ✅ |
+| F-15 | Réponse à complément | CdC §3.5 | `CONTRIBUABLE.spec.ts` complément | ✅ |
 | F-16 | File d'instruction filtrée par organe | CdC §3.6 | `instruction.spec.ts` file | ✅ |
 | F-17 | Prise en charge dossier | CdC §3.6 | `instruction.spec.ts` | ✅ |
 | F-18 | Validation étape workflow + PIN | CdC §3.6 | `instruction.spec.ts` valider | ✅ |
 | F-19 | Demande de complément motivée | CdC §3.6 | `instruction.spec.ts` complément | ✅ |
 | F-20 | Approbation finale avec PIN + commentaire | CdC §3.7 | `instruction.spec.ts` approuver | ✅ |
 | F-21 | Rejet avec motif obligatoire | CdC §3.7 | `instruction.spec.ts` rejet | 🔄 |
-| F-22 | Attestation PDF + QR Code | CdC §3.8 | `beneficiaire.spec.ts` téléchargement | 🔄 |
+| F-22 | Attestation PDF + QR Code | CdC §3.8 | `CONTRIBUABLE.spec.ts` téléchargement | 🔄 |
 | F-23 | Vérification attestation publique | CdC §3.8 | `public.spec.ts` vérifier | ✅ |
 | F-24 | Quota avec alertes 80% / blocage 100% | CdC §3.9 | `dashboards.spec.ts` quota | 🔄 |
 | F-25 | Anomalies paramétrables | CdC §3.10 | — | ❌ |
@@ -71,7 +71,7 @@
 |:---:|---|---|---|:---:|
 | NF-01 | Disponibilité ≥ 99% | CdC §5.1 | Monitoring PM2 | ❌ |
 | NF-02 | Temps réponse < 2s (95e percentile) | CdC §5.1 | — | ❌ |
-| NF-03 | Upload fichier ≤ 15MB | CdC §5.1 | `beneficiaire.spec.ts` upload | ✅ |
+| NF-03 | Upload fichier ≤ 15MB | CdC §5.1 | `CONTRIBUABLE.spec.ts` upload | ✅ |
 | NF-04 | 1 000 utilisateurs simultanés | CdC §5.1 | Load test k6 | ❌ |
 | NF-05 | Données chiffrées au repos (AES-256) | CdC §5.2 | — | 🔄 |
 | NF-06 | JWT access 15min / refresh 7j | CdC §5.2 | `auth.spec.ts` | 🔄 |

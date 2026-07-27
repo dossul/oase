@@ -1,4 +1,4 @@
-# OASE-7 — Statuts métier des demandes et machines d'état
+﻿# OASE-7 — Statuts métier des demandes et machines d'état
 
 > **Issue Plane :** OASE-7  
 > **Date :** 2026-06-16  
@@ -30,7 +30,7 @@
                     └──────┬──────┘                               │
                            │ soumettre()                          │
                            │ [montant > 0]                        │
-                           │ [beneficiaire.statut_fiscal ≠ dette] │
+                           │ [CONTRIBUABLE.statut_fiscal ≠ dette] │
                            ▼                                      │
                     ┌─────────────┐                               │
                     │   soumis    │                               │
@@ -73,10 +73,10 @@
 
 | De | Vers | Action | Acteur autorisé | Règles de garde | Effets de bord |
 |---|---|---|---|---|---|
-| `brouillon` | `soumis` | `soumettre` | P1 (beneficiaire) | `montant_fcfa > 0` ; toutes pièces de 1er rang présentes ; `statut_fiscal ≠ dette_active` | Génère `reference` OASE-YYYY-NNNNNN ; crée `Notification(SOUMISSION)` à instructeurs ; crée `AuditLog(SOUMETTRE_DEMANDE)` |
+| `brouillon` | `soumis` | `soumettre` | P1 (CONTRIBUABLE) | `montant_fcfa > 0` ; toutes pièces de 1er rang présentes ; `statut_fiscal ≠ dette_active` | Génère `reference` OASE-YYYY-NNNNNN ; crée `Notification(SOUMISSION)` à instructeurs ; crée `AuditLog(SOUMETTRE_DEMANDE)` |
 | `soumis` | `en_instruction` | `prendre_en_charge` | P2 (`agent_ci`/`agent_cddi`/`agent_dgbf`/`agent_dgtcp`/`agent_agence`) | Instructeur actif ; rôle compatible avec `organe_gestion` de la mesure | Affecte `instructeur_id` ; crée première `EtapeWorkflow` ; `Notification(INSTRUCTION)` à P1 |
 | `en_instruction` | `action_requise` | `demander_complement` | P2 (instructeur affecté) | `motif` non vide | `Notification(COMPLEMENT)` à P1 avec motif ; `AuditLog` |
-| `action_requise` | `en_instruction` | `completer` | P1 (bénéficiaire) | Au moins une pièce ajoutée depuis le changement de statut | `Notification(RETOUR_INSTRUCTION)` à P2 ; `AuditLog` |
+| `action_requise` | `en_instruction` | `completer` | P1 (contribuable) | Au moins une pièce ajoutée depuis le changement de statut | `Notification(RETOUR_INSTRUCTION)` à P2 ; `AuditLog` |
 | `en_instruction` | `approuve` | `approuver` | P2/P4 selon étape finale | Toutes `EtapeWorkflow.statut = valide` ; PIN saisi valide ; `Anomalie.gravite = critique` absente | Génère `Decision(approbation)` ; génère PDF attestation + QR Code + SHA-256 ; incrémente `Quota.consomme` ; `Notification(APPROBATION)` à P1 ; `AuditLog(APPROUVER_DEMANDE)` |
 | `en_instruction` | `rejete` | `rejeter` | P2 (instructeur) | `motif_rejet` non vide | Génère `Decision(rejet)` ; `Notification(REJET)` à P1 avec motif ; `AuditLog` |
 | `approuve` | `archive` | `archiver` | P7 (admin) ou automatique | `date_archivage` atteinte (configurable) | `AuditLog(ARCHIVER)` |
@@ -88,7 +88,7 @@
 
 ```
 RULE bloc-01 : dette_active
-  IF beneficiaire.statut_fiscal = 'dette_active'
+  IF CONTRIBUABLE.statut_fiscal = 'dette_active'
   THEN BLOCK soumettre()
   MESSAGE "Dossier bloqué : situation fiscale non conforme (OTR). 
            Régularisez votre situation avant de déposer une demande."
@@ -158,7 +158,7 @@ RULE bloc-05 : pieces_manquantes
 #### Accord de siège (MAE)
 ```
 1. Réception MAE                   [agent_mae]
-2. Vérification liste bénéficiaires[agent_mae]
+2. Vérification liste contribuables[agent_mae]
 3. Validation OTR                  [agent_cddi]
 4. Notification automatique Sydonia [system — si code additionnel présent]
 ```
@@ -224,7 +224,7 @@ Toutes les alertes sont générées par un job CRON quotidien à 06h00 (heure Lo
 
 | Déclencheur | Destinataires | Canal | Délai |
 |---|---|---|---|
-| `demande.date_echeance - 30j` | P1 (bénéficiaire) + instructeur | in-app + email | J-30 |
+| `demande.date_echeance - 30j` | P1 (contribuable) + instructeur | in-app + email | J-30 |
 | `demande.date_echeance - 7j` | P1 + instructeur + P4 | in-app + email | J-7 |
 | `demande.date_echeance atteinte` | P1 + instructeur + P4 + P7 | in-app + email + SMS | J0 → `expire` |
 | `convention.date_fin - 90j` | P3 (agence) + P4 | in-app + email | J-90 |
@@ -247,7 +247,7 @@ export class DemandeStateMachine {
       {
         to: 'soumis',
         action: 'soumettre',
-        roles: ['beneficiaire'],
+        roles: ['CONTRIBUABLE'],
         guards: [
           'MontantPositifGuard',
           'PiecesRangUneGuard',
@@ -275,7 +275,7 @@ export class DemandeStateMachine {
         effects: [
           'GenererAttestationEffect',   // PDF + QR + SHA-256
           'IncrementerQuotaEffect',
-          'NotifierBeneficiaireEffect',
+          'NotifierCONTRIBUABLEEffect',
           'PushSIExterneEffect',        // Sydonia / E-TAX si mode = automatique
           'AuditLogEffect',
         ],

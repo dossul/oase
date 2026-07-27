@@ -1,171 +1,320 @@
-[2J[3J[H[[90m12:14:57[0m] Starting compilation in watch mode...
-
-[[90m12:15:04[0m] Found 0 errors. Watching for file changes.
-
-OASE API running on http://localhost:3000/api/v1
+﻿OASE API running on http://localhost:3000/api/v1
 Swagger UI available on http://localhost:3000/api/docs
-[12:15:07.032] [32mINFO[39m (40404): [36mStarting Nest application...[39m
+[12:14:24.906] [32mINFO[39m (60776): [36mStarting Nest application...[39m
     [35mcontext[39m: "NestFactory"
-[12:15:07.032] [32mINFO[39m (40404): [36mPrismaModule dependencies initialized[39m
+[12:14:24.906] [32mINFO[39m (60776): [36mPrismaModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.032] [32mINFO[39m (40404): [36mPassportModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mPassportModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.032] [32mINFO[39m (40404): [36mThrottlerModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mThrottlerModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.032] [32mINFO[39m (40404): [36mConfigHostModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mConfigHostModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mAuditModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mAuditModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mAppModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mAppModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mLoggerModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mDiscoveryModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mCommonModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mLoggerModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mTerminusModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mCommonModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mConfigModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mTerminusModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mConfigModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mConfigModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mHealthModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mConfigModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mConnecteursModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mScheduleModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mJwtModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mHealthModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mAuthModule dependencies initialized[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mConnecteursModule dependencies initialized[39m
     [35mcontext[39m: "InstanceLoader"
-[12:15:07.033] [32mINFO[39m (40404): [36mAppController {/api/v1}:[39m
+[12:14:24.907] [32mINFO[39m (60776): [36mJwtModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.907] [32mINFO[39m (60776): [36mAttestationsModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mNotificationsModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mDashboardsModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mDemandesModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mPiecesJointesModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mBasesJuridiquesModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mRapportsModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mQuotasModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mAnomaliesModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mConventionsModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mJobsModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mCONTRIBUABLEsModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mReglesBlocageModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mUtilisateursModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mAuthModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mWorkflowModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mDecisionsModule dependencies initialized[39m
+    [35mcontext[39m: "InstanceLoader"
+[12:14:24.908] [32mINFO[39m (60776): [36mAppController {/api/v1}:[39m
     [35mcontext[39m: "RoutesResolver"
-[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1, GET} route[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1, GET} route[39m
     [35mcontext[39m: "RouterExplorer"
-[12:15:07.033] [32mINFO[39m (40404): [36mHealthController {/api/v1/health}:[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mHealthController {/api/v1/health}:[39m
     [35mcontext[39m: "RoutesResolver"
-[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/health, GET} route[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/health, GET} route[39m
     [35mcontext[39m: "RouterExplorer"
-[12:15:07.033] [32mINFO[39m (40404): [36mAuthController {/api/v1/auth}:[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mAuthController {/api/v1/auth}:[39m
     [35mcontext[39m: "RoutesResolver"
-[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/login, POST} route[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/auth/login, POST} route[39m
     [35mcontext[39m: "RouterExplorer"
-[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/mfa/verify, POST} route[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/auth/mfa/verify, POST} route[39m
     [35mcontext[39m: "RouterExplorer"
-[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/refresh, POST} route[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/auth/refresh, POST} route[39m
     [35mcontext[39m: "RouterExplorer"
-[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/logout, POST} route[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/auth/logout, POST} route[39m
     [35mcontext[39m: "RouterExplorer"
-[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/pin/set, POST} route[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/auth/pin/set, POST} route[39m
     [35mcontext[39m: "RouterExplorer"
-[12:15:07.033] [32mINFO[39m (40404): [36mMapped {/api/v1/auth/me, GET} route[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/auth/me, GET} route[39m
     [35mcontext[39m: "RouterExplorer"
-[12:15:07.033] [32mINFO[39m (40404): [36mNest application successfully started[39m
+[12:14:24.908] [32mINFO[39m (60776): [36mUtilisateursController {/api/v1/utilisateurs}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/utilisateurs, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/utilisateurs, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/utilisateurs/me, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/utilisateurs/:id, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/utilisateurs/:id, PATCH} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/utilisateurs/:id/reset-mfa, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/utilisateurs/:id/reset-pin, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mCONTRIBUABLEsController {/api/v1/CONTRIBUABLEs}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/CONTRIBUABLEs, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/CONTRIBUABLEs, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/CONTRIBUABLEs/me, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/CONTRIBUABLEs/:id, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/CONTRIBUABLEs/:id, PATCH} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/CONTRIBUABLEs/:id/statut-fiscal, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mDemandesController {/api/v1/demandes}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/stats/par-statut, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.908] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:id, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:id, PATCH} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:id/soumettre, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:id/prendre-en-charge, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:id/demander-complement, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:id/completer, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:id/approuver, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:id/rejeter, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:id/archiver, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mPiecesJointesController {/api/v1/demandes/:demandeId/pieces-jointes}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:demandeId/pieces-jointes, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:demandeId/pieces-jointes, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:demandeId/pieces-jointes/:pieceId/valider, PATCH} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:demandeId/pieces-jointes/:pieceId/invalider, PATCH} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mWorkflowController {/api/v1/workflow}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/workflow/templates, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/workflow/templates, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/workflow/demandes/:demandeId/demarrer/:templateId, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/workflow/demandes/:demandeId/etapes, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/workflow/etapes/:etapeId/valider, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mReglesBlocageController {/api/v1/demandes/:demandeId/blocages}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:demandeId/blocages, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mDecisionsController {/api/v1/demandes/:demandeId/decisions}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:demandeId/decisions/approuver, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:demandeId/decisions/rejeter, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/demandes/:demandeId/decisions, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mAttestationsController {/api/v1/attestations}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/attestations/actes/:acteId, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/attestations/verifier/:qrHash, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mNotificationsController {/api/v1/notifications}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/notifications, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/notifications, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/notifications/:id/lue, PATCH} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mBasesJuridiquesController {/api/v1/bases-juridiques}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/bases-juridiques, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/bases-juridiques/:id, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/bases-juridiques, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/bases-juridiques/versions, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/bases-juridiques/importer, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mQuotasController {/api/v1/quotas}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/quotas, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/quotas/:id, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/quotas, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/quotas/mouvements, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mAnomaliesController {/api/v1/anomalies}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/anomalies, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/anomalies/:id, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/anomalies, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/anomalies/:id/traiter, PATCH} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/anomalies/detecter, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mConventionsController {/api/v1/conventions}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/conventions, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/conventions/:id, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/conventions, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/conventions/:id/renouveler, PATCH} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/conventions/alertes/echeance, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mDashboardsController {/api/v1/dashboards}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/dashboards/p4, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.909] [32mINFO[39m (60776): [36mMapped {/api/v1/dashboards/p5, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.910] [32mINFO[39m (60776): [36mRapportsController {/api/v1/rapports}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.910] [32mINFO[39m (60776): [36mMapped {/api/v1/rapports, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.910] [32mINFO[39m (60776): [36mMapped {/api/v1/rapports/opendata, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.910] [32mINFO[39m (60776): [36mMapped {/api/v1/rapports/:id, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.910] [32mINFO[39m (60776): [36mMapped {/api/v1/rapports/generer, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.910] [32mINFO[39m (60776): [36mJobsController {/api/v1/jobs}:[39m
+    [35mcontext[39m: "RoutesResolver"
+[12:14:24.910] [32mINFO[39m (60776): [36mMapped {/api/v1/jobs/heartbeat, GET} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.910] [32mINFO[39m (60776): [36mMapped {/api/v1/jobs/archiver, POST} route[39m
+    [35mcontext[39m: "RouterExplorer"
+[12:14:24.910] [32mINFO[39m (60776): [36mNest application successfully started[39m
     [35mcontext[39m: "NestApplication"
-[12:15:34.387] [32mINFO[39m (40404): [36mrequest completed[39m
-    [35mreq[39m: {
-      "id": 1,
-      "method": "POST",
-      "url": "/api/v1/auth/login",
-      "query": {},
-      "params": {
-        "0": "auth/login"
-      },
-      "headers": {
-        "content-type": "application/json",
-        "content-length": "49",
-        "host": "localhost:3000",
-        "connection": "keep-alive"
-      },
-      "remoteAddress": "::1",
-      "remotePort": 55039
-    }
-    [35mres[39m: {
-      "statusCode": 200,
-      "headers": {
-        "x-powered-by": "Express",
-        "content-type": "application/json; charset=utf-8",
-        "content-length": "269",
-        "etag": "W/\"10d-FN6M3q98/TG7OSZAFvU3aJfsPzM\""
-      }
-    }
-    [35mresponseTime[39m: 392
-[12:15:34.520] [32mINFO[39m (40404): [36mrequest completed[39m
-    [35mreq[39m: {
-      "id": 2,
-      "method": "GET",
-      "url": "/api/v1/health",
-      "query": {},
-      "params": {
-        "0": "health"
-      },
-      "headers": {
-        "host": "localhost:3000",
-        "connection": "keep-alive"
-      },
-      "remoteAddress": "::1",
-      "remotePort": 55040
-    }
-    [35mres[39m: {
-      "statusCode": 200,
-      "headers": {
-        "x-powered-by": "Express",
-        "cache-control": "no-cache, no-store, must-revalidate",
-        "content-type": "application/json; charset=utf-8",
-        "content-length": "49",
-        "etag": "W/\"31-dxKeoZI+mvmnahNSR0ys2MInE1I\""
-      }
-    }
-    [35mresponseTime[39m: 2
-[12:15:34.526] [32mINFO[39m (40404): [36mrequest completed[39m
-    [35mreq[39m: {
-      "id": 3,
-      "method": "GET",
-      "url": "/api/v1/",
-      "query": {},
-      "params": {
-        "0": ""
-      },
-      "headers": {
-        "host": "localhost:3000",
-        "connection": "keep-alive"
-      },
-      "remoteAddress": "::1",
-      "remotePort": 55040
-    }
-    [35mres[39m: {
-      "statusCode": 200,
-      "headers": {
-        "x-powered-by": "Express",
-        "content-type": "text/html; charset=utf-8",
-        "content-length": "11",
-        "etag": "W/\"b-nvsHFoPHdu0H0p2xy0i6dAMokp8\""
-      }
-    }
-    [35mresponseTime[39m: 1
-[12:15:41.277] [32mINFO[39m (40404): [36mrequest completed[39m
-    [35mreq[39m: {
-      "id": 4,
-      "method": "POST",
-      "url": "/api/v1/auth/login",
-      "query": {},
-      "params": {
-        "0": "auth/login"
-      },
-      "headers": {
-        "content-type": "application/json",
-        "content-length": "49",
-        "host": "localhost:3000",
-        "connection": "keep-alive"
-      },
-      "remoteAddress": "::1",
-      "remotePort": 59586
-    }
-    [35mres[39m: {
-      "statusCode": 200,
-      "headers": {
-        "x-powered-by": "Express",
-        "content-type": "application/json; charset=utf-8",
-        "content-length": "269",
-        "etag": "W/\"10d-JJts/lOi/xj91Mdrh2dehrz26JM\""
-      }
-    }
-    [35mresponseTime[39m: 429
+[12:30:00.034] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[13:00:00.063] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[13:00:00.071] [32mINFO[39m (60776): [36mCRON: vérification des échéances conventions[39m
+    [35mcontext[39m: "JobsService"
+[13:30:00.054] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[14:00:00.058] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[14:00:00.085] [32mINFO[39m (60776): [36mCRON: vérification des échéances conventions[39m
+    [35mcontext[39m: "JobsService"
+[14:30:00.059] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[15:00:00.047] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[15:00:00.095] [32mINFO[39m (60776): [36mCRON: vérification des échéances conventions[39m
+    [35mcontext[39m: "JobsService"
+[15:30:00.052] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[16:00:00.053] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[16:00:00.083] [32mINFO[39m (60776): [36mCRON: vérification des échéances conventions[39m
+    [35mcontext[39m: "JobsService"
+[16:30:00.052] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[17:00:00.046] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[17:00:00.089] [32mINFO[39m (60776): [36mCRON: vérification des échéances conventions[39m
+    [35mcontext[39m: "JobsService"
+[17:30:00.126] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[18:00:00.144] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[18:00:00.251] [32mINFO[39m (60776): [36mCRON: vérification des échéances conventions[39m
+    [35mcontext[39m: "JobsService"
+[18:30:00.093] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[19:00:00.078] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[19:00:00.154] [32mINFO[39m (60776): [36mCRON: vérification des échéances conventions[39m
+    [35mcontext[39m: "JobsService"
+[19:30:00.062] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[20:00:00.055] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[20:00:00.103] [32mINFO[39m (60776): [36mCRON: vérification des échéances conventions[39m
+    [35mcontext[39m: "JobsService"
+[20:30:00.067] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[21:00:00.054] [32mINFO[39m (60776): [36mCRON: heartbeat[39m
+    [35mcontext[39m: "JobsService"
+[21:00:00.103] [32mINFO[39m (60776): [36mCRON: vérification des échéances conventions[39m
+    [35mcontext[39m: "JobsService"

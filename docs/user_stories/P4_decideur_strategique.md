@@ -1,4 +1,4 @@
-# OASE — User Stories P4 (Décideur Stratégique)
+﻿# OASE — User Stories P4 (Décideur Stratégique)
 
 > **Issue Plane :** OASE-35
 > **Persona :** P4 — Décideur Stratégique (UPF, MEF, OIIL)
@@ -58,7 +58,7 @@ P4 valide les décisions à fort enjeu et pilote la politique fiscale d'exonéra
 - [ ] Choix : VALIDER / REJETER / DEMANDER_AVIS
 - [ ] Double signature électronique (PIN + validation par 2 décideurs)
 - [ ] Si rejet : motif obligatoire
-- [ ] Notification automatique à l'instructeur et au bénéficiaire
+- [ ] Notification automatique à l'instructeur et au contribuable
 
 ---
 

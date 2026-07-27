@@ -1,4 +1,4 @@
--- CreateTable
+﻿-- CreateTable
 CREATE TABLE `accords_siege` (
     `id` CHAR(36) NOT NULL DEFAULT (uuid()),
     `institution` VARCHAR(200) NOT NULL,
@@ -1570,10 +1570,10 @@ ALTER TABLE `actes` ADD CONSTRAINT `actes_ibfk_3` FOREIGN KEY (`type_code`) REFE
 ALTER TABLE `actes` ADD CONSTRAINT `actes_ibfk_4` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `agrement_contribuables` ADD CONSTRAINT `agrement_beneficiaires_ibfk_1` FOREIGN KEY (`agrement_id`) REFERENCES `agrements`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE `agrement_contribuables` ADD CONSTRAINT `agrement_CONTRIBUABLEs_ibfk_1` FOREIGN KEY (`agrement_id`) REFERENCES `agrements`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `agrement_contribuables` ADD CONSTRAINT `agrement_beneficiaires_ibfk_2` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE `agrement_contribuables` ADD CONSTRAINT `agrement_CONTRIBUABLEs_ibfk_2` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `agrements` ADD CONSTRAINT `agrements_ibfk_1` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
@@ -1651,25 +1651,25 @@ ALTER TABLE `base_juridique_versions` ADD CONSTRAINT `base_juridique_versions_ib
 ALTER TABLE `base_juridique_versions` ADD CONSTRAINT `base_juridique_versions_ibfk_5` FOREIGN KEY (`mode_instruction_code`) REFERENCES `ref_modes_instruction`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `contribuable_historique_fiscal` ADD CONSTRAINT `beneficiaire_historique_fiscal_ibfk_1` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE `contribuable_historique_fiscal` ADD CONSTRAINT `CONTRIBUABLE_historique_fiscal_ibfk_1` FOREIGN KEY (`contribuable_id`) REFERENCES `contribuables`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `contribuable_historique_fiscal` ADD CONSTRAINT `beneficiaire_historique_fiscal_ibfk_2` FOREIGN KEY (`statut_fiscal_code`) REFERENCES `ref_statuts_fiscal`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `contribuable_historique_fiscal` ADD CONSTRAINT `CONTRIBUABLE_historique_fiscal_ibfk_2` FOREIGN KEY (`statut_fiscal_code`) REFERENCES `ref_statuts_fiscal`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `contribuable_historique_fiscal` ADD CONSTRAINT `fk_histofiscal_connecteur` FOREIGN KEY (`connecteur_code`) REFERENCES `connecteurs`(`code_systeme`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `contribuables` ADD CONSTRAINT `beneficiaires_ibfk_1` FOREIGN KEY (`accord_siege_id`) REFERENCES `accords_siege`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `contribuables` ADD CONSTRAINT `CONTRIBUABLEs_ibfk_1` FOREIGN KEY (`accord_siege_id`) REFERENCES `accords_siege`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `contribuables` ADD CONSTRAINT `beneficiaires_ibfk_2` FOREIGN KEY (`type_contribuable_code`) REFERENCES `ref_types_contribuable`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `contribuables` ADD CONSTRAINT `CONTRIBUABLEs_ibfk_2` FOREIGN KEY (`type_contribuable_code`) REFERENCES `ref_types_contribuable`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `contribuables` ADD CONSTRAINT `beneficiaires_ibfk_3` FOREIGN KEY (`statut_fiscal_code`) REFERENCES `ref_statuts_fiscal`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `contribuables` ADD CONSTRAINT `CONTRIBUABLEs_ibfk_3` FOREIGN KEY (`statut_fiscal_code`) REFERENCES `ref_statuts_fiscal`(`code`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `contribuables` ADD CONSTRAINT `beneficiaires_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `utilisateurs`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `contribuables` ADD CONSTRAINT `CONTRIBUABLEs_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `utilisateurs`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `codes_additionnels` ADD CONSTRAINT `codes_additionnels_ibfk_1` FOREIGN KEY (`base_juridique_version_id`) REFERENCES `base_juridique_versions`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;

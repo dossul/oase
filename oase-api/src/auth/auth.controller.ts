@@ -1,19 +1,26 @@
-import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService, AuthUser } from './auth.service';
+import { ProfileService } from './profile.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { LoginDto } from './dto/login.dto';
 import { VerifyMfaDto } from './dto/verify-mfa.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { SetPinDto } from './dto/set-pin.dto';
+import { UpdateMeDto } from './dto/update-me.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Request } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private profileService: ProfileService,
+  ) {}
 
   @Post('login')
   @HttpCode(200)
@@ -25,9 +32,9 @@ export class AuthController {
 
   @Post('mfa/verify')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Vérification code TOTP — étape 2' })
+  @ApiOperation({ summary: 'Vérification code MFA (TOTP, email, ou WhatsApp) — étape 2' })
   verifyMfa(@Body() dto: VerifyMfaDto, @Req() req: Request) {
-    return this.authService.verifyMfa(dto.mfa_token, dto.code, req.ip ?? 'unknown', req.headers['user-agent'] ?? '');
+    return this.authService.verifyMfa(dto.mfa_token, dto.code, req.ip ?? 'unknown', req.headers['user-agent'] ?? '', dto.canal);
   }
 
   @Post('refresh')
@@ -57,8 +64,64 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Profil de l'utilisateur connecté" })
+  @ApiOperation({
+    summary: "Profil enrichi de l'utilisateur connecté (user + contribuable lié + alertes onboarding)",
+  })
   me(@CurrentUser() user: AuthUser) {
-    return { data: user };
+    return this.profileService.getMeWithContribuable(user.id);
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: "Mise à jour partielle du profil (nom/prenom librement, telephone via OTP CHANGE_PHONE)",
+  })
+  updateMe(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: UpdateMeDto,
+    @Req() req: Request,
+  ) {
+    return this.profileService.updateProfile(
+      user.id,
+      dto,
+      req.ip ?? 'unknown',
+      req.headers['user-agent'] ?? '',
+    );
+  }
+
+  @Post('password/change')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Changement de mot de passe (avec vérif ancien password)' })
+  changePassword(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: ChangePasswordDto,
+    @Req() req: Request,
+  ) {
+    return this.profileService.changePassword(
+      user.id,
+      dto,
+      req.ip ?? 'unknown',
+      req.headers['user-agent'] ?? '',
+    );
+  }
+
+  @Post('password/reset')
+  @HttpCode(200)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiOperation({
+    summary:
+      "Reset password (mot de passe oublié) — consomme OTP RESET_PWD + change password + révoque toutes les sessions",
+  })
+  resetPassword(@Body() dto: ResetPasswordDto, @Req() req: Request) {
+    return this.authService.resetPassword(
+      dto,
+      req.ip ?? 'unknown',
+      req.headers['user-agent'] ?? '',
+    );
   }
 }

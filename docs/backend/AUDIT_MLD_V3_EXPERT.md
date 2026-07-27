@@ -1,4 +1,4 @@
-# Audit Expert du MLD OASE v3.1 — Notation & Amendements
+﻿# Audit Expert du MLD OASE v3.1 — Notation & Amendements
 
 **Auditeur :** Expert Base de Données / Développeur Backend  
 **Date :** 17 juin 2026  
@@ -28,7 +28,7 @@
 4. **Externalisation des enums** — 38 tables `ref_*` avec `code/libelle/ordre/couleur/est_actif` : maintenable et i18n-ready.
 5. **Cohérence technique** — 100 % InnoDB, `utf8mb4_unicode_ci`, UUID, `DATETIME(3)` précision milliseconde.
 6. **CHECK constraints** — Dates (`date_fin > date_debut`), montants positifs, seuils 0-100.
-7. **Historisation** — `quota_mouvements` (solde avant/après), `beneficiaire_historique_fiscal`.
+7. **Historisation** — `quota_mouvements` (solde avant/après), `CONTRIBUABLE_historique_fiscal`.
 
 ---
 
@@ -57,7 +57,7 @@ ALTER TABLE base_juridique_versions
 #### A2. `utilisateurs.role` en VARCHAR libre, sans table `ref_roles`
 **Problème :** Le rôle pilote tout le RBAC mais reste du texte libre. Une faute de frappe (`decideur` vs `décideur`) casse les permissions silencieusement. `roles_permissions.role` souffre du même défaut.
 
-**Vérifié :** `ref_roles` n'existe pas. Rôles réels : `admin_si`, `agent_agence`, `agent_ci`, `auditeur`, `beneficiaire`, `decideur`.
+**Vérifié :** `ref_roles` n'existe pas. Rôles réels : `admin_si`, `agent_agence`, `agent_ci`, `auditeur`, `CONTRIBUABLE`, `decideur`.
 
 **Amendement :**
 ```sql
@@ -77,7 +77,7 @@ INSERT INTO ref_roles (code, libelle, ordre) VALUES
   ('agent_agence','Agent Agence',3),
   ('decideur','Décideur',4),
   ('auditeur','Auditeur',5),
-  ('beneficiaire','Bénéficiaire',6);
+  ('CONTRIBUABLE','contribuable',6);
 
 ALTER TABLE utilisateurs       ADD CONSTRAINT fk_utilisateurs_role  FOREIGN KEY (role) REFERENCES ref_roles(code) ON DELETE RESTRICT;
 ALTER TABLE roles_permissions  ADD CONSTRAINT fk_rolesperm_role     FOREIGN KEY (role) REFERENCES ref_roles(code) ON DELETE CASCADE;
@@ -112,7 +112,7 @@ ALTER TABLE anomalies
 Le statut d'une **instance** (en_cours / terminé / annulé) n'est pas du même domaine qu'un statut d'**étape** (en_attente / validé / rejeté). Réutiliser la même table ref mélange deux vocabulaires.
 **Amendement :** créer `ref_statuts_workflow` dédié.
 
-#### A6. `beneficiaire_historique_fiscal.connecteur_code` sans FK
+#### A6. `CONTRIBUABLE_historique_fiscal.connecteur_code` sans FK
 Devrait référencer `connecteurs.code_systeme`.
 
 #### A7. `pieces_jointes.categorie` en texte libre
@@ -128,9 +128,9 @@ Un blob chiffré AES n'est pas du JSON valide. Utiliser `TEXT`/`VARBINARY` ou st
 Seule `demandes` possède `deleted_at`. Définir une politique globale (soft-delete partout ou nulle part).
 
 #### A11. Absence de FULLTEXT pour la recherche
-Aucun index `FULLTEXT`. Pour la recherche bénéficiaires/mesures :
+Aucun index `FULLTEXT`. Pour la recherche contribuables/mesures :
 ```sql
-ALTER TABLE beneficiaires ADD FULLTEXT INDEX ft_beneficiaires (raison_sociale);
+ALTER TABLE CONTRIBUABLEs ADD FULLTEXT INDEX ft_CONTRIBUABLEs (raison_sociale);
 ALTER TABLE base_juridique_versions ADD FULLTEXT INDEX ft_bjv_libelle (libelle);
 ```
 

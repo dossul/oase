@@ -53,6 +53,39 @@ export class AuditService {
     });
   }
 
+  async lister(params: {
+    page?: number;
+    limit?: number;
+    action?: string;
+    utilisateurId?: string;
+    entite?: string;
+  }) {
+    const page = params.page ?? 1;
+    const limit = Math.min(params.limit ?? 50, 200);
+    const skip = (page - 1) * limit;
+
+    const where: Record<string, unknown> = {};
+    if (params.action) where.action = params.action;
+    if (params.utilisateurId) where.utilisateurId = params.utilisateurId;
+    if (params.entite) where.entite = params.entite;
+
+    const [items, total] = await Promise.all([
+      this.prisma.auditLog.findMany({
+        where,
+        orderBy: { horodatage: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.auditLog.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
+  }
+
+  async trouverParId(id: string) {
+    return this.prisma.auditLog.findUnique({ where: { id } });
+  }
+
   async verifyChain(): Promise<{ verified: number; breaks: string[] }> {
     const logs = await this.prisma.auditLog.findMany({
       orderBy: { horodatage: 'asc' },

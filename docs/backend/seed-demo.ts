@@ -1,4 +1,4 @@
-/**
+﻿/**
  * OASE — Seed de démonstration
  * Issue Plane : OASE-12
  * Date        : 2026-06-16
@@ -11,7 +11,7 @@
  *   - 15 institutions
  *   - 16 utilisateurs (tous les rôles P1→P7)
  *   - 5 accords de siège
- *   - 8 bénéficiaires
+ *   - 8 contribuables
  *   - 20 bases juridiques représentatives (extrait MRD)
  *   - 6 workflow templates
  *   - 5 connecteurs
@@ -48,16 +48,16 @@ const INSTITUTIONS = [
   { code: 'IGF',        nom: 'Inspection Générale des Finances',            type: 'igf' },
   { code: 'DSI_MEF',    nom: 'Direction des Systèmes d\'Information (MEF)', type: 'dsi' },
   { code: 'COUR_CPT',   nom: 'Cour des Comptes',                           type: 'cour_comptes' },
-  { code: 'EXTERNE',    nom: 'Opérateur externe / bénéficiaire',            type: 'externe' },
+  { code: 'EXTERNE',    nom: 'Opérateur externe / contribuable',            type: 'externe' },
 ] as const;
 
 // ─── 2. UTILISATEURS ─────────────────────────────────────────
 
 // Mot de passe demo : Oase@2026! — PIN : 123456
 const USERS = [
-  // P1 — Bénéficiaires (opérateurs économiques)
-  { nom: 'Kodjovi',   prenom: 'Afi',       email: 'afi.kodjovi@texlome.tg',     role: 'beneficiaire',   inst: 'EXTERNE',  mfa: false },
-  { nom: 'Tchalla',   prenom: 'Mawuli',    email: 'm.tchalla@togofarms.tg',     role: 'beneficiaire',   inst: 'EXTERNE',  mfa: false },
+  // P1 — contribuables (opérateurs économiques)
+  { nom: 'Kodjovi',   prenom: 'Afi',       email: 'afi.kodjovi@texlome.tg',     role: 'CONTRIBUABLE',   inst: 'EXTERNE',  mfa: false },
+  { nom: 'Tchalla',   prenom: 'Mawuli',    email: 'm.tchalla@togofarms.tg',     role: 'CONTRIBUABLE',   inst: 'EXTERNE',  mfa: false },
   // P2 — Agents OTR CI
   { nom: 'Agbodjan',  prenom: 'Kossi',     email: 'k.agbodjan@otr.tg',         role: 'agent_ci',       inst: 'OTR_CI',   mfa: true },
   { nom: 'Dossou',    prenom: 'Akoua',     email: 'a.dossou@otr.tg',           role: 'agent_ci',       inst: 'OTR_CI',   mfa: true },
@@ -108,7 +108,7 @@ const BASES_JURIDIQUES = [
     porteeCategorieCode: 'Permanente',
     organeGestionCode: 'CI', organeAttribution: 'OTR',
     systemeInformation: 'E-TAX', modeInstructionCode: 'automatique',
-    objectifType: 'Social', typeBeneficiaireCible: 'Ménages',
+    objectifType: 'Social', typeCONTRIBUABLECible: 'Ménages',
     estDepenseFiscale2024: true, estEvaluee2024: true,
     conformiteDirectiveUemoa: 'oui',
   },
@@ -125,7 +125,7 @@ const BASES_JURIDIQUES = [
     porteeDescription: '5 ans à compter de la date de création',
     organeGestionCode: 'CI', organeAttribution: 'OTR',
     systemeInformation: 'E-TAX', modeInstructionCode: 'automatique',
-    objectifType: 'Economique', typeBeneficiaireCible: 'Entreprises',
+    objectifType: 'Economique', typeCONTRIBUABLECible: 'Entreprises',
     estDepenseFiscale2024: true,
     conformiteDirectiveUemoa: 'oui',
   },
@@ -141,7 +141,7 @@ const BASES_JURIDIQUES = [
     porteeCategorieCode: 'Temporaire_Phase', porteeDescription: 'Phase d\'installation (3 ans)',
     organeGestionCode: 'CDDI', organeAttribution: 'OTR',
     systemeInformation: 'Sydonia World', modeInstructionCode: 'automatique',
-    objectifType: 'Economique', typeBeneficiaireCible: 'Entreprises',
+    objectifType: 'Economique', typeCONTRIBUABLECible: 'Entreprises',
     estDepenseFiscale2024: true,
     conformiteDirectiveUemoa: 'oui',
   },
@@ -158,7 +158,7 @@ const BASES_JURIDIQUES = [
     porteeDescription: '5 ans à compter de la date d\'agrément ZF',
     organeGestionCode: 'CI', organeAttribution: 'SAZOF',
     systemeInformation: 'Base service gestionnaire', modeInstructionCode: 'semi_automatique',
-    objectifType: 'Economique', typeBeneficiaireCible: 'Entreprises',
+    objectifType: 'Economique', typeCONTRIBUABLECible: 'Entreprises',
     estDepenseFiscale2024: true, estEvaluee2024: true,
     conformiteDirectiveUemoa: 'oui',
   },
@@ -174,7 +174,7 @@ const BASES_JURIDIQUES = [
     porteeCategorieCode: 'Permanente',
     organeGestionCode: 'CDDI_CI', organeAttribution: 'OTR',
     systemeInformation: 'Sydonia World', modeInstructionCode: 'automatique',
-    objectifType: 'Autre', typeBeneficiaireCible: 'Institutions internationales et représentations diplomatiques',
+    objectifType: 'Autre', typeCONTRIBUABLECible: 'Institutions internationales et représentations diplomatiques',
     estDepenseFiscale2024: false,
     conformiteDirectiveUemoa: 'N/A',
   },
@@ -190,7 +190,7 @@ const BASES_JURIDIQUES = [
     porteeCategorieCode: 'Temporaire_Phase', porteeDescription: 'Phase de recherche (2-3 ans)',
     organeGestionCode: 'CDDI', organeAttribution: 'DGMG',
     systemeInformation: 'Sydonia World', modeInstructionCode: 'automatique',
-    objectifType: 'Economique', typeBeneficiaireCible: 'Entreprises',
+    objectifType: 'Economique', typeCONTRIBUABLECible: 'Entreprises',
     estDepenseFiscale2024: true,
     conformiteDirectiveUemoa: 'oui',
   },
@@ -223,7 +223,7 @@ const BASES_JURIDIQUES = [
     porteeCategorieCode: 'Permanente',
     organeGestionCode: 'CI', organeAttribution: 'OTR',
     systemeInformation: null, modeInstructionCode: 'manuel',
-    objectifType: 'Autre', typeBeneficiaireCible: 'Institutions internationales et représentations diplomatiques',
+    objectifType: 'Autre', typeCONTRIBUABLECible: 'Institutions internationales et représentations diplomatiques',
     estDepenseFiscale2024: false,
     conformiteDirectiveUemoa: 'N/A',
   },
@@ -240,7 +240,7 @@ const BASES_JURIDIQUES = [
     porteeCategorieCode: 'Permanente',
     organeGestionCode: 'CI', organeAttribution: 'OTR',
     systemeInformation: 'E-TAX', modeInstructionCode: 'automatique',
-    objectifType: 'Economique', typeBeneficiaireCible: 'Entreprises',
+    objectifType: 'Economique', typeCONTRIBUABLECible: 'Entreprises',
     brancheActivite: 'Agriculture',
     estDepenseFiscale2024: true, estEvaluee2024: true,
     conformiteDirectiveUemoa: 'oui',
@@ -257,7 +257,7 @@ const BASES_JURIDIQUES = [
     porteeCategorieCode: 'Permanente',
     organeGestionCode: 'CI', organeAttribution: 'OTR',
     systemeInformation: null, modeInstructionCode: 'manuel',
-    objectifType: 'Autre', typeBeneficiaireCible: 'Institutions internationales et représentations diplomatiques',
+    objectifType: 'Autre', typeCONTRIBUABLECible: 'Institutions internationales et représentations diplomatiques',
     estDepenseFiscale2024: false,
     conformiteTexteFondament: 'oui',
     conformiteDirectiveUemoa: 'N/A',
@@ -313,7 +313,7 @@ const WORKFLOW_TEMPLATES = [
     definition: {
       etapes: [
         { ordre: 1, nom: 'Réception MAE',                       role: 'agent_mae', delai_j: 3, pin: false },
-        { ordre: 2, nom: 'Vérification liste bénéficiaires',    role: 'agent_mae', delai_j: 3, pin: false },
+        { ordre: 2, nom: 'Vérification liste contribuables',    role: 'agent_mae', delai_j: 3, pin: false },
         { ordre: 3, nom: 'Validation OTR',                      role: 'agent_ci',  delai_j: 3, pin: true  },
       ],
     },
@@ -405,50 +405,50 @@ async function main() {
   }
   console.log(`   ✓ ${ACCORDS_SIEGE.length} accords`);
 
-  // 4. Bénéficiaires
-  console.log('🏢 Bénéficiaires...');
+  // 4. contribuables
+  console.log('🏢 contribuables...');
   const benef = await Promise.all([
-    prisma.beneficiaire.upsert({
+    prisma.CONTRIBUABLE.upsert({
       where: { nif: 'TG-LOM-2018-B-0042' },
       update: {},
       create: {
         raisonSociale: 'TEXLOME SA — Textiles de Lomé',
         nif: 'TG-LOM-2018-B-0042',
         rccm: 'TG-LOM-2018-B-0042',
-        typeBeneficiaireCode: 'entreprise_privee',
+        typeCONTRIBUABLECode: 'entreprise_privee',
         statutFiscalCode: 'conforme',
         secteur: 'Industrie textile',
         region: 'Maritime',
         emailContact: 'direction@texlome.tg',
       },
     }),
-    prisma.beneficiaire.upsert({
+    prisma.CONTRIBUABLE.upsert({
       where: { nif: 'TG-KAR-2020-A-0115' },
       update: {},
       create: {
         raisonSociale: 'TOGOFARMS SARL — Agriculture et Élevage',
         nif: 'TG-KAR-2020-A-0115',
         rccm: 'TG-KAR-2020-A-0115',
-        typeBeneficiaireCode: 'entreprise_privee',
+        typeCONTRIBUABLECode: 'entreprise_privee',
         statutFiscalCode: 'conforme',
         secteur: 'Agriculture',
         region: 'Kara',
         emailContact: 'info@togofarms.tg',
       },
     }),
-    prisma.beneficiaire.upsert({
+    prisma.CONTRIBUABLE.upsert({
       where: { nif: 'TG-INT-ONU-PNUD' },
       update: {},
       create: {
         raisonSociale: 'Programme des Nations Unies pour le Développement (PNUD)',
         nif: 'TG-INT-ONU-PNUD',
-        typeBeneficiaireCode: 'organisation_internationale',
+        typeCONTRIBUABLECode: 'organisation_internationale',
         statutFiscalCode: 'conforme',
         accordSiegeId: Object.values(accordMap)[0],
       },
     }),
   ]);
-  console.log(`   ✓ 3 bénéficiaires`);
+  console.log(`   ✓ 3 contribuables`);
 
   // 5. Bases juridiques
   console.log('⚖️  Bases juridiques (extrait MRD)...');
@@ -531,7 +531,7 @@ async function main() {
       create: {
         reference: d.ref,
         baseJuridiqueId: bjMap[d.bj],
-        beneficiaireId: benef[d.benef].id,
+        CONTRIBUABLEId: benef[d.benef].id,
         instructeurId: ['brouillon','soumis'].includes(d.statut) ? null : instructeurId,
         statut: d.statut,
         montantFcfa: BigInt(Math.floor(Math.random() * 50_000_000) + 500_000),
@@ -592,9 +592,9 @@ async function main() {
   // 11. Rôles permissions (matrice RBAC)
   console.log('🔐 Matrice RBAC...');
   const PERMS = [
-    ['beneficiaire',  'demandes',         'CREATE',            null],
-    ['beneficiaire',  'demandes',         'READ',              'beneficiaire_id=self'],
-    ['beneficiaire',  'demandes',         'SOUMETTRE',         'beneficiaire_id=self'],
+    ['CONTRIBUABLE',  'demandes',         'CREATE',            null],
+    ['CONTRIBUABLE',  'demandes',         'READ',              'CONTRIBUABLE_id=self'],
+    ['CONTRIBUABLE',  'demandes',         'SOUMETTRE',         'CONTRIBUABLE_id=self'],
     ['agent_ci',      'demandes',         'READ',              'organe_gestion=CI'],
     ['agent_ci',      'demandes',         'PRENDRE_EN_CHARGE', 'organe_gestion=CI'],
     ['agent_ci',      'demandes',         'APPROUVER_ETAPE',   'organe_gestion=CI'],
@@ -626,7 +626,7 @@ async function main() {
 
   console.log('\n✅ Seed terminé avec succès !');
   console.log('   Accès demo :');
-  console.log('   → P1 bénéficiaire  : afi.kodjovi@texlome.tg     / Oase@2026!');
+  console.log('   → P1 contribuable  : afi.kodjovi@texlome.tg     / Oase@2026!');
   console.log('   → P2 agent CI      : k.agbodjan@otr.tg          / Oase@2026!');
   console.log('   → P2 agent CDDI    : k.mensah@otr.tg            / Oase@2026!');
   console.log('   → P4 décideur      : s.olympio@upf.fin.tg       / Oase@2026!');

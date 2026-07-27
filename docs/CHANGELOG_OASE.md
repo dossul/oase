@@ -1,21 +1,21 @@
-# Changelog OASE - Infrastructure Docker
+﻿# Changelog OASE - Infrastructure Docker
 
 Toutes les evolutions notables du deploiement et de l'infrastructure OASE.
 
 ---
 
-## 2026-07-12 - V3.5.2 — BUG #6 fix : normalisation rôle `beneficiaire → contribuable`
+## 2026-07-12 - V3.5.2 — BUG #6 fix : normalisation rôle `CONTRIBUABLE → contribuable`
 
 ### Résumé
 
-BUG #6 découvert pendant la recette P1 : l'API `POST /auth/login` retournait `"role": "beneficiaire"` (legacy) au lieu de `"contribuable"` car la migration 002 (refactor BENEFICIAIRE → CONTRIBUABLE) n'a pas été appliquée sur la base prod. Le frontend était sauvé par son fallback, mais les checks backend type `user.role === 'contribuable'` dans `demandes.service.ts` étaient court-circuités.
+BUG #6 découvert pendant la recette P1 : l'API `POST /auth/login` retournait `"role": "CONTRIBUABLE"` (legacy) au lieu de `"contribuable"` car la migration 002 (refactor CONTRIBUABLE → CONTRIBUABLE) n'a pas été appliquée sur la base prod. Le frontend était sauvé par son fallback, mais les checks backend type `user.role === 'contribuable'` dans `demandes.service.ts` étaient court-circuités.
 
 ### Fichiers modifiés (2)
 
 | Fichier | Type | Détail |
 |---|---|---|
-| `oase-api/src/auth/auth.service.ts` | Edit | Méthode privée `normalizeRole()` (mapping `beneficiaire → contribuable`) + application dans `issueTokenPair()` (payload, JWT, audit) |
-| `oase-api/src/auth/auth.service.spec.ts` | Edit | + 2 tests : `normalise le rôle legacy "beneficiaire" → "contribuable" (BUG #6)` + `laisse les rôles canoniques inchangés (admin, agent_otr, ...)` |
+| `oase-api/src/auth/auth.service.ts` | Edit | Méthode privée `normalizeRole()` (mapping `CONTRIBUABLE → contribuable`) + application dans `issueTokenPair()` (payload, JWT, audit) |
+| `oase-api/src/auth/auth.service.spec.ts` | Edit | + 2 tests : `normalise le rôle legacy "CONTRIBUABLE" → "contribuable" (BUG #6)` + `laisse les rôles canoniques inchangés (admin, agent_otr, ...)` |
 
 ### Validation — règle des 3 vérifications
 

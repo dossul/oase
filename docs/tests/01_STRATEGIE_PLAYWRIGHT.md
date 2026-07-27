@@ -1,4 +1,4 @@
-# OASE-42 à 51 — Stratégie E2E Playwright + Tests détaillés
+﻿# OASE-42 à 51 — Stratégie E2E Playwright + Tests détaillés
 
 > **Issues Plane :** OASE-42 (stratégie), OASE-43 (auth), OASE-44 (P1), OASE-45 (P2/P3), OASE-46 (dashboards), OASE-47 (P7 admin), OASE-48 (P6 public), OASE-49 (erreurs console), OASE-50 (responsive), OASE-51 (réseau)  
 > **Date :** 2026-06-16
@@ -42,7 +42,7 @@ export default defineConfig({
 
 | Persona | Email | Mot de passe | PIN | MFA |
 |---|---|---|---|---|
-| P1 bénéficiaire | `texlome@demo.tg` | `Oase@2026!` | `123456` | Non |
+| P1 contribuable | `texlome@demo.tg` | `Oase@2026!` | `123456` | Non |
 | P2 agent OTR-CI | `fatima.ouattara@otr.tg` | `Oase@2026!` | `123456` | Oui (TOTP seed fixe) |
 | P3 agence API | `komlan.kodjo@api.tg` | `Oase@2026!` | `123456` | Oui |
 | P4 décideur MEF | `amevi.koffi@mef.tg` | `Oase@2026!` | `123456` | Oui |
@@ -59,12 +59,12 @@ export default defineConfig({
 ```typescript
 // e2e/auth.spec.ts
 test.describe('Authentification', () => {
-  test('P1 : login email+mdp sans MFA → espace bénéficiaire', async ({ page }) => {
+  test('P1 : login email+mdp sans MFA → espace contribuable', async ({ page }) => {
     await page.goto('/login');
     await page.fill('[name=email]', 'texlome@demo.tg');
     await page.fill('[name=password]', 'Oase@2026!');
     await page.click('button[type=submit]');
-    await expect(page).toHaveURL('/beneficiaire');
+    await expect(page).toHaveURL('/CONTRIBUABLE');
     await expect(page.locator('h1')).toContainText('Dashboard');
   });
 
@@ -105,16 +105,16 @@ test.describe('Authentification', () => {
 });
 ```
 
-### OASE-44 — Parcours bénéficiaire complet
+### OASE-44 — Parcours contribuable complet
 
 ```typescript
-// e2e/beneficiaire.spec.ts
-test.describe('Parcours bénéficiaire P1', () => {
+// e2e/CONTRIBUABLE.spec.ts
+test.describe('Parcours contribuable P1', () => {
   test('Soumettre une demande d\'exonération', async ({ page }) => {
     await loginAs(page, 'texlome@demo.tg');
 
     // Étape 1 : sélection base juridique
-    await page.goto('/beneficiaire/demandes/new/step1');
+    await page.goto('/CONTRIBUABLE/demandes/new/step1');
     await page.fill('[name=search]', 'produits alimentaires');
     await page.waitForResponse(/\/bases-juridiques/);
     await page.click('text=Mesure 141 : Exonération TVA sur importation de produits alimentaires');
@@ -138,7 +138,7 @@ test.describe('Parcours bénéficiaire P1', () => {
 
   test('Répondre à une demande de complément', async ({ page }) => {
     await loginAs(page, 'texlome@demo.tg');
-    await page.goto('/beneficiaire/demandes');
+    await page.goto('/CONTRIBUABLE/demandes');
     // Filtrer "Action requise"
     await page.click('text=Action requise');
     await page.click('text=OASE-2024-000002');
@@ -150,7 +150,7 @@ test.describe('Parcours bénéficiaire P1', () => {
 
   test('Télécharger attestation après approbation', async ({ page }) => {
     await loginAs(page, 'texlome@demo.tg');
-    await page.goto('/beneficiaire/demandes');
+    await page.goto('/CONTRIBUABLE/demandes');
     await page.click('text=Approuvé');
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -282,7 +282,7 @@ test.describe('Portail public', () => {
     await page.goto('/');
     await expect(page.locator('[data-testid=stat-nb-mesures]')).toContainText('1 316');
     await expect(page.locator('[data-testid=stat-nb-demandes]')).toBeVisible();
-    // Aucun nom de bénéficiaire ne doit apparaître
+    // Aucun nom de contribuable ne doit apparaître
     await expect(page.locator('text=TEXLOME')).not.toBeVisible();
   });
 });
@@ -308,15 +308,15 @@ test.describe('Qualité navigateur', () => {
 
   test('Responsive mobile — menu hamburger fonctionnel', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/beneficiaire');
+    await page.goto('/CONTRIBUABLE');
     await page.click('[data-testid=menu-hamburger]');
     await expect(page.locator('.mobile-menu')).toBeVisible();
     await page.click('text=Mes demandes');
-    await expect(page).toHaveURL('/beneficiaire/demandes');
+    await expect(page).toHaveURL('/CONTRIBUABLE/demandes');
   });
 
   test('États de chargement API visibles', async ({ page }) => {
-    await page.goto('/beneficiaire/demandes');
+    await page.goto('/CONTRIBUABLE/demandes');
     await expect(page.locator('.skeleton-loader')).toBeVisible(); // pendant le fetch
     await page.waitForResponse(/\/demandes/);
     await expect(page.locator('.skeleton-loader')).not.toBeVisible();
@@ -327,7 +327,7 @@ test.describe('Qualité navigateur', () => {
     page.on('response', r => { if (r.status() === 401) unauthorized.push(r.url()); });
     await page.goto('/');
     await loginAs(page, 'texlome@demo.tg');
-    await page.goto('/beneficiaire/demandes');
+    await page.goto('/CONTRIBUABLE/demandes');
     expect(unauthorized).toEqual([]);
   });
 });
@@ -349,7 +349,7 @@ e2e/
 │   ├── api.ts            # helpers pour appeler l'API NestJS directement
 │   └── selectors.ts      # constantes data-testid
 ├── auth.spec.ts          # OASE-43
-├── beneficiaire.spec.ts  # OASE-44
+├── CONTRIBUABLE.spec.ts  # OASE-44
 ├── instruction.spec.ts   # OASE-45
 ├── dashboards.spec.ts  # OASE-46
 ├── admin.spec.ts         # OASE-47

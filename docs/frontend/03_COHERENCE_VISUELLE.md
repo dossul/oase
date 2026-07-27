@@ -1,4 +1,4 @@
-# OASE-29 — Cohérence visuelle et ergonomique
+﻿# OASE-29 — Cohérence visuelle et ergonomique
 
 > **Issue Plane :** OASE-29  
 > **Date :** 2026-06-16  
@@ -85,7 +85,7 @@
 
 ## 3. Layout par espace
 
-### P1 Bénéficiaire — Layout minimal
+### P1 contribuable — Layout minimal
 
 ```
 ┌──── Header (Logo MEF + Nom Utilisateur + Déconnexion) ────┐

@@ -1,4 +1,4 @@
-# OASE-10 — Structure détaillée des modules NestJS
+﻿# OASE-10 — Structure détaillée des modules NestJS
 
 > **Issue Plane :** OASE-10  
 > **Date :** 2026-06-16  
@@ -28,7 +28,7 @@
     AuthModule,
     UtilisateursModule,
     InstitutionsModule,
-    BeneficiairesModule,
+    CONTRIBUABLEsModule,
     BasesJuridiquesModule,
     DemandesModule,
     PiecesJointesModule,
@@ -116,21 +116,21 @@ prisma/
 
 ---
 
-## 6. `BeneficiairesModule`
+## 6. `CONTRIBUABLEsModule`
 
-**Rôle :** Gestion des bénéficiaires (profil, statut fiscal, accords de siège).
+**Rôle :** Gestion des contribuables (profil, statut fiscal, accords de siège).
 
 | Endpoint | Méthode | Rôle | Description |
 |---|---|---|---|
-| `/beneficiaires/me` | GET | `beneficiaire` | Mon propre profil |
-| `/beneficiaires/me` | PATCH | `beneficiaire` | Modifier mes coordonnées |
-| `/beneficiaires` | POST | `beneficiaire`, `admin_si` | Créer un profil |
-| `/beneficiaires` | GET | P2/P3/P4/P5/`admin_si` | Liste paginée + filtres |
-| `/beneficiaires/:id` | GET | P2/P3/P4/P5/`admin_si` | Détail |
-| `/beneficiaires/:id/statut-fiscal` | GET | P2/P4/`admin_si` | Statut fiscal temps réel (via connecteur OTR) |
-| `/beneficiaires/:id/accords-siege` | GET | `agent_mae`, `admin_si` | Accords de siège liés |
+| `/CONTRIBUABLEs/me` | GET | `CONTRIBUABLE` | Mon propre profil |
+| `/CONTRIBUABLEs/me` | PATCH | `CONTRIBUABLE` | Modifier mes coordonnées |
+| `/CONTRIBUABLEs` | POST | `CONTRIBUABLE`, `admin_si` | Créer un profil |
+| `/CONTRIBUABLEs` | GET | P2/P3/P4/P5/`admin_si` | Liste paginée + filtres |
+| `/CONTRIBUABLEs/:id` | GET | P2/P3/P4/P5/`admin_si` | Détail |
+| `/CONTRIBUABLEs/:id/statut-fiscal` | GET | P2/P4/`admin_si` | Statut fiscal temps réel (via connecteur OTR) |
+| `/CONTRIBUABLEs/:id/accords-siege` | GET | `agent_mae`, `admin_si` | Accords de siège liés |
 
-**DTOs :** `CreerBeneficiaireDto`, `ModifierBeneficiaireDto`, `FiltrerBeneficiairesDto`  
+**DTOs :** `CreerCONTRIBUABLEDto`, `ModifierCONTRIBUABLEDto`, `FiltrerCONTRIBUABLEsDto`  
 **Dépendances :** `ConnecteursModule` (sync statut fiscal)
 
 ---
@@ -177,14 +177,14 @@ class FiltrerBasesJuridiquesDto {
 
 | Endpoint | Méthode | Rôle | Description |
 |---|---|---|---|
-| `/demandes` | POST | `beneficiaire` | Créer brouillon |
+| `/demandes` | POST | `CONTRIBUABLE` | Créer brouillon |
 | `/demandes` | GET | P1…P7 (périmètre RLS) | Liste paginée |
 | `/demandes/:id` | GET | (idem) | Détail complet |
-| `/demandes/:id` | PATCH | `beneficiaire` | Modifier brouillon |
-| `/demandes/:id/soumettre` | POST | `beneficiaire` | brouillon → soumis |
+| `/demandes/:id` | PATCH | `CONTRIBUABLE` | Modifier brouillon |
+| `/demandes/:id/soumettre` | POST | `CONTRIBUABLE` | brouillon → soumis |
 | `/demandes/:id/prendre-en-charge` | POST | P2/P3 | soumis → en_instruction |
 | `/demandes/:id/demander-complement` | POST | P2/P3 | en_instruction → action_requise |
-| `/demandes/:id/completer` | POST | `beneficiaire` | action_requise → en_instruction |
+| `/demandes/:id/completer` | POST | `CONTRIBUABLE` | action_requise → en_instruction |
 | `/demandes/:id/approuver` | POST | `decideur` | en_instruction → approuve |
 | `/demandes/:id/rejeter` | POST | P2/P3/`decideur` | en_instruction → rejete |
 | `/demandes/:id/archiver` | POST | `admin_si` | → archive |
@@ -226,7 +226,7 @@ class RejeterDemandeDto {
 
 | Endpoint | Méthode | Rôle | Description |
 |---|---|---|---|
-| `/pieces-jointes/upload` | POST | `beneficiaire` | Multipart — upload + calcul SHA-256 |
+| `/pieces-jointes/upload` | POST | `CONTRIBUABLE` | Multipart — upload + calcul SHA-256 |
 | `/pieces-jointes/:id` | GET | (périmètre) | Métadonnées |
 | `/pieces-jointes/:id/download` | GET | (périmètre) | URL signée S3 (TTL 15min) |
 | `/pieces-jointes/:id/valider` | POST | P2/P3 | Marquer valide |
@@ -367,7 +367,7 @@ class RejeterDemandeDto {
 
 | Endpoint | Méthode | Rôle | Description |
 |---|---|---|---|
-| `/attestations/:id/download` | GET | `beneficiaire`(soi)/P2/P4 | Télécharger l'attestation |
+| `/attestations/:id/download` | GET | `CONTRIBUABLE`(soi)/P2/P4 | Télécharger l'attestation |
 | `/attestations/verifier` | POST | public | Vérifier l'authenticité par QR hash |
 
 **Providers :** `AttestationsService` (Puppeteer + qrcode + crypto)
@@ -384,7 +384,7 @@ class RejeterDemandeDto {
 | `QuotaAlerteJob` | `*/15 * * * *` (toutes les 15min) | Seuil 80% quota → notification P4 |
 | `ArchivageJob` | `0 2 * * *` (02h00) | Archive les demandes approuvées/rejetées après délai |
 | `ConnecteurHealthJob` | `*/5 * * * *` | Heartbeat SI externes → met à jour `statut` connecteur |
-| `SyncStatutFiscalJob` | `0 7 * * 1-5` (lun-ven 07h00) | Rafraîchit `statut_fiscal` des bénéficiaires actifs |
+| `SyncStatutFiscalJob` | `0 7 * * 1-5` (lun-ven 07h00) | Rafraîchit `statut_fiscal` des contribuables actifs |
 
 ---
 
@@ -420,7 +420,7 @@ AppModule
 │   ├── NotificationsModule                                  │
 │   └── ConnecteursModule (push SI après approbation)        │
 ├── BasesJuridiquesModule                                    │
-├── BeneficiairesModule                                      │   (scope check)
+├── CONTRIBUABLEsModule                                      │   (scope check)
 │   └── ConnecteursModule (statut fiscal OTR)                │
 ├── AuditModule ◄────────────────────────────────────────────┘
 │   (tous les modules métier importent AuditModule)

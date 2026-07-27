@@ -47,7 +47,7 @@ async function main() {
   const checks = [
     ["SELECT COUNT(*) AS nb FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE'", [TEST_DB], 86, 'tables'],
     ['SELECT COUNT(*) AS nb FROM demandes', [], 5, 'demandes'],
-    ['SELECT COUNT(*) AS nb FROM beneficiaires', [], 3, 'beneficiaires'],
+    ['SELECT COUNT(*) AS nb FROM contribuables', [], 3, 'contribuables'],
     ['SELECT COUNT(*) AS nb FROM base_juridique_versions', [], 5, 'versions base juridique'],
     ['SELECT COUNT(*) AS nb FROM utilisateurs', [], 3, 'utilisateurs'],
   ];

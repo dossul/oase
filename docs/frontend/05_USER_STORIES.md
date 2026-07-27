@@ -1,4 +1,4 @@
-# OASE-32 à 38 — User Stories par persona
+﻿# OASE-32 à 38 — User Stories par persona
 
 > **Issues Plane :** OASE-32 (P1), OASE-33 (P2), OASE-34 (P3), OASE-35 (P4), OASE-36 (P5), OASE-37 (P6), OASE-38 (P7)  
 > **Date :** 2026-06-16  
@@ -6,9 +6,9 @@
 
 ---
 
-## P1 — Opérateur économique (Bénéficiaire)
+## P1 — Opérateur économique (contribuable)
 
-### US-P1-01 · Créer mon profil bénéficiaire
+### US-P1-01 · Créer mon profil contribuable
 **En tant qu'** opérateur économique,  
 **je veux** créer mon profil avec mon NIF et RCCM,  
 **afin de** pouvoir déposer des demandes d'exonération.
@@ -125,7 +125,7 @@
 - Commentaire optionnel conservé dans l'audit log
 - Étape suivante activée automatiquement (notification au prochain responsable)
 
-### US-P2-05 · Demander un complément au bénéficiaire
+### US-P2-05 · Demander un complément au contribuable
 **En tant qu'** agent instructeur,  
 **je veux** envoyer une demande de complément motivée,  
 **afin d'** obtenir les pièces manquantes ou insuffisantes.
@@ -225,7 +225,7 @@
 
 **Critères d'acceptance :**
 - Aucune authentification requise
-- Données anonymisées (pas de noms de bénéficiaires)
+- Données anonymisées (pas de noms de contribuables)
 - Mise à jour automatique quotidienne
 
 ### US-P6-02 · Vérifier l'authenticité d'une attestation

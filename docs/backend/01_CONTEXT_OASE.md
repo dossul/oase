@@ -1,4 +1,4 @@
-# OASE-2 — Cartographie complète des sources documentaires
+﻿# OASE-2 — Cartographie complète des sources documentaires
 
 > **Issue Plane :** OASE-2 (Cartographier les sources OASE)  
 > **Date :** 2026-06-16  
@@ -157,7 +157,7 @@ TDR + CdC (client)
 | Concept | Définition | Sources principales |
 |---|---|---|
 | **Demande d'exonération** | Formulaire dématérialisé + pièces justificatives + circuit d'approbation | TDR, CdC, PRD, 06_WORKFLOWS, 08_FLUX_P1 |
-| **Bénéficiaire** | Entreprise/ONG/institution avec NIF, RCCM, secteur | TDR, 02_PROCESSUS, mock/data.ts |
+| **contribuable** | Entreprise/ONG/institution avec NIF, RCCM, secteur | TDR, 02_PROCESSUS, mock/data.ts |
 | **Base juridique** | Texte fondateur (CGI, Code ZFI, Convention, Arrêté) | 01_INVENTAIRE, TDR |
 | **Exonération** | Mesure dérogatoire active avec durée, quota, montant | 01_INVENTAIRE, PRD, mock/data.ts |
 | **Workflow d'approbation** | Circuit de visas (agent → directeur → ministre) | 06_WORKFLOWS, PRD, TDR |

@@ -1,4 +1,4 @@
-# OASE — Rapport d'Intégrité Base de Données
+﻿# OASE — Rapport d'Intégrité Base de Données
 
 > **Issue Plane :** OASE-59
 > **Type :** Vérification technique
@@ -16,7 +16,7 @@
 | Foreign keys | **125** | 100+ | ✅ |
 | Audit logs (entrées) | 8 | > 0 | ✅ |
 | Empreintes SHA-256 manquantes | 0 | 0 | ✅ |
-| Orphans échantillonnés (demandes→beneficiaires) | 0 | 0 | ✅ |
+| Orphans échantillonnés (demandes→CONTRIBUABLEs) | 0 | 0 | ✅ |
 
 **Conclusion globale : base intègre, conforme au MLD v3.3.**
 
@@ -26,11 +26,11 @@
 
 ### 2.1 Tables de référence (ref_*) — 38 tables
 
-`ref_roles`, `ref_statuts_demande`, `ref_types_beneficiaire`, `ref_types_institution`, `ref_types_notification`, `ref_types_document`, `ref_types_job`, `ref_regimes_convention`, `ref_natures_mesure`, `ref_types_accord_siege`, `ref_types_agrement`, `ref_types_parametre`, `ref_types_rapport`, `ref_organes_gestion`, `ref_statuts_etape`, `ref_statuts_utilisateur`, `ref_modes_organes`, `ref_periodicites`, `ref_unites_mesure`, `ref_devises`, `ref_pays`, `ref_regions`, `ref_prefectures`, `ref_communes`, `ref_cantons`, `ref_villages`, `ref_secteurs_activite`, `ref_types_piece`, `ref_types_acte`, `ref_types_decision`, `ref_types_regle_blocage`, `ref_types_workflow`, `ref_types_evenement`, `ref_types_notification_inapp`, `ref_priorites_demande`, `ref_niveaux_anomalie`, `ref_types_donnee_open`, `ref_categories_open_data`.
+`ref_roles`, `ref_statuts_demande`, `ref_types_CONTRIBUABLE`, `ref_types_institution`, `ref_types_notification`, `ref_types_document`, `ref_types_job`, `ref_regimes_convention`, `ref_natures_mesure`, `ref_types_accord_siege`, `ref_types_agrement`, `ref_types_parametre`, `ref_types_rapport`, `ref_organes_gestion`, `ref_statuts_etape`, `ref_statuts_utilisateur`, `ref_modes_organes`, `ref_periodicites`, `ref_unites_mesure`, `ref_devises`, `ref_pays`, `ref_regions`, `ref_prefectures`, `ref_communes`, `ref_cantons`, `ref_villages`, `ref_secteurs_activite`, `ref_types_piece`, `ref_types_acte`, `ref_types_decision`, `ref_types_regle_blocage`, `ref_types_workflow`, `ref_types_evenement`, `ref_types_notification_inapp`, `ref_priorites_demande`, `ref_niveaux_anomalie`, `ref_types_donnee_open`, `ref_categories_open_data`.
 
 ### 2.2 Tables métier (cœur) — 30 tables
 
-`institutions`, `utilisateurs`, `roles_permissions`, `beneficiaires`, `demandes`, `decisions`, `actes`, `pieces_jointes`, `workflow_templates`, `workflow_instances`, `workflow_etapes`, `regles_blocage`, `quotas`, `quota_mouvements`, `mvt_quota`, `bases_juridiques`, `base_juridique_versions`, `base_juridique_documents`, `conventions`, `engagements`, `agrements`, `agrement_beneficiaires`, `accords_siege`, `notifications`, `sessions`, `audit_logs`, `anomalies`, `missions_audit`, `rapports`, `jobs`, `imports`, `exports`, `documents_ged`, `tags`, `commentaires`, `historique_statuts`, `open_data_publications`.
+`institutions`, `utilisateurs`, `roles_permissions`, `CONTRIBUABLEs`, `demandes`, `decisions`, `actes`, `pieces_jointes`, `workflow_templates`, `workflow_instances`, `workflow_etapes`, `regles_blocage`, `quotas`, `quota_mouvements`, `mvt_quota`, `bases_juridiques`, `base_juridique_versions`, `base_juridique_documents`, `conventions`, `engagements`, `agrements`, `agrement_CONTRIBUABLEs`, `accords_siege`, `notifications`, `sessions`, `audit_logs`, `anomalies`, `missions_audit`, `rapports`, `jobs`, `imports`, `exports`, `documents_ged`, `tags`, `commentaires`, `historique_statuts`, `open_data_publications`.
 
 ### 2.3 Tables système / infrastructure — 22 tables
 
@@ -51,13 +51,13 @@
 | bases_juridiques | 10 |
 | utilisateurs | 10 |
 | ref_types_notification | 9 |
-| ref_types_beneficiaire | 9 |
+| ref_types_CONTRIBUABLE | 9 |
 | audit_logs | 8 |
 | ref_statuts_demande | 8 |
 | ref_types_job | 7 |
 | ref_types_document | 7 |
 | ref_regimes_convention | 7 |
-| beneficiaires | 6 |
+| CONTRIBUABLEs | 6 |
 | ref_types_parametre | 6 |
 | ref_types_accord_siege | 6 |
 | ref_types_agrement | 6 |
@@ -81,7 +81,7 @@
 
 | Test | Résultat |
 |---|---|
-| `demandes` avec `beneficiaire_id` orphelin | 0 ✅ |
+| `demandes` avec `CONTRIBUABLE_id` orphelin | 0 ✅ |
 | `actes` avec `demande_id` orphelin | 0 ✅ |
 | `pieces_jointes` avec `demande_id` orphelin | 0 ✅ |
 | `audit_logs` avec `utilisateur_id` orphelin (nullable) | 0 ✅ |
@@ -113,7 +113,7 @@
 | base_juridique_versions | 10 | ≥ 10 (historique SCD2) | ✅ |
 | demandes | 10 | ≥ 5 (démo) | ✅ |
 | audit_logs | 8 | ≥ 1 | ✅ |
-| beneficiaires | 6 | ≥ 3 (démo) | ✅ |
+| CONTRIBUABLEs | 6 | ≥ 3 (démo) | ✅ |
 
 > **⚠️ Action :** le seed des 15 utilisateurs canoniques (un par rôle) reste à finaliser. Les 10 actuels sont probablement des doublons. À voir avec OASE-88 (A.5 seed demo).
 
@@ -149,8 +149,8 @@ ORDER BY TABLE_NAME, CONSTRAINT_NAME;
 
 -- Orphans check (exemple)
 SELECT COUNT(*) FROM demandes d 
-LEFT JOIN beneficiaires b ON d.beneficiaire_id=b.id 
-WHERE d.beneficiaire_id IS NOT NULL AND b.id IS NULL;
+LEFT JOIN CONTRIBUABLEs b ON d.CONTRIBUABLE_id=b.id 
+WHERE d.CONTRIBUABLE_id IS NOT NULL AND b.id IS NULL;
 
 -- Audit chain
 SELECT COUNT(*) FROM audit_logs WHERE empreinte_sha256 IS NULL OR empreinte_sha256='';

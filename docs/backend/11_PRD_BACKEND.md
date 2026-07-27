@@ -1,4 +1,4 @@
-# OASE-23 — PRD Backend
+﻿# OASE-23 — PRD Backend
 
 > **Issue Plane :** OASE-23  
 > **Date :** 2026-06-16  
@@ -65,7 +65,7 @@ Tables critiques : `demandes` (centre), `bases_juridiques` (SCD T2), `audit_logs
 | Groupe | Endpoints | Sécurité |
 |---|---|---|
 | Auth | 6 | Public (login) + JWT |
-| Bénéficiaires (P1) | 8 | JWT + RBAC |
+| contribuables (P1) | 8 | JWT + RBAC |
 | Instruction (P2/P3) | 12 | JWT + RBAC + ScopeGuard |
 | Workflow / décisions | 6 | JWT + RBAC + PinGuard |
 | Dashboards / stats | 5 | JWT + RBAC |

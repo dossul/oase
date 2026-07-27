@@ -1,4 +1,4 @@
-# OASE-6 — Domain Model
+﻿# OASE-6 — Domain Model
 
 > **Issue Plane :** OASE-6 (In Progress → Done)  
 > **Date :** 2026-06-16  
@@ -23,14 +23,14 @@ Chaque entité est décrite avec :
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         AGGREGATE: Demande                              │
 │                                                                         │
-│  Beneficiaire ──────── Demande ──────── BaseJuridique                   │
+│  CONTRIBUABLE ──────── Demande ──────── BaseJuridique                   │
 │       │                  │                    │                         │
 │       │                  ├── PieceJointe       ├── CodeAdditionnel      │
 │       │                  ├── EtapeWorkflow     └── TexteFondateur       │
 │       │                  ├── Decision                                   │
 │       │                  └── Notification                               │
 │       │                                                                 │
-│  Convention ──── Beneficiaire                                           │
+│  Convention ──── CONTRIBUABLE                                           │
 │       └── BaseJuridique                                                 │
 │                                                                         │
 │  Utilisateur ──── Institution ──── Role                                 │
@@ -38,7 +38,7 @@ Chaque entité est décrite avec :
 │                                                                         │
 │  Anomalie ──── Demande | BaseJuridique                                  │
 │  Connecteur ──── Demande (sync SI externe)                              │
-│  Quota ──── BaseJuridique | Beneficiaire                                │
+│  Quota ──── BaseJuridique | CONTRIBUABLE                                │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -46,7 +46,7 @@ Chaque entité est décrite avec :
 
 ## 2. Entités du domaine
 
-### 2.1 `Beneficiaire` (Aggregate Root)
+### 2.1 `CONTRIBUABLE` (Aggregate Root)
 
 **Responsabilités :**
 - Représente une personne morale ou physique pouvant demander ou bénéficier d'une exonération.
@@ -55,8 +55,8 @@ Chaque entité est décrite avec :
 
 **Invariants :**
 - `nif` est unique et non modifiable après validation.
-- Un bénéficiaire avec `statut_fiscal = 'dette_active'` ne peut pas déposer une nouvelle demande tant que la dette n'est pas résolue.
-- `type_beneficiaire` ne peut pas être modifié après le premier dossier approuvé.
+- Un contribuable avec `statut_fiscal = 'dette_active'` ne peut pas déposer une nouvelle demande tant que la dette n'est pas résolue.
+- `type_CONTRIBUABLE` ne peut pas être modifié après le premier dossier approuvé.
 
 **Attributs clés :**
 ```
@@ -64,7 +64,7 @@ id                  UUID PK
 raison_sociale      VARCHAR(200)   NOT NULL
 nif                 VARCHAR(20)    UNIQUE NOT NULL
 rccm                VARCHAR(30)    NULL
-type_beneficiaire   ENUM           -- entreprise_privee | organisme_public | ong |
+type_CONTRIBUABLE   ENUM           -- entreprise_privee | organisme_public | ong |
                                    -- institution_diplomatique | organisation_internationale |
                                    -- personne_physique | entreprises_et_menages | autre
 statut_fiscal       ENUM           -- conforme | dette_active | inconnu
@@ -75,7 +75,7 @@ created_at, updated_at
 ```
 
 **Relations :**
-- 1 → N `Demande` (un bénéficiaire peut avoir plusieurs demandes)
+- 1 → N `Demande` (un contribuable peut avoir plusieurs demandes)
 - 1 → N `Convention` (plusieurs conventions d'investissement possibles)
 - 0..1 → `AccordSiege`
 
@@ -119,7 +119,7 @@ systeme_information        VARCHAR(100)  NULL              -- Sydonia World|E-TA
 mode_instruction           VARCHAR(20)   NOT NULL DEFAULT 'manuel'  -- automatique|semi_automatique|manuel
 objectif_type              VARCHAR(50)   NULL              -- Economique|Social|Economique et social
 branche_activite           VARCHAR(100)  NULL
-type_beneficiaire_cible    VARCHAR(100)  NULL              -- Types de bénéficiaires MRD
+type_CONTRIBUABLE_cible    VARCHAR(100)  NULL              -- Types de contribuables MRD
 est_depense_fiscale_2024   BOOLEAN       DEFAULT FALSE
 est_evaluee_2024           BOOLEAN       DEFAULT FALSE
 donnees_disponibles        BOOLEAN       DEFAULT FALSE
@@ -173,7 +173,7 @@ created_at
 **Invariants :**
 - `reference` est unique, générée à la soumission (format `OASE-YYYY-NNNNNN`), immuable.
 - Une demande ne peut passer en `approuve` que si toutes les étapes du workflow de sa `BaseJuridique` ont un statut `valide`.
-- Un bénéficiaire avec `statut_fiscal = 'dette_active'` ne peut pas soumettre (statut bloqué en `brouillon`).
+- Un contribuable avec `statut_fiscal = 'dette_active'` ne peut pas soumettre (statut bloqué en `brouillon`).
 - `montant_fcfa` doit être > 0 pour passer de `brouillon` à `en_cours`.
 - Un `quota` consommé ne peut pas dépasser le quota total défini.
 
@@ -193,7 +193,7 @@ created_at
 id                  UUID PK
 reference           VARCHAR(20)   UNIQUE NOT NULL    -- OASE-2024-000001
 base_juridique_id   UUID FK NOT NULL  → BaseJuridique
-beneficiaire_id     UUID FK NOT NULL  → Beneficiaire
+CONTRIBUABLE_id     UUID FK NOT NULL  → CONTRIBUABLE
 instructeur_id      UUID FK NULL      → Utilisateur
 statut              ENUM NOT NULL     -- brouillon|soumis|en_instruction|action_requise|
                                       -- approuve|rejete|expire|archive
@@ -212,7 +212,7 @@ created_at, updated_at, deleted_at
 
 **Relations :**
 - N → 1 `BaseJuridique`
-- N → 1 `Beneficiaire`
+- N → 1 `CONTRIBUABLE`
 - N → 0..1 `Utilisateur` (instructeur)
 - 1 → N `PieceJointe`
 - 1 → N `EtapeWorkflow`
@@ -309,7 +309,7 @@ created_at
 ### 2.8 `Convention` (Aggregate Root)
 
 **Responsabilités :**
-- Représente un accord formel entre l'État et un bénéficiaire (investissement, Zone Franche, accord de siège).
+- Représente un accord formel entre l'État et un contribuable (investissement, Zone Franche, accord de siège).
 - Peut générer plusieurs demandes au fil du temps.
 - A ses propres métriques (emplois engagés/créés, montant investi).
 
@@ -322,7 +322,7 @@ created_at
 ```
 id                  UUID PK
 reference           VARCHAR(30)   UNIQUE NOT NULL
-beneficiaire_id     UUID FK NOT NULL  → Beneficiaire
+CONTRIBUABLE_id     UUID FK NOT NULL  → CONTRIBUABLE
 base_juridique_id   UUID FK NULL      → BaseJuridique   -- régime juridique de base
 regime              VARCHAR(50)       -- ZFI|ZES|Code_Investissements|Minier|Hydrocarbures|Siege
 statut              ENUM  -- active | suspendue | resiliee | expiree
@@ -360,7 +360,7 @@ created_at
 ### 2.10 `Quota`
 
 **Responsabilités :**
-- Définit un plafond d'utilisation pour une mesure donnée, selon le contexte (bénéficiaire, convention, exercice budgétaire).
+- Définit un plafond d'utilisation pour une mesure donnée, selon le contexte (contribuable, convention, exercice budgétaire).
 - Déclenche une alerte et bloque les nouvelles demandes si `consomme >= total`.
 
 **Invariants :**
@@ -372,10 +372,10 @@ created_at
 ```
 id                  UUID PK
 base_juridique_id   UUID FK NOT NULL  → BaseJuridique
-beneficiaire_id     UUID FK NULL       → Beneficiaire  -- NULL = quota global mesure
+CONTRIBUABLE_id     UUID FK NULL       → CONTRIBUABLE  -- NULL = quota global mesure
 convention_id       UUID FK NULL       → Convention
 exercice_annuel     INT NULL                           -- si quota annuel
-type_quota          ENUM  -- global_mesure | par_beneficiaire | par_convention | annuel
+type_quota          ENUM  -- global_mesure | par_CONTRIBUABLE | par_convention | annuel
 unite               ENUM  -- fcfa | quantite_physique | nombre_operations
 total               BIGINT NOT NULL
 consomme            BIGINT DEFAULT 0
@@ -558,7 +558,7 @@ created_at
 | Agrégat | Root | Invariants transactionnels |
 |---|---|---|
 | **Demande** | `Demande` | Statut + étapes + pièces + décision cohérents |
-| **Bénéficiaire** | `Beneficiaire` | NIF unique + statut fiscal synchronisé |
+| **contribuable** | `CONTRIBUABLE` | NIF unique + statut fiscal synchronisé |
 | **BaseJuridique** | `BaseJuridique` | Version SCD T2 + code immuable |
 | **Convention** | `Convention` | Dates + engagements contractuels |
 | **Audit** | `AuditLog` | Chaîne de hash intègre |
@@ -569,7 +569,7 @@ created_at
 ## 4. Événements du domaine (Domain Events)
 
 ```
-DemandeSoumise           { demandeId, beneficiaireId, baseJuridiqueId, timestamp }
+DemandeSoumise           { demandeId, CONTRIBUABLEId, baseJuridiqueId, timestamp }
 DemandeInstruite         { demandeId, instructeurId, timestamp }
 DemandeApprouvee         { demandeId, decisionId, attestationUrl, timestamp }
 DemandeRejetee           { demandeId, decisionId, motif, timestamp }
@@ -605,7 +605,7 @@ EcheanceProche           { demandeId | baseJuridiqueId, joursRestants, timestamp
 | Module NestJS | Entités principales | Événements produits |
 |---|---|---|
 | `AuthModule` | Utilisateur, Institution | UtilisateurConnecte |
-| `BeneficiaireModule` | Beneficiaire, AccordSiege | — |
+| `CONTRIBUABLEModule` | CONTRIBUABLE, AccordSiege | — |
 | `DemandeModule` | Demande, PieceJointe, EtapeWorkflow | DemandeSoumise, DemandeApprouvee... |
 | `DecisionModule` | Decision | DemandeApprouvee, DemandeRejetee |
 | `BaseJuridiqueModule` | BaseJuridique, CodeAdditionnel | — |

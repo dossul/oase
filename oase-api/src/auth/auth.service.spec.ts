@@ -4,8 +4,10 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { MfaService } from './mfa.service';
+import { OtpService } from '../otp/otp.service';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { MfaPolicyService } from './mfa/mfa-policy.service';
 
 // Mock bcrypt entierement pour contourner la propriete non-redefinissable de bcrypt 6.x
 jest.mock('bcrypt', () => ({
@@ -22,6 +24,8 @@ describe('AuthService', () => {
   let cfg: jest.Mocked<ConfigService>;
   let mfa: jest.Mocked<MfaService>;
   let audit: jest.Mocked<AuditService>;
+  let otp: jest.Mocked<OtpService>;
+  let mfaPolicy: jest.Mocked<MfaPolicyService>;
 
   const mockUser = (overrides: Partial<any> = {}) => ({
     id: 'user-1',
@@ -90,7 +94,29 @@ describe('AuthService', () => {
       createEntry: jest.fn().mockResolvedValue(undefined),
     } as any;
 
-    service = new AuthService(prisma, jwt, cfg, mfa, audit);
+    otp = {
+      verifier: jest.fn(),
+    } as any;
+
+    mfaPolicy = {
+      getConfig: jest.fn().mockResolvedValue({
+        enabled: false,
+        channels: ['totp'],
+        defaultChannel: 'totp',
+        ttlSeconds: 300,
+        maxAttempts: 5,
+        emailEnabled: false,
+        whatsappEnabled: false,
+        whatsappTemplate: 'Votre code de vérification OASE est: {code}',
+      }),
+      sendChallenge: jest.fn().mockResolvedValue({ envoye: true, canal: 'totp', expireDans: 300 }),
+      verifyChallenge: jest.fn().mockResolvedValue(false),
+      updateConfig: jest.fn(),
+      isMfaRequired: jest.fn().mockResolvedValue(false),
+      getAdapter: jest.fn(),
+    } as any;
+
+    service = new AuthService(prisma, jwt, cfg, mfa, otp, audit, mfaPolicy);
   });
 
   describe('validateCredentials', () => {
@@ -136,6 +162,16 @@ describe('AuthService', () => {
       (prisma.utilisateur.findUnique as jest.Mock).mockResolvedValue(
         mockUser({ mfaActive: true }),
       );
+      (mfaPolicy.getConfig as jest.Mock).mockResolvedValue({
+        enabled: true,
+        channels: ['totp'],
+        defaultChannel: 'totp',
+        ttlSeconds: 300,
+        maxAttempts: 5,
+        emailEnabled: false,
+        whatsappEnabled: false,
+        whatsappTemplate: 'Votre code de vérification OASE est: {code}',
+      });
       const result = await service.login(
         { email: 'k.agbodjan@otr.tg', password: 'good' },
         '127.0.0.1',
@@ -167,13 +203,10 @@ describe('AuthService', () => {
       );
     });
 
-    // OASE [BUG #6] fix : le code legacy 'beneficiaire' doit être normalisé
-    // en 'contribuable' dans le payload retourné, le JWT et l'audit, même si
-    // la DB n'a pas encore reçu la migration 002. Ce test bloque la régression.
-    it('normalise le rôle legacy "beneficiaire" → "contribuable" (BUG #6)', async () => {
+    it('passe le rôle "contribuable" tel quel dans le payload, le JWT et l\'audit', async () => {
       bcryptMock.compare.mockResolvedValue(true as never);
       (prisma.utilisateur.findUnique as jest.Mock).mockResolvedValue(
-        mockUser({ email: 'contribuable@gouv.tg', role: 'beneficiaire' }),
+        mockUser({ email: 'contribuable@gouv.tg', role: 'contribuable' }),
       );
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
       (prisma.utilisateur.update as jest.Mock).mockResolvedValue({});
@@ -186,7 +219,6 @@ describe('AuthService', () => {
       const pair = result as { user: { role: string } };
       expect(pair.user.role).toBe('contribuable');
 
-      // L'audit log doit aussi avoir la valeur normalisée
       expect(audit.createEntry).toHaveBeenCalledWith(
         expect.objectContaining({
           action: 'LOGIN_SUCCES',
@@ -194,7 +226,6 @@ describe('AuthService', () => {
         }),
       );
 
-      // Le JWT doit aussi être signé avec la valeur normalisée
       expect(jwt.sign).toHaveBeenCalledWith(
         expect.objectContaining({ role: 'contribuable' }),
         expect.any(Object),
@@ -239,7 +270,7 @@ describe('AuthService', () => {
     it('rejette si code TOTP invalide', async () => {
       (jwt.verify as jest.Mock).mockReturnValue({ sub: 'user-1', step: 'mfa_pending' });
       (prisma.utilisateur.findUniqueOrThrow as jest.Mock).mockResolvedValue(mockUser());
-      (mfa.verifyTotp as jest.Mock).mockResolvedValue(false);
+      (mfaPolicy.verifyChallenge as jest.Mock).mockResolvedValue(false);
       await expect(
         service.verifyMfa('token', '000000', '127.0.0.1', 'jest'),
       ).rejects.toThrow(UnauthorizedException);
@@ -248,7 +279,7 @@ describe('AuthService', () => {
     it('retourne token pair si TOTP valide', async () => {
       (jwt.verify as jest.Mock).mockReturnValue({ sub: 'user-1', step: 'mfa_pending' });
       (prisma.utilisateur.findUniqueOrThrow as jest.Mock).mockResolvedValue(mockUser());
-      (mfa.verifyTotp as jest.Mock).mockResolvedValue(true);
+      (mfaPolicy.verifyChallenge as jest.Mock).mockResolvedValue(true);
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
       (prisma.utilisateur.update as jest.Mock).mockResolvedValue({});
 

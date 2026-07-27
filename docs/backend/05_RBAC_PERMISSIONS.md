@@ -1,4 +1,4 @@
-# OASE-8 — Rôles, permissions et matrice RBAC
+﻿# OASE-8 — Rôles, permissions et matrice RBAC
 
 > **Issue Plane :** OASE-8  
 > **Date :** 2026-06-16  
@@ -11,7 +11,7 @@
 
 | Persona | Code rôle | Institution | Description |
 |---|---|---|---|
-| P1 — Opérateur économique | `beneficiaire` | Externe | Dépose et suit ses propres demandes |
+| P1 — Opérateur économique | `CONTRIBUABLE` | Externe | Dépose et suit ses propres demandes |
 | P2 — Agent OTR (CI) | `agent_ci` | OTR — Centre des Impôts | Instruit les dossiers fiscaux |
 | P2 — Agent OTR (CDDI) | `agent_cddi` | OTR — CDDI | Instruit les dossiers douaniers |
 | P2 — Agent DGBF | `agent_dgbf` | DGBF / MEF | Visa budgétaire |
@@ -35,7 +35,7 @@ Légende : `C` = Create · `R` = Read · `U` = Update · `D` = Delete · `X` = A
 
 ### 2.1 `Demande`
 
-| Action | beneficiaire | agent_ci | agent_cddi | agent_dgbf | agent_dgtcp | agent_agence | agent_mae | agent_dgmg | agent_ministere | decideur | agent_conedef | auditeur | public | admin_si |
+| Action | CONTRIBUABLE | agent_ci | agent_cddi | agent_dgbf | agent_dgtcp | agent_agence | agent_mae | agent_dgmg | agent_ministere | decideur | agent_conedef | auditeur | public | admin_si |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | Créer (brouillon) | C | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | Lire ses propres demandes | R | — | — | — | — | — | — | — | — | — | — | — | — | — |
@@ -61,7 +61,7 @@ Légende : `C` = Create · `R` = Read · `U` = Update · `D` = Delete · `X` = A
 
 ### 2.2 `BaseJuridique`
 
-| Action | beneficiaire | agent_* (P2/P3) | decideur | auditeur | admin_si | public |
+| Action | CONTRIBUABLE | agent_* (P2/P3) | decideur | auditeur | admin_si | public |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | Lire (liste + détail) | R (partiel)¹ | R | R | R | R | R (anonyme)² |
 | Créer / importer | — | — | — | — | C | — |
@@ -72,22 +72,22 @@ Légende : `C` = Create · `R` = Read · `U` = Update · `D` = Delete · `X` = A
 > ¹ P1 voit uniquement les mesures actives et conformes UEMOA — `conformite_directive_uemoa ≠ non`  
 > ² Open Data : libellé, nature, impôt, portée — sans `article` ni `code_additionnel`
 
-### 2.3 `Beneficiaire`
+### 2.3 `CONTRIBUABLE`
 
-| Action | beneficiaire (soi) | agent_* | decideur | auditeur | admin_si |
+| Action | CONTRIBUABLE (soi) | agent_* | decideur | auditeur | admin_si |
 |---|:---:|:---:|:---:|:---:|:---:|
 | Créer son profil | C | — | — | — | C |
 | Lire son propre profil | R | — | — | — | R |
-| Lire tous les bénéficiaires | — | R | R | R | R |
+| Lire tous les contribuables | — | R | R | R | R |
 | Modifier ses coordonnées | U | — | — | — | U |
-| Modifier `type_beneficiaire` | — | — | — | — | U¹ |
+| Modifier `type_CONTRIBUABLE` | — | — | — | — | U¹ |
 | Voir `statut_fiscal` | R (soi) | R | R | R | R |
 
 > ¹ Uniquement avant le premier dossier approuvé (cf. invariant OASE-6)
 
 ### 2.4 `Convention`
 
-| Action | beneficiaire | agent_agence / agent_mae / agent_dgmg | decideur | auditeur | admin_si |
+| Action | CONTRIBUABLE | agent_agence / agent_mae / agent_dgmg | decideur | auditeur | admin_si |
 |---|:---:|:---:|:---:|:---:|:---:|
 | Créer | — | C | C | — | C |
 | Lire ses propres conventions | R | — | — | — | — |
@@ -97,7 +97,7 @@ Légende : `C` = Create · `R` = Read · `U` = Update · `D` = Delete · `X` = A
 
 ### 2.5 `Utilisateur` et `Institution`
 
-| Action | beneficiaire | agent_* | decideur | auditeur | admin_si |
+| Action | CONTRIBUABLE | agent_* | decideur | auditeur | admin_si |
 |---|:---:|:---:|:---:|:---:|:---:|
 | Créer un utilisateur | — | — | — | — | C |
 | Lire son propre profil | R | R | R | R | R |
@@ -109,7 +109,7 @@ Légende : `C` = Create · `R` = Read · `U` = Update · `D` = Delete · `X` = A
 
 ### 2.6 `AuditLog`
 
-| Action | beneficiaire | agent_* | decideur | auditeur | admin_si |
+| Action | CONTRIBUABLE | agent_* | decideur | auditeur | admin_si |
 |---|:---:|:---:|:---:|:---:|:---:|
 | Lire ses propres entrées | R | — | — | — | — |
 | Lire toutes les entrées | — | — | R (read-only) | R | R |
@@ -118,7 +118,7 @@ Légende : `C` = Create · `R` = Read · `U` = Update · `D` = Delete · `X` = A
 
 ### 2.7 `Anomalie`
 
-| Action | beneficiaire | agent_* | decideur | auditeur | admin_si |
+| Action | CONTRIBUABLE | agent_* | decideur | auditeur | admin_si |
 |---|:---:|:---:|:---:|:---:|:---:|
 | Détecter (moteur règles) | — | — | — | — | system |
 | Lire ses anomalies | R (liées à ses demandes) | R (périmètre) | R | R | R |
@@ -127,7 +127,7 @@ Légende : `C` = Create · `R` = Read · `U` = Update · `D` = Delete · `X` = A
 
 ### 2.8 `Connecteur`
 
-| Action | beneficiaire | agent_* | decideur | auditeur | admin_si |
+| Action | CONTRIBUABLE | agent_* | decideur | auditeur | admin_si |
 |---|:---:|:---:|:---:|:---:|:---:|
 | Voir statut connecteurs | — | — | — | — | R |
 | Modifier config | — | — | — | — | U |
@@ -136,7 +136,7 @@ Légende : `C` = Create · `R` = Read · `U` = Update · `D` = Delete · `X` = A
 
 ### 2.9 `Quota`
 
-| Action | beneficiaire | agent_* | decideur | admin_si |
+| Action | CONTRIBUABLE | agent_* | decideur | admin_si |
 |---|:---:|:---:|:---:|:---:|
 | Voir quotas actifs | R (soi) | R (périmètre) | R | R |
 | Créer / définir quota | — | — | X | X |
@@ -148,9 +148,9 @@ Légende : `C` = Create · `R` = Read · `U` = Update · `D` = Delete · `X` = A
 ## 3. Règles de périmètre de données (Row-Level Security)
 
 ```
-RLS-01 : beneficiaire
-  SELECT WHERE beneficiaire_id = auth.uid()
-  → Un bénéficiaire ne voit QUE ses propres demandes, pièces, quotas.
+RLS-01 : CONTRIBUABLE
+  SELECT WHERE CONTRIBUABLE_id = auth.uid()
+  → Un contribuable ne voit QUE ses propres demandes, pièces, quotas.
 
 RLS-02 : agent_ci
   SELECT WHERE base_juridique.organe_gestion = 'CI'
@@ -243,7 +243,7 @@ export class ScopeGuard implements CanActivate {
 export class DemandeController {
 
   @Post()
-  @Roles('beneficiaire')
+  @Roles('CONTRIBUABLE')
   creer(@Body() dto: CreerDemandeDto, @CurrentUser() user: AuthUser) { ... }
 
   @Get()
@@ -276,8 +276,8 @@ CREATE TABLE roles_permissions (
 
 -- Exemple de données
 INSERT INTO roles_permissions VALUES
-  ('beneficiaire',  'demandes',        'CREATE',   NULL),
-  ('beneficiaire',  'demandes',        'READ',     'beneficiaire_id=self'),
+  ('CONTRIBUABLE',  'demandes',        'CREATE',   NULL),
+  ('CONTRIBUABLE',  'demandes',        'READ',     'CONTRIBUABLE_id=self'),
   ('agent_ci',      'demandes',        'READ',     'organe_gestion=CI'),
   ('agent_ci',      'demandes',        'PRENDRE_EN_CHARGE', 'organe_gestion=CI'),
   ('decideur',      'demandes',        'APPROUVER',NULL),
@@ -292,7 +292,7 @@ INSERT INTO roles_permissions VALUES
 
 | Route maquette | Rôle(s) autorisés |
 |---|---|
-| `/portail/*` | `beneficiaire` |
+| `/portail/*` | `CONTRIBUABLE` |
 | `/backoffice/*` | `agent_ci`, `agent_cddi`, `agent_dgbf` |
 | `/tresor/*` | `agent_dgtcp` |
 | `/agences/*` | `agent_agence` |
@@ -304,7 +304,7 @@ INSERT INTO roles_permissions VALUES
 | `/audit/*` | `auditeur` |
 | `/opendata` | `public` (non authentifié) |
 | `/admin/*` | `admin_si` |
-| `/mobile/*` | `beneficiaire`, `agent_ci`, `agent_cddi` |
+| `/mobile/*` | `CONTRIBUABLE`, `agent_ci`, `agent_cddi` |
 
 ---
 

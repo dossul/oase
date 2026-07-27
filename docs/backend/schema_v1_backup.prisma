@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // OASE — Prisma Schema
 // Version : 1.0.0 (OASE-11)
 // Date    : 2026-06-16
@@ -72,7 +72,7 @@ enum StatutUtilisateur {
   suspendu
 }
 
-enum TypeBeneficiaire {
+enum TypeCONTRIBUABLE {
   entreprise_privee
   organisme_public
   ong
@@ -130,7 +130,7 @@ enum OrganeGestion {
 
 enum TypeQuota {
   global_mesure
-  par_beneficiaire
+  par_CONTRIBUABLE
   par_convention
   annuel
 }
@@ -270,22 +270,22 @@ model AccordSiege {
   est_actif        Boolean         @default(true)
   created_at       DateTime        @default(now())
 
-  beneficiaires Beneficiaire[]
+  CONTRIBUABLEs CONTRIBUABLE[]
   conventions   Convention[]
 
   @@map("accords_siege")
 }
 
 // ============================================================
-// BENEFICIAIRES
+// CONTRIBUABLES
 // ============================================================
 
-model Beneficiaire {
+model CONTRIBUABLE {
   id               String           @id @default(uuid()) @db.Uuid
   raison_sociale   String           @db.VarChar(200)
   nif              String           @unique @db.VarChar(20)
   rccm             String?          @db.VarChar(30)
-  type_beneficiaire TypeBeneficiaire
+  type_CONTRIBUABLE TypeCONTRIBUABLE
   statut_fiscal    StatutFiscal     @default(inconnu)
   secteur          String?          @db.VarChar(100)
   region           String?          @db.VarChar(100)
@@ -302,8 +302,8 @@ model Beneficiaire {
   quotas      Quota[]
 
   @@index([nif])
-  @@index([type_beneficiaire])
-  @@map("beneficiaires")
+  @@index([type_CONTRIBUABLE])
+  @@map("CONTRIBUABLEs")
 }
 
 // ============================================================
@@ -332,7 +332,7 @@ model BaseJuridique {
   mode_instruction            ModeInstruction @default(manuel)
   objectif_type               String?         @db.VarChar(50)           // Economique | Social | ...
   branche_activite            String?         @db.VarChar(100)
-  type_beneficiaire_cible     String?         @db.VarChar(100)          // Types bénéficiaires MRD
+  type_CONTRIBUABLE_cible     String?         @db.VarChar(100)          // Types contribuables MRD
   est_depense_fiscale_2024    Boolean         @default(false)
   est_evaluee_2024            Boolean         @default(false)
   donnees_disponibles         Boolean         @default(false)
@@ -393,8 +393,8 @@ model Demande {
   reference         String        @unique @db.VarChar(20)  // OASE-2024-000001
   base_juridique_id String        @db.Uuid
   base_juridique    BaseJuridique @relation(fields: [base_juridique_id], references: [id])
-  beneficiaire_id   String        @db.Uuid
-  beneficiaire      Beneficiaire  @relation(fields: [beneficiaire_id], references: [id])
+  CONTRIBUABLE_id   String        @db.Uuid
+  CONTRIBUABLE      CONTRIBUABLE  @relation(fields: [CONTRIBUABLE_id], references: [id])
   instructeur_id    String?       @db.Uuid
   instructeur       Utilisateur?  @relation("InstructeurDemande", fields: [instructeur_id], references: [id])
   statut            StatutDemande @default(brouillon)
@@ -422,7 +422,7 @@ model Demande {
   audit_logs     AuditLog[]
 
   @@index([reference])
-  @@index([beneficiaire_id])
+  @@index([CONTRIBUABLE_id])
   @@index([instructeur_id])
   @@index([statut])
   @@index([base_juridique_id])
@@ -528,8 +528,8 @@ model Decision {
 model Convention {
   id                String            @id @default(uuid()) @db.Uuid
   reference         String            @unique @db.VarChar(30)
-  beneficiaire_id   String            @db.Uuid
-  beneficiaire      Beneficiaire      @relation(fields: [beneficiaire_id], references: [id])
+  CONTRIBUABLE_id   String            @db.Uuid
+  CONTRIBUABLE      CONTRIBUABLE      @relation(fields: [CONTRIBUABLE_id], references: [id])
   base_juridique_id String?           @db.Uuid
   base_juridique    BaseJuridique?    @relation(fields: [base_juridique_id], references: [id])
   accord_siege_id   String?           @db.Uuid
@@ -548,7 +548,7 @@ model Convention {
   demandes  Demande[]
   anomalies Anomalie[]
 
-  @@index([beneficiaire_id])
+  @@index([CONTRIBUABLE_id])
   @@index([statut])
   @@map("conventions")
 }
@@ -561,8 +561,8 @@ model Quota {
   id                String        @id @default(uuid()) @db.Uuid
   base_juridique_id String        @db.Uuid
   base_juridique    BaseJuridique @relation(fields: [base_juridique_id], references: [id])
-  beneficiaire_id   String?       @db.Uuid
-  beneficiaire      Beneficiaire? @relation(fields: [beneficiaire_id], references: [id])
+  CONTRIBUABLE_id   String?       @db.Uuid
+  CONTRIBUABLE      CONTRIBUABLE? @relation(fields: [CONTRIBUABLE_id], references: [id])
   convention_id     String?       @db.Uuid
   exercice_annuel   Int?
   type_quota        TypeQuota

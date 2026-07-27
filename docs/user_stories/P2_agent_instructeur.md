@@ -1,4 +1,4 @@
-# OASE — User Stories P2 (Agent Instructeur)
+﻿# OASE — User Stories P2 (Agent Instructeur)
 
 > **Issue Plane :** OASE-33
 > **Persona :** P2 — Agent Instructeur (OTR-CI, OTR-CDDI, DGBF)
@@ -10,7 +10,7 @@
 
 ## Vue d'ensemble
 
-Le persona **P2** instruit les demandes d'exonération déposées par les bénéficiaires. Il est rattaché à une institution (OTR-CI pour le code des investissements, OTR-CDDI pour les douanes, DGBF pour la gestion budgétaire). Il interagit avec 12 écrans du back-office :
+Le persona **P2** instruit les demandes d'exonération déposées par les contribuables. Il est rattaché à une institution (OTR-CI pour le code des investissements, OTR-CDDI pour les douanes, DGBF pour la gestion budgétaire). Il interagit avec 12 écrans du back-office :
 - `DashboardView` — KPIs instruction
 - `DossiersView` — file des dossiers à instruire
 - `InstructionView` — instruction détaillée d'un dossier
@@ -89,7 +89,7 @@ Le persona **P2** instruit les demandes d'exonération déposées par les béné
 **En tant qu'** agent instructeur, **je veux** consulter la file de dossiers qui m'est assignée, **afin de** les traiter dans l'ordre de priorité.
 
 **Critères d'acceptation :**
-- [ ] Tableau paginé : n° demande, bénéficiaire, type régime, date dépôt, SLA (jours restants), priorité
+- [ ] Tableau paginé : n° demande, contribuable, type régime, date dépôt, SLA (jours restants), priorité
 - [ ] Filtres : statut, régime, période, priorité
 - [ ] Tri par SLA ASC par défaut (les plus urgents en premier)
 - [ ] Badge coloré SLA : vert (> 5j), orange (3-5j), rouge (< 3j)
@@ -112,17 +112,17 @@ Le persona **P2** instruit les demandes d'exonération déposées par les béné
 **En tant qu'** instructeur technique, **je veux** analyser un dossier et émettre un avis technique, **afin de** permettre la décision finale.
 
 **Critères d'acceptation :**
-- [ ] Affichage complet du dossier : infos bénéficiaire, type régime, base juridique, pièces jointes, historique
+- [ ] Affichage complet du dossier : infos contribuable, type régime, base juridique, pièces jointes, historique
 - [ ] Visualiseur PDF intégré pour les pièces
 - [ ] Zone de saisie pour l'avis technique (favorable / défavorable / complément requis)
 - [ ] Si complément requis → motif obligatoire + liste des pièces attendues
 - [ ] Calcul automatique du montant d'exonération proposé (selon barème)
-- [ ] Comparaison avec les exonérations antérieures du même bénéficiaire
+- [ ] Comparaison avec les exonérations antérieures du même contribuable
 - [ ] Sauvegarde en brouillon + soumission finale (les deux tracés dans `audit_logs`)
 
 ---
 
-## US-P2-05 — Demander un complément au bénéficiaire
+## US-P2-05 — Demander un complément au contribuable
 
 | Champ | Valeur |
 |---|---|
@@ -133,15 +133,15 @@ Le persona **P2** instruit les demandes d'exonération déposées par les béné
 | **Priorité** | Haute |
 | **Statut** | ✅ Implémenté |
 
-**En tant qu'** instructeur, **je veux** demander des pièces ou informations complémentaires au bénéficiaire, **afin de** poursuivre l'instruction.
+**En tant qu'** instructeur, **je veux** demander des pièces ou informations complémentaires au contribuable, **afin de** poursuivre l'instruction.
 
 **Critères d'acceptation :**
 - [ ] Modale : motif du complément (textarea obligatoire) + liste des pièces attendues (multi-select)
 - [ ] Délai de réponse paramétrable (par défaut 15 jours, max 30)
-- [ ] Notification automatique envoyée au bénéficiaire (in-app + email)
+- [ ] Notification automatique envoyée au contribuable (in-app + email)
 - [ ] Statut du dossier passe à `en_complement`
 - [ ] Timer visible dans le dossier (« Expire dans 12 jours »)
-- [ ] Le bénéficiaire peut répondre directement via son portail
+- [ ] Le contribuable peut répondre directement via son portail
 
 ---
 
@@ -166,7 +166,7 @@ Le persona **P2** instruit les demandes d'exonération déposées par les béné
 - [ ] Si validation : durée de validité (date début + date fin)
 - [ ] Saisie du PIN de signature pour engager la décision
 - [ ] Décision tracée dans `audit_logs` avec hash SHA-256
-- [ ] Notification automatique au bénéficiaire
+- [ ] Notification automatique au contribuable
 
 ---
 
@@ -253,7 +253,7 @@ Le persona **P2** instruit les demandes d'exonération déposées par les béné
 
 **Critères d'acceptation :**
 - [ ] Filtres : période, statut, régime
-- [ ] Colonnes : n° dossier, bénéficiaire, date instruction, décision, montant, durée
+- [ ] Colonnes : n° dossier, contribuable, date instruction, décision, montant, durée
 - [ ] Formats : XLSX et PDF
 - [ ] Limite : 5 000 lignes par export
 - [ ] Export tracé dans `audit_logs` (qui a exporté quoi quand)

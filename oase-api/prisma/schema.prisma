@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -61,8 +62,8 @@ model AgrementContribuable {
   contribuableId String @map("contribuable_id")        @db.Char(36)
   role            String?       @db.VarChar(50)
   createdAt      DateTime @map("created_at")      @default(now())
-  agrements       Agrement     @relation(fields: [agrementId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_beneficiaires_ibfk_1")
-  contribuables   Contribuable @relation(fields: [contribuableId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_beneficiaires_ibfk_2")
+  agrements       Agrement     @relation(fields: [agrementId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_contribuables_ibfk_1")
+  contribuables   Contribuable @relation(fields: [contribuableId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "agrement_contribuables_ibfk_2")
 
   @@unique([agrementId, contribuableId], map: "uk_agrement_contribuable")
   @@index([agrementId], map: "idx_agrement_id")
@@ -311,8 +312,8 @@ model ContribuableHistoriqueFiscal {
   source             String?            @db.VarChar(100)
   connecteurCode    String? @map("connecteur_code")            @db.VarChar(50)
   createdAt         DateTime @map("created_at")           @default(now())
-  contribuables      Contribuable      @relation(fields: [contribuableId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "beneficiaire_historique_fiscal_ibfk_1")
-  refStatutsFiscal RefStatutFiscal @relation(fields: [statutFiscalCode], references: [code], onUpdate: NoAction, map: "beneficiaire_historique_fiscal_ibfk_2")
+  contribuables      Contribuable      @relation(fields: [contribuableId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "contribuable_historique_fiscal_ibfk_1")
+  refStatutsFiscal RefStatutFiscal @relation(fields: [statutFiscalCode], references: [code], onUpdate: NoAction, map: "contribuable_historique_fiscal_ibfk_2")
   connecteurs        Connecteur?       @relation(fields: [connecteurCode], references: [codeSysteme], onUpdate: NoAction, map: "fk_histofiscal_connecteur")
 
   @@index([connecteurCode], map: "fk_histofiscal_connecteur")
@@ -335,19 +336,24 @@ model Contribuable {
   adresse                        String?                          @db.Text
   accordSiegeId                String? @map("accord_siege_id")                          @db.Char(36)
   userId                        String? @map("user_id")                          @unique(map: "user_id") @db.Char(36)
+  // Complétude du profil (Lot 1 — feature creation de compte contribuable)
+  profilCompletude              Int @default(0) @map("profil_completude")
+  profilLocked                  Boolean @default(false) @map("profil_locked")
+  derniereMajCompletude         DateTime? @map("derniere_maj_completude")
   createdAt                     DateTime @map("created_at")                         @default(now())
   updatedAt                     DateTime @map("updated_at")                         @default(now())
   actes                          Acte[]
   agrementContribuables         AgrementContribuable[]
   agrements                      Agrement[]
   contribuableHistoriqueFiscal ContribuableHistoriqueFiscal[]
-  accordsSiege                  AccordSiege?                   @relation(fields: [accordSiegeId], references: [id], onUpdate: NoAction, map: "beneficiaires_ibfk_1")
-  refTypesContribuable         RefTypeContribuable           @relation(fields: [typeContribuableCode], references: [code], onUpdate: NoAction, map: "beneficiaires_ibfk_2")
-  refStatutsFiscal             RefStatutFiscal               @relation(fields: [statutFiscalCode], references: [code], onUpdate: NoAction, map: "beneficiaires_ibfk_3")
-  utilisateurs                   Utilisateur?                    @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "beneficiaires_ibfk_4")
+  accordsSiege                  AccordSiege?                   @relation(fields: [accordSiegeId], references: [id], onUpdate: NoAction, map: "contribuables_ibfk_1")
+  refTypesContribuable         RefTypeContribuable           @relation(fields: [typeContribuableCode], references: [code], onUpdate: NoAction, map: "contribuables_ibfk_2")
+  refStatutsFiscal             RefStatutFiscal               @relation(fields: [statutFiscalCode], references: [code], onUpdate: NoAction, map: "contribuables_ibfk_3")
+  utilisateurs                   Utilisateur?                    @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "contribuables_ibfk_4")
   conventions                    Convention[]
   demandes                       Demande[]
   quotas                         Quota[]
+  piecesJointes                 PieceJointe[]  @relation("ContribuablePiecesJointes")
 
   @@index([accordSiegeId], map: "idx_accord_siege_id")
   @@index([nif], map: "idx_nif")
@@ -843,7 +849,8 @@ model ParametreSysteme {
 
 model PieceJointe {
   id                     String              @id @default(dbgenerated("(uuid())")) @db.Char(36)
-  demandeId             String @map("demande_id")              @db.Char(36)
+  demandeId             String? @map("demande_id")              @db.Char(36)
+  contribuableId       String? @map("contribuable_id")             @db.Char(36)
   nomFichier            String @map("nom_fichier")              @db.VarChar(300)
   typeMime              String @map("type_mime")              @db.VarChar(100)
   tailleOctets          BigInt @map("taille_octets")
@@ -857,12 +864,14 @@ model PieceJointe {
   dateValidation        DateTime? @map("date_validation")
   commentaireValidation String? @map("commentaire_validation")             @db.Text
   createdAt             DateTime @map("created_at")            @default(now())
-  demandes               Demande            @relation(fields: [demandeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "pieces_jointes_ibfk_1")
+  demandes               Demande?            @relation(fields: [demandeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "pieces_jointes_ibfk_1")
+  contribuables          Contribuable?       @relation("ContribuablePiecesJointes", fields: [contribuableId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "pieces_jointes_ibfk_5")
   refRangsPiece        RefRangPiece     @relation(fields: [rangCode], references: [code], onUpdate: NoAction, map: "pieces_jointes_ibfk_2")
   refTypesDocument     RefTypeDocument? @relation(fields: [typeDocumentCode], references: [code], onUpdate: NoAction, map: "pieces_jointes_ibfk_3")
   utilisateurs           Utilisateur?       @relation(fields: [valideParId], references: [id], onUpdate: NoAction, map: "pieces_jointes_ibfk_4")
 
   @@index([demandeId], map: "idx_demande_id")
+  @@index([contribuableId], map: "idx_contribuable_id")
   @@index([hashSha256], map: "idx_hash_sha256")
   @@index([demandeId, rangCode], map: "idx_pieces_jointes_demande_rang")
   @@index([rangCode], map: "idx_rang_code")
@@ -1673,4 +1682,53 @@ model WorkflowTemplate {
   @@index([organeGestionCode], map: "idx_organe_gestion_code")
   @@index([typeTexte1], map: "idx_type_texte_1")
   @@map("workflow_templates")
+}
+
+// ====================================================================
+// OASE - Lot 1 : creation de compte contribuable
+// Verification du telephone par OTP SMS (signup, futur import DGI, reset pwd)
+// Le code OTP n'est JAMAIS stocke en clair : hash SHA-256(code+sel).
+// On conserve 1 OTP actif max par couple (telephone, contexte).
+// ====================================================================
+model PhoneOtpCode {
+  id                String   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  telephone         String   @db.VarChar(20)
+  contexte          String   @db.VarChar(30)        // 'SIGNUP' | 'RESET_PWD' | futur 'IMPORT_DGI'
+  codeHash          String   @map("code_hash") @db.Char(64)
+  sel               String   @db.VarChar(32)        // sel aleatoire pour le hash
+  payloadJson       Json?    @map("payload_json")    // {email, passwordHash, ...} selon contexte
+  tentatives        Int      @default(0)
+  expiresAt         DateTime @map("expires_at") @db.DateTime(3)
+  estUtilise        Boolean  @default(false) @map("est_utilise")
+  ipOrigine         String?  @map("ip_origine") @db.VarChar(45)
+  createdAt         DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([telephone, contexte, estUtilise], map: "idx_phone_otp_actif")
+  @@index([expiresAt], map: "idx_phone_otp_expires")
+  @@map("phone_otp_codes")
+}
+
+model SystemConfig {
+  key       String   @id @db.VarChar(100)
+  value     String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@map("system_config")
+}
+
+model MfaChallenge {
+  id            String   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  utilisateurId String   @map("utilisateur_id") @db.Char(36)
+  canal         String   @db.VarChar(20)
+  codeHash      String   @map("code_hash") @db.VarChar(255)
+  sel           String   @db.VarChar(64)
+  tentatives    Int      @default(0)
+  expiresAt     DateTime @map("expires_at") @db.DateTime(3)
+  estUtilise    Boolean  @default(false) @map("est_utilise")
+  createdAt     DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  @@index([utilisateurId, canal, estUtilise], map: "idx_mfa_challenge_actif")
+  @@index([expiresAt], map: "idx_mfa_challenge_expires")
+  @@map("mfa_challenges")
 }

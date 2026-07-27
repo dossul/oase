@@ -1,4 +1,4 @@
-# OASE — Analyse critique du schéma actuel (v2) face au périmètre complet
+﻿# OASE — Analyse critique du schéma actuel (v2) face au périmètre complet
 
 > **Date :** 2026-06-17  
 > **Référence :** PRD_OASE.md, Cahier des Charges, Rapport diagnostique, maquettes 41 écrans, matrice de tests, fiche technique officielle.
@@ -30,12 +30,12 @@ Mais il ignore ou sous-modélise massivement : les 7 processus institutionnels d
 |---|---------------------|-----------:|------------------------|
 | 1 | **Architecture globale & normalisation** | 45 | Séparation ref/métier, UUID PK, FK RESTRICT, JSON pour définitions. Mais nombreux champs `VARCHAR` sans référentiel (`impot_concerne`, `secteur`, `region`, `branche_activite`, `programme_dotation`, `position_sh`). Pas de méta-modèle fonctionnel, pas de versioning générique, pas de tables `pays`, `devises`, `unites_temps`. |
 | 2 | **Authentification, IAM & sécurité** | 38 | MFA, PIN, hash mot de passe, refresh tokens présents. Aucune table `sessions`, `tentatives_connexion`, `lockout`, `devices`, `webauthn`, `password_history`, `certificats`. RBAC plat `(role, ressource, action)` sans hiérarchie, sans contexte institution, sans RLS ligne. Le chiffrement AES-256-GCM n'est matérialisé que par `mfa_secret_enc`. |
-| 3 | **Gestion des bénéficiaires & portail** | 35 | `beneficiaires` est une fiche simpliste. Pas de `contacts`, `adresses`, `representants_legaux`, `beneficiaires_effectifs`, `comptes_bancaires`, `historique_fiscal`, `relations_groupe`. Un seul `user_id` par bénéficiaire : impossible de gérer plusieurs utilisateurs internes. Pas de `preferences_notifications`. |
+| 3 | **Gestion des contribuables & portail** | 35 | `CONTRIBUABLEs` est une fiche simpliste. Pas de `contacts`, `adresses`, `representants_legaux`, `CONTRIBUABLEs_effectifs`, `comptes_bancaires`, `historique_fiscal`, `relations_groupe`. Un seul `user_id` par contribuable : impossible de gérer plusieurs utilisateurs internes. Pas de `preferences_notifications`. |
 | 4 | **Référentiel juridique MRD & SCD Type 2** | 28 | La table `bases_juridiques` tente le SCD Type 2 (`version`, `valid_from`, `valid_to`) mais `code_mesure` est `UNIQUE`, ce qui interdit physiquement plusieurs versions d'une même mesure. **Écart bloquant**. Pas de table `ref_familles_juridiques` (11 familles), `ref_impots` (27 types), `ref_textes_fondamentaux`, `articles_paragraphes`, `liens_textes`. `impot_concerne` est un `VARCHAR(100)` sans FK. |
-| 5 | **Gestion des demandes** | 42 | `demandes` couvre le minimum (référence, base juridique, bénéficiaire, montant, statut). Manquent : type de demande, priorité, canal de dépôt, montant demandé/accordé/réalisé, SLA, dates de réception/traitement, lien parent/enfant (renouvellement, modification), motif complet structuré, contentieux. Soft delete OK. |
+| 5 | **Gestion des demandes** | 42 | `demandes` couvre le minimum (référence, base juridique, contribuable, montant, statut). Manquent : type de demande, priorité, canal de dépôt, montant demandé/accordé/réalisé, SLA, dates de réception/traitement, lien parent/enfant (renouvellement, modification), motif complet structuré, contentieux. Soft delete OK. |
 | 6 | **Instruction back-office & workflow** | 44 | `workflow_templates` + `etapes_workflow` permettent un circuit linéaire. Mais `definition` JSON est opaque, non contraint. Pas de `conditions_transition`, `regles_routage`, `taches`, `commentaires_instruction`, `demandes_complement`, `remplacements_agents`, `competences_agent`, `delais_reels`. |
 | 7 | **Validation, décisions & actes administratifs** | 30 | `decisions` stocke un avis avec hash et PIN. Aucune table `actes_administratifs` : pas de numérotation officielle, pas d'acte signé, pas de signature électronique qualifiée, pas de visa/collégialité, pas de mentions légales obligatoires, pas d'enregistrement au registre des actes. |
-| 8 | **Conventions, agréments & accords de siège** | 33 | `conventions` et `accords_siege` existent mais sont pauvres. Pas de table `agrements`. Pas de `avenants`, `clauses`, `documents_convention`, `niveau_confidentialite`, `acces_convention_autorise`, `log_acces_confidentiel`, `beneficiaires_effectifs`. `conventions.regime_code` ENUM restreint. |
+| 8 | **Conventions, agréments & accords de siège** | 33 | `conventions` et `accords_siege` existent mais sont pauvres. Pas de table `agrements`. Pas de `avenants`, `clauses`, `documents_convention`, `niveau_confidentialite`, `acces_convention_autorise`, `log_acces_confidentiel`, `CONTRIBUABLEs_effectifs`. `conventions.regime_code` ENUM restreint. |
 | 9 | **Suivi actif & reporting d'engagements** | 15 | Quasi inexistant. Pas de `suivi_realisations`, `attestations_annuelles`, `visites_inspections`, `reports`, `investissements_realises`, `emplois_verifies`, `indicateurs_engagements`. Impossible de contrôler les clauses suspensives ou les engagements d'emploi/investissement. |
 | 10 | **Suivi budgétaire, fiscal & TVA** | 22 | Seul `quotas` (`total/consomme`) et un booléen `est_depense_fiscale_2024` existent. Pas de `budgets`, `credits_ouverts`, `engagements_budgetaires`, `liquidations`, `depenses_fiscales_annuelles`, `prises_en_charge_tva`, `recettes_fiscales_perdues`, `evaluations_impact`. La distinction dépenses fiscales / prises en charge TVA n'est pas modélisée. |
 | 11 | **Interopérabilité avec 8 SI** | 30 | `connecteurs` + `codes_additionnels` sont insuffisants. Seeds : seulement 5 connecteurs (SYDONIA, ETAX, SIGFIP, GUDEF, DAS) ; il en manque 3 (SIGTAS, Base DLFC, Base service gestionnaire). Pas de `logs_connecteur`, `transactions_si`, `file_attente`, `mappings_champs`, `erreurs_reconciliation`, `etats_synchronisation`, `messages SOAP/REST`. `config_auth` JSON n'est pas chiffré. |
@@ -66,8 +66,8 @@ Mais il ignore ou sous-modélise massivement : les 7 processus institutionnels d
 
 ## 4. Écarts majeurs
 
-- Pas de gestion multi-comptes/utilisateurs par bénéficiaire.
-- Pas de table `contacts`, `adresses`, `representants_legaux`, `beneficiaires_effectifs`.
+- Pas de gestion multi-comptes/utilisateurs par contribuable.
+- Pas de table `contacts`, `adresses`, `representants_legaux`, `CONTRIBUABLEs_effectifs`.
 - Pas de circuit de demande de complément ni de commentaires d'instruction structurés.
 - Pas de signatures électroniques qualifiées ni de registre des actes signés.
 - Pas de gestion des avenants et clauses des conventions.

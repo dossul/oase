@@ -1,4 +1,4 @@
-{
+﻿{
   "project": "OASE",
   "epic": "Phase A — Reconciliation Modele de Donnees",
   "description": "Reconcilier schema.prisma avec MLD v3.3 (85 tables MySQL). Verrou bloquant pour tout developpement module.",
@@ -40,7 +40,7 @@
       "type": "Feature",
       "priority": "high",
       "estimate": "8h",
-      "description": "Mettre a jour prisma/seed.ts avec 15 roles canoniques, 38 tables ref_*, 5 bases juridiques SCD2, 3 beneficiaires, 5 demandes demo",
+      "description": "Mettre a jour prisma/seed.ts avec 15 roles canoniques, 38 tables ref_*, 5 bases juridiques SCD2, 3 CONTRIBUABLEs, 5 demandes demo",
       "acceptance": ["prisma db seed execute sans erreur", "85 tables peuplees avec donnees coherentes"]
     },
     {

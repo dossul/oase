@@ -1,4 +1,4 @@
-# Audit Qualité — Document d'Analyse `ANALYSE_MLD_V3_COMPLETE.md`
+﻿# Audit Qualité — Document d'Analyse `ANALYSE_MLD_V3_COMPLETE.md`
 
 **Auditeur :** Expert Documentation Technique / Architecte  
 **Date :** 17 juin 2026  
@@ -43,7 +43,7 @@
 - Statuts de demande alignés conceptuellement avec `04_STATUTS_ET_TRANSITIONS.md`.
 
 ### Incohérences détectées (−9)
-1. **Conflit de nommage des rôles RBAC** — `04_STATUTS_ET_TRANSITIONS.md` cite les rôles `agent_otr`, `agent_dgbf`, `agent_dgtcp`, `agence`. La base réelle (`ref_roles`) définit `agent_ci`, `agent_agence`, `decideur`, `auditeur`, `admin_si`, `beneficiaire`. **Divergence non signalée** par l'analyse.
+1. **Conflit de nommage des rôles RBAC** — `04_STATUTS_ET_TRANSITIONS.md` cite les rôles `agent_otr`, `agent_dgbf`, `agent_dgtcp`, `agence`. La base réelle (`ref_roles`) définit `agent_ci`, `agent_agence`, `decideur`, `auditeur`, `admin_si`, `CONTRIBUABLE`. **Divergence non signalée** par l'analyse.
 2. **Statuts sous-décrits** — L'analyse résume « 8 statuts : brouillon → soumis → en instruction → approuvé/rejeté » en omettant `action_requise`, `expire`, `archive` pourtant seedés et présents dans la maquette (badges couleur).
 3. **Aucun lien avec les 41 écrans** — La maquette Vue 3 (`01_INVENTAIRE_ECRANS.md`) définit 41 écrans avec leurs endpoints ; l'analyse n'établit aucune correspondance tables ↔ écrans.
 4. **Règles de blocage métier absentes** — `04` définit `bloc-01..05` (dette fiscale, anomalie critique, quota dépassé, mesure expirée, pièces manquantes). L'analyse ne les rattache pas aux tables concernées.

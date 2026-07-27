@@ -1,4 +1,4 @@
-# OASE-27 — Inventaire exhaustif des écrans
+﻿# OASE-27 — Inventaire exhaustif des écrans
 
 > **Issue Plane :** OASE-27  
 > **Date :** 2026-06-16  
@@ -11,7 +11,7 @@
 | Espace | Écrans | Personas |
 |---|:---:|---|
 | Authentification | 3 | Tous |
-| Portail bénéficiaire (P1) | 7 | Opérateur économique |
+| Portail contribuable (P1) | 7 | Opérateur économique |
 | Back-office instruction (P2) | 9 | Agent CI / CDDI / DGBF / Décideur |
 | Agences de promotion (P3) | 4 | Agence (API, ZATP…) |
 | Décideurs stratégiques (P4) | 5 | UPF / MEF / OIIL |
@@ -46,49 +46,49 @@
 
 ---
 
-## B — Portail bénéficiaire P1 (7 écrans)
+## B — Portail contribuable P1 (7 écrans)
 
-### B-01 · Dashboard bénéficiaire
-- **Route :** `/beneficiaire`  
-- **Composant :** `BeneficiaireHomeView.vue`  
+### B-01 · Dashboard contribuable
+- **Route :** `/CONTRIBUABLE`  
+- **Composant :** `CONTRIBUABLEHomeView.vue`  
 - **Données affichées :** nb demandes actives, statut fiscal OTR, demandes récentes, alertes échéances  
-- **API :** `GET /beneficiaires/me` · `GET /demandes?limit=5`
+- **API :** `GET /CONTRIBUABLEs/me` · `GET /demandes?limit=5`
 
 ### B-02 · Liste des demandes
-- **Route :** `/beneficiaire/demandes`  
+- **Route :** `/CONTRIBUABLE/demandes`  
 - **Composant :** `DemandesListView.vue`  
 - **Fonctions :** filtre par statut/date/texte, pagination, télécharger attestation  
 - **API :** `GET /demandes`
 
 ### B-03 · Détail d'une demande
-- **Route :** `/beneficiaire/demandes/:id`  
+- **Route :** `/CONTRIBUABLE/demandes/:id`  
 - **Composant :** `DemandeDetailView.vue`  
 - **Données :** référence, statut (badge couleur), étapes workflow, pièces, historique, attestation si approuvée  
 - **API :** `GET /demandes/:id`
 
 ### B-04 · Nouvelle demande — Étape 1 : choix base juridique
-- **Route :** `/beneficiaire/demandes/new/step1`  
+- **Route :** `/CONTRIBUABLE/demandes/new/step1`  
 - **Composant :** `NouvelleDemandeStep1View.vue`  
 - **Fonctions :** recherche dans référentiel MRD (filtre type impôt / nature), sélection mesure, affichage description  
 - **API :** `GET /bases-juridiques?search=&type=&nature=`
 
 ### B-05 · Nouvelle demande — Étape 2 : informations + pièces
-- **Route :** `/beneficiaire/demandes/new/step2`  
+- **Route :** `/CONTRIBUABLE/demandes/new/step2`  
 - **Composant :** `NouvelleDemandeStep2View.vue`  
 - **Fonctions :** montant estimé, date échéance souhaitée, upload pièces rang 1 (obligatoires), upload pièces rang 2 (optionnelles), barre de progression  
 - **API :** `POST /pieces-jointes/upload` · `POST /demandes`
 
 ### B-06 · Nouvelle demande — Étape 3 : récapitulatif + soumission
-- **Route :** `/beneficiaire/demandes/new/step3`  
+- **Route :** `/CONTRIBUABLE/demandes/new/step3`  
 - **Composant :** `NouvelleDemandeStep3View.vue`  
 - **Fonctions :** récapitulatif complet, case à cocher déclaration sur l'honneur, bouton Soumettre  
 - **API :** `POST /demandes/:id/soumettre`
 
-### B-07 · Profil bénéficiaire
-- **Route :** `/beneficiaire/profil`  
-- **Composant :** `ProfilBeneficiaireView.vue`  
+### B-07 · Profil contribuable
+- **Route :** `/CONTRIBUABLE/profil`  
+- **Composant :** `ProfilCONTRIBUABLEView.vue`  
 - **Fonctions :** infos entreprise, NIF, RCCM, statut fiscal (badge), modifier contacts, changer PIN  
-- **API :** `GET /beneficiaires/me` · `PATCH /beneficiaires/me` · `POST /auth/pin/set`
+- **API :** `GET /CONTRIBUABLEs/me` · `PATCH /CONTRIBUABLEs/me` · `POST /auth/pin/set`
 
 ---
 
@@ -247,7 +247,7 @@
 ### G-02 · Catalogue mesures
 - **Route :** `/catalogue`  
 - **Composant :** `CatalogueView.vue`  
-- **Fonctions :** liste publique des bases juridiques actives, filtre par type/nature, sans données bénéficiaires  
+- **Fonctions :** liste publique des bases juridiques actives, filtre par type/nature, sans données contribuables  
 - **API :** `GET /bases-juridiques/public`
 
 ### G-03 · Vérification attestation

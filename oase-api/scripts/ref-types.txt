@@ -19,7 +19,7 @@
   inactif : Inactif
   suspendu : Suspendu
 
-=== ref_types_beneficiaire ===
+=== ref_types_contribuable ===
   autre : Autre
   entreprise_privee : Entreprise privee
   entreprises_et_menages : Entreprises et menages

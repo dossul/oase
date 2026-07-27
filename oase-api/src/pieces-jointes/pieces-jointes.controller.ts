@@ -60,7 +60,17 @@ export class PiecesJointesController {
   }
 
   @Patch(':pieceId/valider')
-  @Roles(Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.ADMIN_SI)
+  @Roles(
+    Role.AGENT_CI,
+    Role.AGENT_CDDI,
+    Role.AGENT_DGBF,
+    Role.AGENT_AGENCE,
+    Role.AGENT_MAE,
+    Role.AGENT_DGMG,
+    Role.AGENT_MINISTERE,
+    Role.DECIDEUR,
+    Role.ADMIN_SI,
+  )
   valider(
     @CurrentUser() user: AuthUser,
     @Param('pieceId', ParseUUIDPipe) pieceId: string,
@@ -71,7 +81,17 @@ export class PiecesJointesController {
   }
 
   @Patch(':pieceId/invalider')
-  @Roles(Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.ADMIN_SI)
+  @Roles(
+    Role.AGENT_CI,
+    Role.AGENT_CDDI,
+    Role.AGENT_DGBF,
+    Role.AGENT_AGENCE,
+    Role.AGENT_MAE,
+    Role.AGENT_DGMG,
+    Role.AGENT_MINISTERE,
+    Role.DECIDEUR,
+    Role.ADMIN_SI,
+  )
   invalider(
     @CurrentUser() user: AuthUser,
     @Param('pieceId', ParseUUIDPipe) pieceId: string,

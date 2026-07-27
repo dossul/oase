@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise');
 const tables = [
   'bases_juridiques',
   'base_juridique_versions',
-  'beneficiaires',
+  'contribuables',
   'demandes',
   'institutions',
   'utilisateurs',

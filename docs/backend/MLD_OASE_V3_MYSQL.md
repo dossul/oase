@@ -1,4 +1,4 @@
-# OASE — Modèle Logique de Données MySQL 8/9 (MLD v3)
+﻿# OASE — Modèle Logique de Données MySQL 8/9 (MLD v3)
 
 > **Objectif :** couvrir 100 % du périmètre fonctionnel OASE avec un schéma relationnel corrigé, normalisé et prêt à exécuter sous MySQL 8/9.
 >
@@ -50,7 +50,7 @@ CREATE TABLE ref_statuts_utilisateur (
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE ref_types_beneficiaire (
+CREATE TABLE ref_types_CONTRIBUABLE (
   code VARCHAR(50) PRIMARY KEY,
   libelle VARCHAR(200) NOT NULL,
   description TEXT,
@@ -459,7 +459,7 @@ CREATE TABLE base_juridique_versions (
   mode_instruction_code VARCHAR(50) NOT NULL DEFAULT 'manuel',
   objectif_type VARCHAR(50) DEFAULT NULL,
   branche_activite VARCHAR(100) DEFAULT NULL,
-  type_beneficiaire_cible VARCHAR(100) DEFAULT NULL,
+  type_CONTRIBUABLE_cible VARCHAR(100) DEFAULT NULL,
   est_depense_fiscale_2024 TINYINT(1) NOT NULL DEFAULT 0,
   est_evaluee_2024 TINYINT(1) NOT NULL DEFAULT 0,
   donnees_disponibles TINYINT(1) NOT NULL DEFAULT 0,
@@ -623,19 +623,19 @@ CREATE TABLE base_juridique_documents (
 
 ---
 
-## 4. Bénéficiaires et conventions
+## 4. contribuables et conventions
 
 ```sql
 -- ============================================================
--- 4. BENEFICIAIRES ET CONVENTIONS
+-- 4. CONTRIBUABLES ET CONVENTIONS
 -- ============================================================
 
-CREATE TABLE beneficiaires (
+CREATE TABLE CONTRIBUABLEs (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
   raison_sociale VARCHAR(200) NOT NULL,
   nif VARCHAR(20) NOT NULL UNIQUE,
   rccm VARCHAR(30) DEFAULT NULL,
-  type_beneficiaire_code VARCHAR(50) NOT NULL,
+  type_CONTRIBUABLE_code VARCHAR(50) NOT NULL,
   statut_fiscal_code VARCHAR(50) NOT NULL DEFAULT 'inconnu',
   secteur VARCHAR(100) DEFAULT NULL,
   region VARCHAR(100) DEFAULT NULL,
@@ -647,11 +647,11 @@ CREATE TABLE beneficiaires (
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   INDEX idx_nif (nif),
-  INDEX idx_type_beneficiaire_code (type_beneficiaire_code),
+  INDEX idx_type_CONTRIBUABLE_code (type_CONTRIBUABLE_code),
   INDEX idx_statut_fiscal_code (statut_fiscal_code),
   INDEX idx_accord_siege_id (accord_siege_id),
   FOREIGN KEY (accord_siege_id) REFERENCES accords_siege(id) ON DELETE SET NULL,
-  FOREIGN KEY (type_beneficiaire_code) REFERENCES ref_types_beneficiaire(code) ON DELETE RESTRICT,
+  FOREIGN KEY (type_CONTRIBUABLE_code) REFERENCES ref_types_CONTRIBUABLE(code) ON DELETE RESTRICT,
   FOREIGN KEY (statut_fiscal_code) REFERENCES ref_statuts_fiscal(code) ON DELETE RESTRICT,
   FOREIGN KEY (user_id) REFERENCES utilisateurs(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -659,7 +659,7 @@ CREATE TABLE beneficiaires (
 CREATE TABLE conventions (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
   reference VARCHAR(30) NOT NULL UNIQUE,
-  beneficiaire_id CHAR(36) NOT NULL,
+  CONTRIBUABLE_id CHAR(36) NOT NULL,
   base_juridique_version_id CHAR(36) DEFAULT NULL,
   accord_siege_id CHAR(36) DEFAULT NULL,
   regime_code VARCHAR(50) NOT NULL,
@@ -673,12 +673,12 @@ CREATE TABLE conventions (
   objet TEXT DEFAULT NULL,
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  INDEX idx_beneficiaire_id (beneficiaire_id),
+  INDEX idx_CONTRIBUABLE_id (CONTRIBUABLE_id),
   INDEX idx_base_juridique_version_id (base_juridique_version_id),
   INDEX idx_accord_siege_id (accord_siege_id),
   INDEX idx_statut_code (statut_code),
   INDEX idx_date_fin (date_fin),
-  FOREIGN KEY (beneficiaire_id) REFERENCES beneficiaires(id) ON DELETE RESTRICT,
+  FOREIGN KEY (CONTRIBUABLE_id) REFERENCES CONTRIBUABLEs(id) ON DELETE RESTRICT,
   FOREIGN KEY (base_juridique_version_id) REFERENCES base_juridique_versions(id) ON DELETE SET NULL,
   FOREIGN KEY (accord_siege_id) REFERENCES accords_siege(id) ON DELETE SET NULL,
   FOREIGN KEY (regime_code) REFERENCES ref_regimes_convention(code) ON DELETE RESTRICT,
@@ -701,25 +701,25 @@ CREATE TABLE convention_engagements (
   FOREIGN KEY (convention_id) REFERENCES conventions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE beneficiaire_historique_fiscal (
+CREATE TABLE CONTRIBUABLE_historique_fiscal (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-  beneficiaire_id CHAR(36) NOT NULL,
+  CONTRIBUABLE_id CHAR(36) NOT NULL,
   statut_fiscal_code VARCHAR(50) NOT NULL,
   date_debut DATE NOT NULL,
   date_fin DATE DEFAULT NULL,
   source VARCHAR(100) DEFAULT NULL,
   connecteur_code VARCHAR(50) DEFAULT NULL,
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  INDEX idx_beneficiaire_id (beneficiaire_id),
+  INDEX idx_CONTRIBUABLE_id (CONTRIBUABLE_id),
   INDEX idx_statut_fiscal_code (statut_fiscal_code),
-  FOREIGN KEY (beneficiaire_id) REFERENCES beneficiaires(id) ON DELETE CASCADE,
+  FOREIGN KEY (CONTRIBUABLE_id) REFERENCES CONTRIBUABLEs(id) ON DELETE CASCADE,
   FOREIGN KEY (statut_fiscal_code) REFERENCES ref_statuts_fiscal(code) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE agrements (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
   reference VARCHAR(30) NOT NULL UNIQUE,
-  beneficiaire_id CHAR(36) NOT NULL,
+  CONTRIBUABLE_id CHAR(36) NOT NULL,
   type_agrement_code VARCHAR(50) NOT NULL,
   base_juridique_version_id CHAR(36) DEFAULT NULL,
   regime_code VARCHAR(50) DEFAULT NULL,
@@ -732,11 +732,11 @@ CREATE TABLE agrements (
   hash_document CHAR(64) DEFAULT NULL,
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  INDEX idx_beneficiaire_id (beneficiaire_id),
+  INDEX idx_CONTRIBUABLE_id (CONTRIBUABLE_id),
   INDEX idx_type_agrement_code (type_agrement_code),
   INDEX idx_base_juridique_version_id (base_juridique_version_id),
   INDEX idx_statut_code (statut_code),
-  FOREIGN KEY (beneficiaire_id) REFERENCES beneficiaires(id) ON DELETE RESTRICT,
+  FOREIGN KEY (CONTRIBUABLE_id) REFERENCES CONTRIBUABLEs(id) ON DELETE RESTRICT,
   FOREIGN KEY (type_agrement_code) REFERENCES ref_types_agrement(code) ON DELETE RESTRICT,
   FOREIGN KEY (base_juridique_version_id) REFERENCES base_juridique_versions(id) ON DELETE SET NULL,
   FOREIGN KEY (regime_code) REFERENCES ref_regimes_convention(code) ON DELETE SET NULL,
@@ -744,17 +744,17 @@ CREATE TABLE agrements (
   CONSTRAINT chk_agrements_dates CHECK (date_fin > date_debut)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE agrement_beneficiaires (
+CREATE TABLE agrement_CONTRIBUABLEs (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
   agrement_id CHAR(36) NOT NULL,
-  beneficiaire_id CHAR(36) NOT NULL,
+  CONTRIBUABLE_id CHAR(36) NOT NULL,
   role VARCHAR(50) DEFAULT NULL,
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  UNIQUE KEY uk_agrement_beneficiaire (agrement_id, beneficiaire_id),
+  UNIQUE KEY uk_agrement_CONTRIBUABLE (agrement_id, CONTRIBUABLE_id),
   INDEX idx_agrement_id (agrement_id),
-  INDEX idx_beneficiaire_id (beneficiaire_id),
+  INDEX idx_CONTRIBUABLE_id (CONTRIBUABLE_id),
   FOREIGN KEY (agrement_id) REFERENCES agrements(id) ON DELETE CASCADE,
-  FOREIGN KEY (beneficiaire_id) REFERENCES beneficiaires(id) ON DELETE CASCADE
+  FOREIGN KEY (CONTRIBUABLE_id) REFERENCES CONTRIBUABLEs(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
@@ -771,7 +771,7 @@ CREATE TABLE demandes (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
   reference VARCHAR(20) NOT NULL UNIQUE,
   base_juridique_version_id CHAR(36) NOT NULL,
-  beneficiaire_id CHAR(36) NOT NULL,
+  CONTRIBUABLE_id CHAR(36) NOT NULL,
   convention_id CHAR(36) DEFAULT NULL,
   instructeur_id CHAR(36) DEFAULT NULL,
   statut_code VARCHAR(50) NOT NULL DEFAULT 'brouillon',
@@ -791,7 +791,7 @@ CREATE TABLE demandes (
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   deleted_at DATETIME(3) DEFAULT NULL,
   INDEX idx_reference (reference),
-  INDEX idx_beneficiaire_id (beneficiaire_id),
+  INDEX idx_CONTRIBUABLE_id (CONTRIBUABLE_id),
   INDEX idx_instructeur_id (instructeur_id),
   INDEX idx_statut_code (statut_code),
   INDEX idx_base_juridique_version_id (base_juridique_version_id),
@@ -800,7 +800,7 @@ CREATE TABLE demandes (
   INDEX idx_date_echeance (date_echeance),
   INDEX idx_date_archivage (date_archivage),
   FOREIGN KEY (base_juridique_version_id) REFERENCES base_juridique_versions(id) ON DELETE RESTRICT,
-  FOREIGN KEY (beneficiaire_id) REFERENCES beneficiaires(id) ON DELETE RESTRICT,
+  FOREIGN KEY (CONTRIBUABLE_id) REFERENCES CONTRIBUABLEs(id) ON DELETE RESTRICT,
   FOREIGN KEY (convention_id) REFERENCES conventions(id) ON DELETE SET NULL,
   FOREIGN KEY (instructeur_id) REFERENCES utilisateurs(id) ON DELETE SET NULL,
   FOREIGN KEY (statut_code) REFERENCES ref_statuts_demande(code) ON DELETE RESTRICT,
@@ -989,7 +989,7 @@ CREATE TABLE actes (
   decision_id CHAR(36) DEFAULT NULL,
   type_code VARCHAR(50) NOT NULL,
   reference VARCHAR(50) NOT NULL UNIQUE,
-  beneficiaire_id CHAR(36) NOT NULL,
+  CONTRIBUABLE_id CHAR(36) NOT NULL,
   montant_fcfa BIGINT DEFAULT NULL,
   date_effet DATE NOT NULL,
   document_url VARCHAR(500) NOT NULL,
@@ -1003,13 +1003,13 @@ CREATE TABLE actes (
   INDEX idx_demande_id (demande_id),
   INDEX idx_decision_id (decision_id),
   INDEX idx_type_code (type_code),
-  INDEX idx_beneficiaire_id (beneficiaire_id),
+  INDEX idx_CONTRIBUABLE_id (CONTRIBUABLE_id),
   INDEX idx_qr_code_hash (qr_code_hash),
   INDEX idx_reference (reference),
   FOREIGN KEY (demande_id) REFERENCES demandes(id) ON DELETE CASCADE,
   FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE SET NULL,
   FOREIGN KEY (type_code) REFERENCES ref_types_acte(code) ON DELETE RESTRICT,
-  FOREIGN KEY (beneficiaire_id) REFERENCES beneficiaires(id) ON DELETE RESTRICT
+  FOREIGN KEY (CONTRIBUABLE_id) REFERENCES CONTRIBUABLEs(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
@@ -1025,7 +1025,7 @@ CREATE TABLE actes (
 CREATE TABLE quotas (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
   base_juridique_version_id CHAR(36) NOT NULL,
-  beneficiaire_id CHAR(36) DEFAULT NULL,
+  CONTRIBUABLE_id CHAR(36) DEFAULT NULL,
   convention_id CHAR(36) DEFAULT NULL,
   exercice_annuel INT DEFAULT NULL,
   type_quota_code VARCHAR(50) NOT NULL,
@@ -1038,12 +1038,12 @@ CREATE TABLE quotas (
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   INDEX idx_base_juridique_version_id (base_juridique_version_id),
-  INDEX idx_beneficiaire_id (beneficiaire_id),
+  INDEX idx_CONTRIBUABLE_id (CONTRIBUABLE_id),
   INDEX idx_convention_id (convention_id),
   INDEX idx_exercice_annuel (exercice_annuel),
   INDEX idx_type_quota_code (type_quota_code),
   FOREIGN KEY (base_juridique_version_id) REFERENCES base_juridique_versions(id) ON DELETE CASCADE,
-  FOREIGN KEY (beneficiaire_id) REFERENCES beneficiaires(id) ON DELETE SET NULL,
+  FOREIGN KEY (CONTRIBUABLE_id) REFERENCES CONTRIBUABLEs(id) ON DELETE SET NULL,
   FOREIGN KEY (convention_id) REFERENCES conventions(id) ON DELETE SET NULL,
   FOREIGN KEY (type_quota_code) REFERENCES ref_types_quota(code) ON DELETE RESTRICT,
   FOREIGN KEY (unite_code) REFERENCES ref_unites_quota(code) ON DELETE RESTRICT,
@@ -1365,7 +1365,7 @@ CREATE TABLE reporting_aggregats (
   type_texte_1 VARCHAR(100) DEFAULT NULL,
   impot_concerne VARCHAR(100) DEFAULT NULL,
   nature_mesure_code VARCHAR(50) DEFAULT NULL,
-  type_beneficiaire_code VARCHAR(50) DEFAULT NULL,
+  type_CONTRIBUABLE_code VARCHAR(50) DEFAULT NULL,
   regime_code VARCHAR(50) DEFAULT NULL,
   region VARCHAR(100) DEFAULT NULL,
   secteur VARCHAR(100) DEFAULT NULL,
@@ -1385,7 +1385,7 @@ CREATE TABLE reporting_aggregats (
   INDEX idx_nature_mesure_code (nature_mesure_code),
   INDEX idx_est_anonymise (est_anonymise),
   FOREIGN KEY (nature_mesure_code) REFERENCES ref_natures_mesure(code) ON DELETE SET NULL,
-  FOREIGN KEY (type_beneficiaire_code) REFERENCES ref_types_beneficiaire(code) ON DELETE SET NULL,
+  FOREIGN KEY (type_CONTRIBUABLE_code) REFERENCES ref_types_CONTRIBUABLE(code) ON DELETE SET NULL,
   FOREIGN KEY (regime_code) REFERENCES ref_regimes_convention(code) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1565,7 +1565,7 @@ CREATE TABLE push_tokens (
 
 -- Index composites pour les requetes frequentes metier
 CREATE INDEX idx_demandes_statut_created ON demandes(statut_code, created_at);
-CREATE INDEX idx_demandes_beneficiaire_statut ON demandes(beneficiaire_id, statut_code);
+CREATE INDEX idx_demandes_CONTRIBUABLE_statut ON demandes(CONTRIBUABLE_id, statut_code);
 CREATE INDEX idx_pieces_jointes_demande_rang ON pieces_jointes(demande_id, rang_code);
 CREATE INDEX idx_decisions_demande_type ON decisions(demande_id, type_code);
 CREATE INDEX idx_actes_demande_type ON actes(demande_id, type_code);
@@ -1610,7 +1610,7 @@ SELECT
 FROM demandes d
 JOIN base_juridique_versions bjv ON bjv.id = d.base_juridique_version_id
 JOIN bases_juridiques bj ON bj.id = bjv.base_juridique_id
-JOIN beneficiaires b ON b.id = d.beneficiaire_id
+JOIN CONTRIBUABLEs b ON b.id = d.CONTRIBUABLE_id
 LEFT JOIN utilisateurs u ON u.id = d.instructeur_id
 WHERE d.statut_code = 'en_instruction';
 
@@ -1621,15 +1621,15 @@ SELECT
   bjv.type_texte_1,
   bjv.impot_concerne,
   bjv.nature_mesure_code,
-  b.type_beneficiaire_code,
+  b.type_CONTRIBUABLE_code,
   COUNT(d.id) AS nb_demandes,
   SUM(CASE WHEN d.statut_code = 'approuve' THEN 1 ELSE 0 END) AS nb_approuvees,
   SUM(CASE WHEN d.statut_code = 'approuve' THEN d.montant_fcfa ELSE 0 END) AS montant_approuve_fcfa
 FROM demandes d
 JOIN base_juridique_versions bjv ON bjv.id = d.base_juridique_version_id
-JOIN beneficiaires b ON b.id = d.beneficiaire_id
+JOIN CONTRIBUABLEs b ON b.id = d.CONTRIBUABLE_id
 WHERE d.statut_code NOT IN ('brouillon', 'archive')
-GROUP BY annee, bjv.type_texte_1, bjv.impot_concerne, bjv.nature_mesure_code, b.type_beneficiaire_code;
+GROUP BY annee, bjv.type_texte_1, bjv.impot_concerne, bjv.nature_mesure_code, b.type_CONTRIBUABLE_code;
 
 -- Vue des alertes quotas
 CREATE OR REPLACE VIEW v_alertes_quotas AS
@@ -1676,7 +1676,7 @@ INSERT INTO ref_statuts_utilisateur (code, libelle, ordre, couleur) VALUES
 ('inactif','Inactif',2,'#6b7280'),
 ('suspendu','Suspendu',3,'#dc2626');
 
-INSERT INTO ref_types_beneficiaire (code, libelle, ordre, couleur) VALUES
+INSERT INTO ref_types_CONTRIBUABLE (code, libelle, ordre, couleur) VALUES
 ('entreprise_privee','Entreprise privee',1,'#2563eb'),
 ('organisme_public','Organisme public',2,'#059669'),
 ('ong','ONG',3,'#d97706'),
@@ -1757,7 +1757,7 @@ INSERT INTO ref_rangs_piece (code, libelle, ordre, couleur) VALUES
 
 INSERT INTO ref_types_quota (code, libelle, ordre, couleur) VALUES
 ('global_mesure','Global par mesure',1,'#2563eb'),
-('par_beneficiaire','Par beneficiaire',2,'#059669'),
+('par_CONTRIBUABLE','Par CONTRIBUABLE',2,'#059669'),
 ('par_convention','Par convention',3,'#d97706'),
 ('annuel','Annuel',4,'#7c3aed');
 
@@ -1930,14 +1930,14 @@ INSERT INTO utilisateurs (id, nom, prenom, email, password_hash, role, instituti
 ('user-003','Kodjo','Komlan','komlan.kodjo@api.tg','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYA.qGZvKG6G','agent_agence','inst-005','actif',1,'$2b$12$fakehashforpin1234567890123456789012345678901234'),
 ('user-004','Koffi','Amevi','amevi.koffi@mef.tg','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYA.qGZvKG6G','decideur','inst-006','actif',1,'$2b$12$fakehashforpin1234567890123456789012345678901234'),
 ('user-005','Adjovi','Paul','paul.adjovi@igf.tg','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYA.qGZvKG6G','auditeur','inst-007','actif',1,'$2b$12$fakehashforpin1234567890123456789012345678901234'),
-('user-006','Amele','Kossiwa','kossiwa.amele@texlome.tg','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYA.qGZvKG6G','beneficiaire','inst-001','actif',0,NULL),
-('user-007','Kossi','Amouzou','amouzou.kossi@togo-farms.tg','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYA.qGZvKG6G','beneficiaire','inst-001','actif',0,NULL);
+('user-006','Amele','Kossiwa','kossiwa.amele@texlome.tg','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYA.qGZvKG6G','CONTRIBUABLE','inst-001','actif',0,NULL),
+('user-007','Kossi','Amouzou','amouzou.kossi@togo-farms.tg','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYA.qGZvKG6G','CONTRIBUABLE','inst-001','actif',0,NULL);
 
 INSERT INTO accords_siege (id, institution, type_institution_code, texte_fondateur, date_signature, est_actif) VALUES
 ('as-001','PNUD Togo','onu','Accord de siege ONU-Togo','1968-05-25',1),
 ('as-002','Ambassade de France','ambassade','Accord bilateral France-Togo','2010-01-01',1);
 
-INSERT INTO beneficiaires (id, raison_sociale, nif, rccm, type_beneficiaire_code, statut_fiscal_code, secteur, region, email_contact, telephone, accord_siege_id, user_id) VALUES
+INSERT INTO CONTRIBUABLEs (id, raison_sociale, nif, rccm, type_CONTRIBUABLE_code, statut_fiscal_code, secteur, region, email_contact, telephone, accord_siege_id, user_id) VALUES
 ('ben-001','TEXLOME SA — Textiles de Lome','TG-LOM-2018-B-0042','TG-LME-2018-0042','entreprise_privee','conforme','Industrie textile','Maritime','contact@texlome.tg','+228 90 12 34 56',NULL,'user-006'),
 ('ben-002','TOGOFARMS SARL','TG-KAR-2020-A-0115','TG-KAR-2020-0115','entreprise_privee','conforme','Agriculture','Kara','info@togofarms.tg','+228 90 23 45 67',NULL,'user-007'),
 ('ben-003','PNUD Togo','TG-INT-ONU-PNUD','','organisation_internationale','conforme','Developpement','Maritime','togo.office@undp.org','+228 22 21 70 00','as-001',NULL);
@@ -1961,7 +1961,7 @@ INSERT INTO codes_additionnels (id, base_juridique_version_id, code, source_code
 ('ca-002','bjv-002','DDI-AGRI-015','sydonia',1),
 ('ca-003','bjv-004','IS-SIEGE-ONU-001','etax',1);
 
-INSERT INTO demandes (id, reference, base_juridique_version_id, beneficiaire_id, statut_code, date_depot, date_echeance, montant_fcfa, secteur, created_at) VALUES
+INSERT INTO demandes (id, reference, base_juridique_version_id, CONTRIBUABLE_id, statut_code, date_depot, date_echeance, montant_fcfa, secteur, created_at) VALUES
 ('dem-001','OASE-2024-000001','bjv-001','ben-001','approuve','2024-09-10 08:30:00.000','2025-09-10',15000000,'Industrie textile','2024-09-10 08:30:00.000'),
 ('dem-002','OASE-2024-000002','bjv-002','ben-002','approuve','2024-10-05 09:15:00.000','2025-10-05',8200000,'Agriculture','2024-10-05 09:15:00.000'),
 ('dem-003','OASE-2025-000001','bjv-004','ben-003','approuve','2025-03-20 10:00:00.000','2026-03-20',25000000,'Developpement','2025-03-20 10:00:00.000'),
@@ -1986,7 +1986,7 @@ INSERT INTO connecteurs (id, nom, code_systeme, institution_id, statut_code, end
 ('conn-005','Base DLFC (DAS)','DAS','inst-003','inactif','https://das.dgbf.fin.tg/soap','{"mock":true}',0,0.00);
 
 INSERT INTO audit_logs (id, horodatage, utilisateur_id, role_au_moment, action, entite, entite_id, demande_id, nouvelle_valeur, empreinte_sha256) VALUES
-('audit-001','2024-09-10 08:30:00.000','user-006','beneficiaire','SOUMETTRE_DEMANDE','demandes','dem-001','dem-001','{"statut":"soumis"}','a1b2c3d4e5f6789012345678901234567890abcd1234567890abcdef12345678'),
+('audit-001','2024-09-10 08:30:00.000','user-006','CONTRIBUABLE','SOUMETTRE_DEMANDE','demandes','dem-001','dem-001','{"statut":"soumis"}','a1b2c3d4e5f6789012345678901234567890abcd1234567890abcdef12345678'),
 ('audit-002','2024-09-12 10:15:00.000','user-002','agent_ci','VALIDER_ETAPE','demande_workflow_etapes','dwe-001','dem-001','{"statut":"valide"}','b2c3d4e5f6789012345678901234567890abcd1234567890abcdef1234567891'),
 ('audit-003','2024-09-15 14:00:00.000','user-004','decideur','APPROUVER_DEMANDE','demandes','dem-001','dem-001','{"statut":"approuve","montant":15000000}','c3d4e5f6789012345678901234567890abcd1234567890abcdef1234567892');
 
@@ -1995,9 +1995,9 @@ INSERT INTO roles_permissions (role, ressource, action, perimetre) VALUES
 ('admin_si','utilisateurs','read',NULL),
 ('admin_si','utilisateurs','update',NULL),
 ('admin_si','utilisateurs','delete',NULL),
-('beneficiaire','demandes','create',NULL),
-('beneficiaire','demandes','read','beneficiaire_id=self'),
-('beneficiaire','demandes','update','beneficiaire_id=self'),
+('CONTRIBUABLE','demandes','create',NULL),
+('CONTRIBUABLE','demandes','read','CONTRIBUABLE_id=self'),
+('CONTRIBUABLE','demandes','update','CONTRIBUABLE_id=self'),
 ('agent_ci','demandes','read','organe_gestion_code=CI'),
 ('agent_ci','demandes','update','organe_gestion_code=CI'),
 ('agent_ci','demande_workflow_etapes','update','organe_gestion_code=CI'),

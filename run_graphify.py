@@ -68,7 +68,7 @@ print(f"  Communities: {len(communities)}")
 
 # Save graph
 from graphify.export import to_json as export_json
-export_json(G, communities, str(OUTPUT_DIR / "graph.json"))
+export_json(G, communities, str(OUTPUT_DIR / "graph.json"), force=True)
 
 # Step 4: Generate report
 print("\n[4/4] Generating report...")

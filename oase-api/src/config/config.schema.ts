@@ -12,6 +12,15 @@ export const configSchema = z.object({
   JWT_ACCESS_EXPIRATION: z.string().default('15m'),
   JWT_REFRESH_EXPIRATION: z.string().default('7d'),
   ENCRYPTION_KEY: z.string().min(16).default('change-me-in-production-encryption-key'),
+  // OTP phone verification (Lot 2)
+  OTP_TTL_SECONDS: z.coerce.number().int().positive().default(600),           // 10 min
+  OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+  OTP_LENGTH: z.coerce.number().int().min(4).max(8).default(6),
+  // DEV ONLY: include the OTP code in the /otp/request response (jamais en prod)
+  OTP_EXPOSE_CODE_IN_RESPONSE: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 export type Config = z.infer<typeof configSchema>;

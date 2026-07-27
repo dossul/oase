@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 
 test.describe('Parcours P1 -> P4 (API)', () => {
   test('P1 - API racine accessible', async ({ request }) => {
@@ -19,7 +19,7 @@ test.describe('Parcours P1 -> P4 (API)', () => {
   test('P4 - authentification API retourne reponse valide', async ({ request }) => {
     const response = await request.post('/api/v1/auth/login', {
       data: {
-        email: 'beneficiaire@oase.tg',
+        email: 'CONTRIBUABLE@oase.tg',
         password: 'Oase@2026!',
       },
     });

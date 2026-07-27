@@ -11,13 +11,13 @@ export class DashboardsController {
   constructor(private readonly service: DashboardsService) {}
 
   @Get('p4')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR)
+  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR, Role.AGENT_CONEDEF)
   async p4(@Query('dateDebut') dateDebut?: string, @Query('dateFin') dateFin?: string) {
     return this.service.kpisP4(dateDebut, dateFin);
   }
 
   @Get('p5')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR)
+  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR, Role.AUDITEUR)
   async p5(@Query('dateDebut') dateDebut?: string, @Query('dateFin') dateFin?: string) {
     return this.service.kpisP5(dateDebut, dateFin);
   }

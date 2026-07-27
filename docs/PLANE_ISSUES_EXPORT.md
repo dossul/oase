@@ -1,4 +1,4 @@
-# OASE — Issues Plane pour la Réconciliation Prisma (Phase A)
+﻿# OASE — Issues Plane pour la Réconciliation Prisma (Phase A)
 
 > **Projet :** OASE  
 > **Épopée :** Phase A — Réconciliation Modèle de Données  
@@ -125,7 +125,7 @@ Mettre à jour `prisma/seed.ts` pour inclure :
 2. 10 institutions types
 3. 38 tables de référence complètes
 4. 5 bases juridiques avec versions SCD2
-5. 3 bénéficiaires, 5 demandes démo
+5. 3 contribuables, 5 demandes démo
 6. Médiathèque (`base_juridique_documents`)
 
 **Critère d'acceptation :**

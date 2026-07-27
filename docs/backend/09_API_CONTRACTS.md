@@ -1,6 +1,6 @@
-# OASE-14 à 18 — Contrats API
+﻿# OASE-14 à 18 — Contrats API
 
-> **Issues Plane :** OASE-14 (Auth), OASE-15 (Bénéficiaire), OASE-16 (Instruction), OASE-17 (Dashboards), OASE-18 (Administration)  
+> **Issues Plane :** OASE-14 (Auth), OASE-15 (contribuable), OASE-16 (Instruction), OASE-17 (Dashboards), OASE-18 (Administration)  
 > **Date :** 2026-06-16  
 > **Sources :** OASE-8 (RBAC), OASE-9 (Architecture), OASE-10 (Modules), OASE-11 (Schéma)  
 > **Base URL :** `https://oase.mef.tg/api/v1`  
@@ -142,10 +142,10 @@ Profil et permissions de l'utilisateur courant.
 
 ---
 
-## OASE-15 — API Bénéficiaire (P1)
+## OASE-15 — API contribuable (P1)
 
-### POST `/beneficiaires`
-Créer son profil bénéficiaire.
+### POST `/CONTRIBUABLEs`
+Créer son profil contribuable.
 
 **Body**
 ```json
@@ -153,7 +153,7 @@ Créer son profil bénéficiaire.
   "raison_sociale": "TEXLOME SA",
   "nif": "TG-LOM-2018-B-0042",
   "rccm": "TG-LOM-2018-B-0042",
-  "type_beneficiaire": "entreprise_privee",
+  "type_CONTRIBUABLE": "entreprise_privee",
   "secteur": "Industrie textile",
   "region": "Maritime",
   "email_contact": "direction@texlome.tg"
@@ -168,7 +168,7 @@ Créer son profil bénéficiaire.
 
 ---
 
-### GET `/beneficiaires/me`
+### GET `/CONTRIBUABLEs/me`
 Profil + statut fiscal courant.
 
 **Réponse 200**
@@ -393,11 +393,11 @@ Détail complet d'une demande.
       "portee_categorie": "Temporaire_Phase",
       "conformite_directive_uemoa": "oui"
     },
-    "beneficiaire": {
+    "CONTRIBUABLE": {
       "raison_sociale": "TEXLOME SA",
       "nif": "TG-LOM-2018-B-0042",
       "statut_fiscal": "conforme",
-      "type_beneficiaire": "entreprise_privee"
+      "type_CONTRIBUABLE": "entreprise_privee"
     },
     "instructeur": { "nom": "Agbodjan", "prenom": "Kossi", "role": "agent_ci" },
     "montant_fcfa": 15000000,

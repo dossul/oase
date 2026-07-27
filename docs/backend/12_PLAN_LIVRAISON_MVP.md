@@ -1,4 +1,4 @@
-# OASE-24 — Plan de livraison MVP
+﻿# OASE-24 — Plan de livraison MVP
 
 > **Issue Plane :** OASE-24  
 > **Date :** 2026-06-16  
@@ -41,7 +41,7 @@
 
 | # | Tâche | Livrable | Effort |
 |---|---|---|---|
-| 2.1 | Module Beneficiaires (CRUD profil, statut fiscal E-TAX mock) | `BeneficiairesModule` | 2j |
+| 2.1 | Module CONTRIBUABLEs (CRUD profil, statut fiscal E-TAX mock) | `CONTRIBUABLEsModule` | 2j |
 | 2.2 | Module Demandes (CRUD, soumettre, cycle de vie) | `DemandesModule` | 4j |
 | 2.3 | Module GED (upload S3, validation MIME + SHA-256) | `StorageModule` | 2j |
 | 2.4 | Module Workflow (routing par type texte, étapes, transitions) | `WorkflowModule` | 3j |

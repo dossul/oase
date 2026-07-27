@@ -54,7 +54,7 @@ const enumNameMapping = {
   'RefTypeAccordSiege': 'TypeAccordSiege',
   'RefTypeActe': 'TypeActe',
   'RefTypeAgrement': 'TypeAgrement',
-  'RefTypeBeneficiaire': 'TypeBeneficiaire',
+  'RefTypeContribuable': 'TypeContribuable',
   'RefTypeDecision': 'TypeDecision',
   'RefTypeDocument': 'TypeDocument',
   'RefTypeInstitution': 'TypeInstitution',

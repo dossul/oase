@@ -1,4 +1,4 @@
-# OASE-39, 40, 41 — Use Cases métier complets
+﻿# OASE-39, 40, 41 — Use Cases métier complets
 
 > **Issues Plane :** OASE-39 (use cases), OASE-40 (cycle demande), OASE-41 (cas limites)  
 > **Date :** 2026-06-16  
@@ -11,8 +11,8 @@
 | | |
 |---|---|
 | **Acteur** | Opérateur économique (P1) |
-| **Précondition** | Authentifié · Profil bénéficiaire créé · `statut_fiscal = conforme` |
-| **Déclencheur** | Bénéficiaire clique "Nouvelle demande" |
+| **Précondition** | Authentifié · Profil contribuable créé · `statut_fiscal = conforme` |
+| **Déclencheur** | contribuable clique "Nouvelle demande" |
 | **Postcondition** | Demande créée avec statut `brouillon` puis `soumis` · Pièces jointes uploadées · Email confirmation envoyé |
 
 **Flux nominal :**

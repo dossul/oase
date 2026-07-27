@@ -1,4 +1,4 @@
-# OASE-5 — Contradictions, zones floues et points à clarifier
+﻿# OASE-5 — Contradictions, zones floues et points à clarifier
 
 > **Issue Plane :** OASE-5 (In Progress)  
 > **Date :** 2026-06-16  
@@ -138,11 +138,11 @@ OASE-4 modélise `conformite_texte_fondamental` et `conformite_directive_uemoa` 
 
 ---
 
-### C-07 ⚠️ `TypeBeneficiaire` OASE-4 ≠ `Types de bénéficiaires` MRD
+### C-07 ⚠️ `TypeCONTRIBUABLE` OASE-4 ≠ `Types de contribuables` MRD
 
 **Sévérité : MOYENNE**
 
-| OASE-4 `TypeBeneficiaire` | MRD `Types de bénéficiaires` |
+| OASE-4 `TypeCONTRIBUABLE` | MRD `Types de contribuables` |
 |---|---|
 | `entreprise_privee` | Entreprises (610) |
 | `organisme_public` | Administration publique et autres entités d'utilité publique (98) |
@@ -155,7 +155,7 @@ OASE-4 modélise `conformite_texte_fondamental` et `conformite_directive_uemoa` 
 
 La catégorie **Entreprises et ménages** (86 mesures) n'a pas d'équivalent dans OASE-4.
 
-**Décision requise :** Ajouter `entreprises_et_menages` à l'enum `TypeBeneficiaire`.
+**Décision requise :** Ajouter `entreprises_et_menages` à l'enum `TypeCONTRIBUABLE`.
 
 ---
 
@@ -227,7 +227,7 @@ Mais la MRD ne contient **aucune colonne quota**.
 
 Questions sans réponse :
 - Le quota est-il défini par mesure (ex. : enveloppe annuelle globale par code additionnel) ?
-- Ou par bénéficiaire × mesure (ex. : agrément Zone Franche avec plafond d'investissement) ?
+- Ou par contribuable × mesure (ex. : agrément Zone Franche avec plafond d'investissement) ?
 - Ou par convention individuelle ?
 - Qui saisit le quota dans OASE ? L'instructeur ? L'administrateur ?
 
@@ -291,14 +291,14 @@ OASE-4 stocke `code_additionnel_douane VARCHAR(20)` et `code_additionnel_impots 
 
 ---
 
-### Z-07 🔵 Bénéficiaires des Accords de siège : personne physique ou morale ?
+### Z-07 🔵 contribuables des Accords de siège : personne physique ou morale ?
 
 398 mesures (30,2 %) sont liées à des Accords de siège (ONU, ambassades, ONG...).  
-La table `beneficiaires` OASE-4 n'a pas de distinction **institution → accord de siège**.
+La table `CONTRIBUABLEs` OASE-4 n'a pas de distinction **institution → accord de siège**.
 
 **Zone floue :** Un accord de siège donne des droits à l'institution ET à ses employés (expatriés). Deux entités différentes peuvent bénéficier de la même mesure.
 
-**Décision requise :** Clarifier si OASE gère les bénéficiaires individuels (expatriés) ou seulement les institutions bénéficiaires. Modéliser `accord_siege_id FK NULL` dans `beneficiaires` si nécessaire.
+**Décision requise :** Clarifier si OASE gère les contribuables individuels (expatriés) ou seulement les institutions contribuables. Modéliser `accord_siege_id FK NULL` dans `CONTRIBUABLEs` si nécessaire.
 
 ---
 
@@ -380,10 +380,10 @@ CREATE INDEX idx_codes_additionnels_code ON codes_additionnels(code, source);
 | D-02 | Traitement des 274 mesures sans SI (manuel obligatoire ?) | **CRITIQUE** | OASE-11, OASE-21 |
 | D-03 | Comportement quand mesure non-conforme UEMOA (bloquer / alerter / continuer) | **HAUTE** | OASE-7, moteur règles |
 | D-04 | Format stable du `code_mesure` (MRD-YYYY-NNNN ?) | **HAUTE** | OASE-11, OASE-12 |
-| D-05 | Quota : défini par mesure, bénéficiaire, convention ou agrément ? | **HAUTE** | OASE-11 |
+| D-05 | Quota : défini par mesure, contribuable, convention ou agrément ? | **HAUTE** | OASE-11 |
 | D-06 | Versioning SCD T2 : événements déclencheurs + rétroactivité | **HAUTE** | OASE-12 |
 | D-07 | Normalisation MRD : ETL pre-import ou validation in-app ? | **MOYENNE** | OASE-12, OASE-13 |
-| D-08 | Bénéficiaires accords de siège : institution seule ou expatriés aussi ? | **MOYENNE** | OASE-11 |
+| D-08 | contribuables accords de siège : institution seule ou expatriés aussi ? | **MOYENNE** | OASE-11 |
 | D-09 | Codes additionnels multiples (N\n142) : table dédiée ou JSONB ? | **MOYENNE** | OASE-12 |
 
 ---

@@ -1,4 +1,4 @@
-# OASE — Plan QA Global (Phases 0 à 5)
+﻿# OASE — Plan QA Global (Phases 0 à 5)
 
 > **Issues Plane :** OASE-110, OASE-111, OASE-112, OASE-113, OASE-114, OASE-115
 > **Date :** 10 juillet 2026
@@ -142,7 +142,7 @@ Vérification des modules métier : demandes, décisions, workflows, pièces joi
 | Module | Endpoints | Tests unitaires | Tests e2e |
 |---|---|---|---|
 | Utilisateurs | 6 | ✅ | À faire |
-| Bénéficiaires | 5 | ✅ | À faire |
+| contribuables | 5 | ✅ | À faire |
 | Demandes | 8 | ✅ | À faire |
 | Décisions | 4 | ✅ | À faire |
 | Actes | 3 | ✅ | À faire |

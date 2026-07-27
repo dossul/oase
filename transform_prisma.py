@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Transforme schema.prisma vers les conventions OASE :
 - modèles PascalCase (singulier) avec @@map(nom_table_snake_case)
@@ -16,7 +16,7 @@ BACKUP = Path("oase-api/prisma/schema.prisma.bak")
 MODEL_MAP: dict[str, str] = {
     "accords_siege": "AccordSiege",
     "actes": "Acte",
-    "agrement_beneficiaires": "AgrementBeneficiaire",
+    "agrement_CONTRIBUABLEs": "AgrementCONTRIBUABLE",
     "agrements": "Agrement",
     "anomalies": "Anomalie",
     "archivages": "Archivage",
@@ -24,8 +24,8 @@ MODEL_MAP: dict[str, str] = {
     "base_juridique_documents": "BaseJuridiqueDocument",
     "base_juridique_versions": "BaseJuridiqueVersion",
     "bases_juridiques": "BaseJuridique",
-    "beneficiaire_historique_fiscal": "BeneficiaireHistoriqueFiscal",
-    "beneficiaires": "Beneficiaire",
+    "CONTRIBUABLE_historique_fiscal": "CONTRIBUABLEHistoriqueFiscal",
+    "CONTRIBUABLEs": "CONTRIBUABLE",
     "codes_additionnels": "CodeAdditionnel",
     "connecteur_logs": "ConnecteurLog",
     "connecteurs": "Connecteur",
@@ -76,7 +76,7 @@ MODEL_MAP: dict[str, str] = {
     "ref_types_accord_siege": "RefTypeAccordSiege",
     "ref_types_acte": "RefTypeActe",
     "ref_types_agrement": "RefTypeAgrement",
-    "ref_types_beneficiaire": "RefTypeBeneficiaire",
+    "ref_types_CONTRIBUABLE": "RefTypeCONTRIBUABLE",
     "ref_types_decision": "RefTypeDecision",
     "ref_types_document": "RefTypeDocument",
     "ref_types_institution": "RefTypeInstitution",

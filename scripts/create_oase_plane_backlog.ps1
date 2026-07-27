@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory=$true)]
     [string]$ApiKey
 )
@@ -19,7 +19,7 @@ if (-not $STATE_BACKLOG) { throw 'Aucun etat backlog trouve pour le projet OASE.
 $items = @(
     @{ n='[Analyse] Cartographier les sources OASE'; p='urgent'; d='Lire et organiser les sources de verite OASE : kb, comprehension, elaboration_rapport et maquette. Livrable : liste des sources utiles et role de chaque dossier.' },
     @{ n='[Analyse] Generer le graphe de connaissance OASE'; p='urgent'; d='Utiliser Graphify pour produire une cartographie des concepts, modules, personas, workflows et dependances. Livrables : GRAPH_REPORT.md, graph.json et graph.html.' },
-    @{ n='[Docs] Produire le langage metier commun OASE'; p='urgent'; d='Rediger docs/backend/01_CONTEXT_OASE.md avec les definitions metier : exoneration, demande, decision, beneficiaire, base juridique, convention, agrement, quota, echeance, alerte, audit.' },
+    @{ n='[Docs] Produire le langage metier commun OASE'; p='urgent'; d='Rediger docs/backend/01_CONTEXT_OASE.md avec les definitions metier : exoneration, demande, decision, CONTRIBUABLE, base juridique, convention, agrement, quota, echeance, alerte, audit.' },
     @{ n='[Analyse] Identifier les contradictions et zones floues'; p='high'; d='Comparer PRD, TDR, cahier des charges, rapports et ecrans existants. Livrable : docs/backend/00_POINTS_A_CLARIFIER.md.' },
     @{ n='[Backend] Definir le domain model OASE'; p='urgent'; d='Definir les objets metier principaux : User, Institution, Beneficiary, ExonerationRequest, ExonerationDecision, Exoneration, LegalBasis, Document, Workflow, Alert, AuditLog.' },
     @{ n='[Workflow] Definir les statuts metier des demandes'; p='urgent'; d='Definir les statuts et transitions : brouillon, soumis, en instruction, a completer, valide, rejete, expire, archive.' },
@@ -30,9 +30,9 @@ $items = @(
     @{ n='[Database] Creer le schema Prisma initial'; p='high'; d='Creer backend/prisma/schema.prisma a partir du modele valide. Inclure utilisateurs, roles, demandes, exonerations, documents, workflows, audit et alertes.' },
     @{ n='[Database] Preparer les seeds de demonstration'; p='medium'; d='Preparer institutions, personas, roles, permissions, statuts, types d exonerations et bases juridiques de demonstration.' },
     @{ n='[API] Definir le contrat API Auth'; p='high'; d='Definir endpoints login, refresh token, logout, MFA, recuperation mot de passe et profil courant. Livrable : docs/backend/06_API_CONTRACT.md.' },
-    @{ n='[API] Definir le contrat API beneficiaire'; p='high'; d='Definir endpoints profil, depot de demande, pieces justificatives, suivi dossier, exonerations actives et telechargement documents.' },
+    @{ n='[API] Definir le contrat API CONTRIBUABLE'; p='high'; d='Definir endpoints profil, depot de demande, pieces justificatives, suivi dossier, exonerations actives et telechargement documents.' },
     @{ n='[API] Definir le contrat API instruction'; p='high'; d='Definir endpoints liste dossiers, detail dossier, verification pieces, demande de complement, validation, rejet et historique.' },
-    @{ n='[API] Definir le contrat API tableaux de bord'; p='medium'; d='Definir endpoints KPIs, filtres, agregations, exports et indicateurs par regime, secteur, impot, beneficiaire et periode.' },
+    @{ n='[API] Definir le contrat API tableaux de bord'; p='medium'; d='Definir endpoints KPIs, filtres, agregations, exports et indicateurs par regime, secteur, impot, CONTRIBUABLE et periode.' },
     @{ n='[API] Definir le contrat API administration'; p='medium'; d='Definir endpoints utilisateurs, roles, permissions, workflows, connecteurs, parametres, logs et supervision.' },
     @{ n='[Securite] Implementer authentification securisee'; p='high'; d='Implementer JWT, refresh tokens, gestion session, MFA et protection des routes avec guards NestJS.' },
     @{ n='[Audit] Journaliser les actions sensibles'; p='high'; d='Journaliser connexion, creation demande, modification dossier, validation, rejet, export, administration et acces aux documents.' },

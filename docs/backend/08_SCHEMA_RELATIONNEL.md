@@ -1,4 +1,4 @@
-# OASE-11 — Modèle relationnel (Prisma Schema)
+﻿# OASE-11 — Modèle relationnel (Prisma Schema)
 
 > **Issue Plane :** OASE-11  
 > **Date :** 2026-06-16  
@@ -15,7 +15,7 @@
 | 2 | `utilisateurs` | ~50 (demo) | Comptes P1→P7 |
 | 3 | `refresh_tokens` | dynamique | Rotation JWT |
 | 4 | `accords_siege` | ~100 | Accords ONU/ambassades/ONG |
-| 5 | `beneficiaires` | ~200 (demo) | Opérateurs économiques |
+| 5 | `CONTRIBUABLEs` | ~200 (demo) | Opérateurs économiques |
 | 6 | `bases_juridiques` | **1 316** (MRD) | Mesures dérogatoires — import MRD |
 | 7 | `codes_additionnels` | ~1 000 | Codes Sydonia / E-TAX par mesure |
 | 8 | `demandes` | ~500 (demo) | Dossiers d'exonération |
@@ -24,7 +24,7 @@
 | 11 | `etapes_workflow` | ~3 000 (demo) | Étapes par demande |
 | 12 | `decisions` | ~400 (demo) | Approbations/rejets |
 | 13 | `conventions` | ~50 (demo) | Conventions investissement/ZF/siège |
-| 14 | `quotas` | ~100 | Plafonds par mesure/bénéficiaire |
+| 14 | `quotas` | ~100 | Plafonds par mesure/contribuable |
 | 15 | `anomalies` | ~80 (demo) | Irrégularités détectées |
 | 16 | `audit_logs` | dynamique | Journal SHA-256 chaîné |
 | 17 | `connecteurs` | 5 | Sydonia, SIGTAS, SIGFiP, GUDEF, E-TAX |
@@ -46,7 +46,7 @@ institutions ──< utilisateurs
                       ├── pièces_jointes (validée_par)
                       └── notifications
 
-accords_siege ──< bénéficiaires ──< demandes ──< pièces_jointes
+accords_siege ──< contribuables ──< demandes ──< pièces_jointes
                       │                │
                       │                ├── étapes_workflow
                       │                ├── décisions
@@ -133,7 +133,7 @@ async generate(): Promise<string> {
 | Table | Index | Justification |
 |---|---|---|
 | `demandes` | `(statut)` | Filtrage principal toutes vues |
-| `demandes` | `(beneficiaire_id)` | RLS P1 |
+| `demandes` | `(CONTRIBUABLE_id)` | RLS P1 |
 | `demandes` | `(instructeur_id)` | RLS P2 |
 | `demandes` | `(base_juridique_id)` | JOIN fréquent |
 | `bases_juridiques` | `(type_texte_1)` | Routage workflow |
@@ -160,10 +160,10 @@ SELECT
   COUNT(d.id)                       AS nb_demandes,
   COUNT(d.id) FILTER (WHERE d.statut = 'approuve') AS nb_approuvees,
   SUM(d.montant_fcfa) FILTER (WHERE d.statut = 'approuve') AS montant_total_fcfa,
-  b.type_beneficiaire               AS type_beneficiaire
+  b.type_CONTRIBUABLE               AS type_CONTRIBUABLE
 FROM demandes d
   JOIN bases_juridiques bj ON bj.id = d.base_juridique_id
-  JOIN beneficiaires b     ON b.id  = d.beneficiaire_id
+  JOIN CONTRIBUABLEs b     ON b.id  = d.CONTRIBUABLE_id
 WHERE d.statut NOT IN ('brouillon', 'archive')
 GROUP BY 1, 2, 3, 4, 8;
 

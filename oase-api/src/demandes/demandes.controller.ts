@@ -124,6 +124,7 @@ export class DemandesController {
   @Roles(
     Role.AGENT_CI,
     Role.AGENT_CDDI,
+    Role.AGENT_DGBF,
     Role.AGENT_AGENCE,
     Role.AGENT_MAE,
     Role.AGENT_DGMG,

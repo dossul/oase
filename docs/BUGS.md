@@ -1,4 +1,4 @@
-# OASE - Rapport de bugs
+﻿# OASE - Rapport de bugs
 
 **Date debut :** 2026-07-10 23:30 UTC
 **Testeur :** Ulrich (interface) + Mavis (navig. Playwright)
@@ -22,7 +22,7 @@
 | # | Workflow | Status | Bugs |
 |---|---|---|---|
 | W1 | Auth (login/MFA/logout/me) | A FAIRE | - |
-| W2 | Portail beneficiaire | A FAIRE | - |
+| W2 | Portail CONTRIBUABLE | A FAIRE | - |
 | W3 | Backoffice instructeur | A FAIRE | - |
 | W4 | Decideur | A FAIRE | - |
 | W5 | Agences | A FAIRE | - |
@@ -148,7 +148,7 @@ est le même (lookup dans `DEFAULT_ROUTE_BY_ROLE`), donc la vérif API sur
 
 ---
 
-### BUG #6 - 2026-07-12 00:22 UTC - API renvoie `role: "beneficiaire"` au lieu de `"contribuable"`
+### BUG #6 - 2026-07-12 00:22 UTC - API renvoie `role: "CONTRIBUABLE"` au lieu de `"contribuable"`
 
 - **Workflow** : W1, W2 (tous)
 - **Page/Route** : API `POST /api/v1/auth/login`
@@ -158,24 +158,24 @@ est le même (lookup dans `DEFAULT_ROUTE_BY_ROLE`), donc la vérif API sur
 - **Reproduction** :
   1. `curl -X POST https://api.oase.ulia.site/api/v1/auth/login -H 'Content-Type: application/json' -d '{"email":"contribuable@gouv.tg","password":"Oase@2026!"}'`
 - **Attendu** : `user.role = "contribuable"`
-- **Obtenu** : `user.role = "beneficiaire"` (legacy)
-- **Cause racine** : Le code backend (`auth.service.ts`) lit `user.role` directement depuis la DB Prisma. La DB prod n'a pas reçu la migration 002 (`UPDATE utilisateurs SET role='contribuable' WHERE role='beneficiaire'`), donc l'API retourne l'ancien code. Le seed mis à jour n'écrase pas la prod.
+- **Obtenu** : `user.role = "CONTRIBUABLE"` (legacy)
+- **Cause racine** : Le code backend (`auth.service.ts`) lit `user.role` directement depuis la DB Prisma. La DB prod n'a pas reçu la migration 002 (`UPDATE utilisateurs SET role='contribuable' WHERE role='CONTRIBUABLE'`), donc l'API retourne l'ancien code. Le seed mis à jour n'écrase pas la prod.
 - **Impact** :
   - Côté UX : **nul** (le frontend a un fallback `?? '/portail/dashboard'` dans `getDefaultRouteForRole` qui sauve la mise)
   - Côté sécurité : **réel** — les checks type `user.role === 'contribuable'` dans `demandes.service.ts` ligne 22 court-circuitent, donnant au user un accès plus large qu'il ne devrait
 - **Solution appliquée (2026-07-12 00:35)** :
 
   **Fix 1 — Défense en profondeur dans `auth.service.ts`** (méthode privée `normalizeRole()`) :
-  - Normalise `beneficiaire → contribuable` dans le payload de réponse, dans le JWT et dans l'audit
+  - Normalise `CONTRIBUABLE → contribuable` dans le payload de réponse, dans le JWT et dans l'audit
   - Garantit que TOUT le code aval voit la valeur canonique, même si la DB n'est pas migrée
   - Marqué "à supprimer une fois la migration 002 appliquée partout"
 
   **Fix 2 — Test unitaire dans `auth.service.spec.ts`** (2 nouveaux tests) :
-  - `normalise le rôle legacy "beneficiaire" → "contribuable" (BUG #6)` : bloque la régression
+  - `normalise le rôle legacy "CONTRIBUABLE" → "contribuable" (BUG #6)` : bloque la régression
   - `laisse les rôles canoniques inchangés (admin, agent_otr, ...)` : sanity check
 
 - **Solution opérationnelle (à faire en parallèle)** :
-  - [ ] Déployer la migration 002 sur la base prod (cf. `oase-api/prisma/migrations/002_rename_beneficiaire_to_contribuable/migration_final.sql` lignes 56-58)
+  - [ ] Déployer la migration 002 sur la base prod (cf. `oase-api/prisma/migrations/002_rename_CONTRIBUABLE_to_contribuable/migration_final.sql` lignes 56-58)
   - [ ] Une fois la migration appliquée, retirer `normalizeRole()` (devenu inutile)
 
 - **Vérifications** :
@@ -231,34 +231,34 @@ Unknown argument `contribuable`. Did you mean `contribuables`?
 
 ##### BUG #7.2 — Migration Prisma 002 incomplète : TABLES renommées mais pas les COLONNES
 
-**Cause racine** : La migration `002_rename_beneficiaire_to_contribuable` a renommé les tables (`beneficiaires` → `contribuables`) mais **a oublié de renommer les colonnes** (`beneficiaire_id`, `type_beneficiaire_code`, etc.). Le `schema.prisma` attend `contribuable_id` / `type_contribuable_code` mais la DB prod a encore l'ancien nom.
+**Cause racine** : La migration `002_rename_CONTRIBUABLE_to_contribuable` a renommé les tables (`CONTRIBUABLEs` → `contribuables`) mais **a oublié de renommer les colonnes** (`CONTRIBUABLE_id`, `type_CONTRIBUABLE_code`, etc.). Le `schema.prisma` attend `contribuable_id` / `type_contribuable_code` mais la DB prod a encore l'ancien nom.
 
 **Vérification en prod** :
 ```sql
 SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS
-WHERE TABLE_SCHEMA='oase' AND COLUMN_NAME LIKE '%beneficiaire%';
+WHERE TABLE_SCHEMA='oase' AND COLUMN_NAME LIKE '%CONTRIBUABLE%';
 -- AVANT fix :
--- actes                       | beneficiaire_id
--- agrement_contribuables      | beneficiaire_id
--- base_juridique_versions     | type_beneficiaire_cible
--- contribuable_historique_fiscal | beneficiaire_id
--- contribuables               | type_beneficiaire_code
--- conventions                 | beneficiaire_id
--- demandes                    | beneficiaire_id          ← CRITIQUE pour flow demande
--- quotas                      | beneficiaire_id
--- reporting_aggregats         | type_beneficiaire_code
+-- actes                       | CONTRIBUABLE_id
+-- agrement_contribuables      | CONTRIBUABLE_id
+-- base_juridique_versions     | type_CONTRIBUABLE_cible
+-- contribuable_historique_fiscal | CONTRIBUABLE_id
+-- contribuables               | type_CONTRIBUABLE_code
+-- conventions                 | CONTRIBUABLE_id
+-- demandes                    | CONTRIBUABLE_id          ← CRITIQUE pour flow demande
+-- quotas                      | CONTRIBUABLE_id
+-- reporting_aggregats         | type_CONTRIBUABLE_code
 -- 9 colonnes, 11 index, 1 FK unique key à renommer
 ```
 
-**Fix appliqué** : Nouvelle migration `oase-api/prisma/migrations/002b_rename_columns_beneficiaire_to_contribuable/migration.sql` :
-- 9 colonnes renommées (`beneficiaire_id` → `contribuable_id`, `type_beneficiaire_*` → `type_contribuable_*`)
-- 11 index renommés (`idx_beneficiaire_id` → `idx_contribuable_id`, `ft_beneficiaires` → `ft_contribuables`, etc.)
-- 1 FK unique key renommée (`uk_agrement_beneficiaire` → `uk_agrement_contribuable`)
+**Fix appliqué** : Nouvelle migration `oase-api/prisma/migrations/002b_rename_columns_CONTRIBUABLE_to_contribuable/migration.sql` :
+- 9 colonnes renommées (`CONTRIBUABLE_id` → `contribuable_id`, `type_CONTRIBUABLE_*` → `type_contribuable_*`)
+- 11 index renommés (`idx_CONTRIBUABLE_id` → `idx_contribuable_id`, `ft_CONTRIBUABLEs` → `ft_contribuables`, etc.)
+- 1 FK unique key renommée (`uk_agrement_CONTRIBUABLE` → `uk_agrement_contribuable`)
 - **Idempotente** : 2 procédures stockées `rename_col_if_old_exists()` et `rename_index_if_exists()` permettent de rejouer sans erreur
 - Gère la nullabilité par colonne (CHAR(36) NOT NULL pour `demandes.contribuable_id`, NULL pour `quotas.contribuable_id` à cause de la FK SET NULL)
 - Trace insérée dans `_prisma_migrations` pour que Prisma ne la re-applique pas
 
-**Vérification finale** : `colonnes_beneficiaire=0, index_beneficiaire=0, fk_beneficiaire=0`
+**Vérification finale** : `colonnes_CONTRIBUABLE=0, index_CONTRIBUABLE=0, fk_CONTRIBUABLE=0`
 
 ##### BUG #7.3 — `@IsUUID()` de class-validator rejette les UUIDs "exotiques" du seed
 
@@ -339,7 +339,7 @@ OK - Demande soumise
 
 | Hash | Sujet |
 |---|---|
-| `b720c69` | refactor(oase-api): beneficiaire → contribuable (module + Prisma + role enum) |
+| `b720c69` | refactor(oase-api): CONTRIBUABLE → contribuable (module + Prisma + role enum) |
 | `c4bb5c6` | fix(deploy): healthcheck frontend IPv4 force (1er essai, insuﬀisant) |
 | `7867ba1` | fix(deploy): healthcheck frontend via curl+0.0.0.0 (le bon) |
 | `16007ea` | fix(oase-api): BUG #7 flow demande - scope service + migration colonnes |
@@ -358,7 +358,7 @@ OK - Demande soumise
 
 ---
 
-### Refactoring BENEFICIAIRE → CONTRIBUABLE - LIVRE (2026-07-11)
+### Refactoring CONTRIBUABLE → CONTRIBUABLE - LIVRE (2026-07-11)
 
 **Statut** : ✅ COMPLET
 **Methode** : 3 passes Python + 1 migration DB
@@ -366,19 +366,19 @@ OK - Demande soumise
 
 **Fichiers modifies (~45 au total) :**
 - Prisma : schema.prisma, seed.js, migration 001 (3 fichiers)
-- Backend : app.module.ts, auth.service.ts, demandes/conventions + renommage dossier beneficiaires/ → contribuables/ (7 fichiers)
+- Backend : app.module.ts, auth.service.ts, demandes/conventions + renommage dossier CONTRIBUABLEs/ → contribuables/ (7 fichiers)
 - Frontend : 34 fichiers (layouts, router, services, vues admin/portail/backoffice/decideur/tresor/audit/agences/institutions/opendata/mobile)
 
 **Migration DB creee :**
-- `prisma/migrations/002_rename_beneficiaire_to_contribuable/migration.sql` (renomme tables + colonnes)
+- `prisma/migrations/002_rename_CONTRIBUABLE_to_contribuable/migration.sql` (renomme tables + colonnes)
 - `migration_part2_v2.sql` (FK drop/recreate pour eviter ALGORITHM=COPY/INPLACE)
-- `migration_part3_v2.js` (UPDATE role beneficiaire → contribuable)
+- `migration_part3_v2.js` (UPDATE role CONTRIBUABLE → contribuable)
 
 **A FAIRE - Non deploye en prod :**
 - [ ] Deployer le code refactore sur le VPS (commande : `deploy\deploy-from-windows.bat`)
 - [ ] Appliquer la migration 002 sur la base prod
 - [ ] Smoke test post-deploy : login admin + navigation /portail/dashboard
-- [ ] Les contraintes MySQL `agrement_beneficiaires_ibfk_X` restent (metadata DB) - non critique mais peut etre nettoye plus tard
+- [ ] Les contraintes MySQL `agrement_CONTRIBUABLEs_ibfk_X` restent (metadata DB) - non critique mais peut etre nettoye plus tard
 
 ---
 
@@ -440,7 +440,7 @@ OK - Demande soumise
 
 ---
 
-### BUG #1 - 2026-07-11 00:14 UTC - Terminologie "Bénéficiaire" → "Contribuable"
+### BUG #1 - 2026-07-11 00:14 UTC - Terminologie "contribuable" → "Contribuable"
 
 **Decouverte par :** Ulrich
 **Type :** Refactoring semantique (pas un bug technique)
@@ -448,28 +448,28 @@ OK - Demande soumise
 
 **Contexte :**
 - OASE gere des exonerations fiscales au Togo
-- Le terme "beneficiaire" designe le demandeur d'exoneration
-- En fiscalite togolaise, le bon terme est "contribuable" (le contribuable demande l'exoneration, le beneficiaire serait plutot l'entreprise apres octroi)
+- Le terme "CONTRIBUABLE" designe le demandeur d'exoneration
+- En fiscalite togolaise, le bon terme est "contribuable" (le contribuable demande l'exoneration, le CONTRIBUABLE serait plutot l'entreprise apres octroi)
 - L'utilisateur prefere "contribuable" dans toute l'app
 
 **Changement effectue (commit feaec27) :**
-- ✅ Role DB libelle : "Bénéficiaire" → "Contribuable"
+- ✅ Role DB libelle : "contribuable" → "Contribuable"
 - ✅ Description : "Dépôt et suivi des demandes" → "Dépôt et suivi des demandes d'exonération fiscale"
-- ✅ Email user : `beneficiaire@gouv.tg` → `contribuable@gouv.tg`
-- ✅ Log du seed affiche les libelles (Contribuable au lieu de beneficiaire)
+- ✅ Email user : `CONTRIBUABLE@gouv.tg` → `contribuable@gouv.tg`
+- ✅ Log du seed affiche les libelles (Contribuable au lieu de CONTRIBUABLE)
 - ✅ ON DUPLICATE KEY UPDATE inclut maintenant email (pour les futures MAJ)
 
 **A faire (TODO - pas fait) :**
-- [ ] Renommer la table `beneficiaires` → `contribuables` (Prisma schema + migration)
-- [ ] Renommer `beneficiaire_id` → `contribuable_id` dans toutes les tables
-- [ ] Renommer `ref_types_beneficiaire` → `ref_types_contribuable`
-- [ ] Renommer `beneficiaire_historique_fiscal` → `contribuable_historique_fiscal`
-- [ ] Renommer `agrement_beneficiaires` → `agrement_contribuables`
-- [ ] Renommer le code role `beneficiaire` → `contribuable` (breaking change, gere migration)
-- [ ] Renommer `src/beneficiaires/` → `src/contribuables/` dans le backend NestJS
-- [ ] Renommer endpoints `/api/v1/beneficiaires/` → `/api/v1/contribuables/`
+- [ ] Renommer la table `CONTRIBUABLEs` → `contribuables` (Prisma schema + migration)
+- [ ] Renommer `CONTRIBUABLE_id` → `contribuable_id` dans toutes les tables
+- [ ] Renommer `ref_types_CONTRIBUABLE` → `ref_types_contribuable`
+- [ ] Renommer `CONTRIBUABLE_historique_fiscal` → `contribuable_historique_fiscal`
+- [ ] Renommer `agrement_CONTRIBUABLEs` → `agrement_contribuables`
+- [ ] Renommer le code role `CONTRIBUABLE` → `contribuable` (breaking change, gere migration)
+- [ ] Renommer `src/CONTRIBUABLEs/` → `src/contribuables/` dans le backend NestJS
+- [ ] Renommer endpoints `/api/v1/CONTRIBUABLEs/` → `/api/v1/contribuables/`
 - [ ] Mettre a jour 50+ fichiers frontend (RolesView.vue, NewDemandeView.vue, ProfilView.vue, etc.)
-- [ ] Mettre a jour le `Beneficiaire` dans le router (route paths)
+- [ ] Mettre a jour le `CONTRIBUABLE` dans le router (route paths)
 - [ ] Mettre a jour les labels i18n dans toutes les vues
 - [ ] Mettre a jour la documentation (DEPLOIEMENT_DOCKER.md, etc.)
 

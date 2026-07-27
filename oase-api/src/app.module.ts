@@ -26,6 +26,8 @@ import { ConventionsModule } from './conventions/conventions.module';
 import { DashboardsModule } from './dashboards/dashboards.module';
 import { RapportsModule } from './rapports/rapports.module';
 import { JobsModule } from './jobs/jobs.module';
+import { OtpModule } from './otp/otp.module';
+import { ContribuablesModule } from './contribuables/contribuables.module';
 
 @Module({
   imports: [
@@ -67,6 +69,8 @@ import { JobsModule } from './jobs/jobs.module';
     DashboardsModule,
     RapportsModule,
     JobsModule,
+    OtpModule,
+    ContribuablesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

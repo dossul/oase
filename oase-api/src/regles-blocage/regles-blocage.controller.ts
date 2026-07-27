@@ -14,10 +14,14 @@ export class ReglesBlocageController {
   @Roles(
     Role.AGENT_CI,
     Role.AGENT_CDDI,
+    Role.AGENT_DGBF,
+    Role.AGENT_DGTCP,
     Role.AGENT_AGENCE,
     Role.AGENT_MAE,
     Role.AGENT_DGMG,
+    Role.AGENT_MINISTERE,
     Role.DECIDEUR,
+    Role.AGENT_CONEDEF,
     Role.AUDITEUR,
     Role.ADMIN_SI,
   )

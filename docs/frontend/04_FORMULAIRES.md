@@ -1,4 +1,4 @@
-# OASE-30 & 31 — Inventaire formulaires + règles de validation
+﻿# OASE-30 & 31 — Inventaire formulaires + règles de validation
 
 > **Issues Plane :** OASE-30 (inventaire), OASE-31 (validation)  
 > **Date :** 2026-06-16
@@ -37,14 +37,14 @@
 
 ---
 
-## F-04 · Création profil bénéficiaire
+## F-04 · Création profil contribuable
 
 | Champ | Type | Requis | Validation |
 |---|---|---|---|
 | `raison_sociale` | text | ✅ | 3–200 car. |
 | `nif` | text | ✅ | Format `TG-[A-Z]{2,4}-\d{4}-[A-Z]-\d{4}` |
 | `rccm` | text | ✅ | Non vide · ≤ 100 car. |
-| `type_beneficiaire` | select | ✅ | Enum `TypeBeneficiaire` |
+| `type_CONTRIBUABLE` | select | ✅ | Enum `TypeCONTRIBUABLE` |
 | `secteur` | text | ✅ | Min 2 car. |
 | `region` | select | ✅ | Enum régions Togo (Maritime, Plateaux, Centrale, Kara, Savanes) |
 | `email_contact` | email | ✅ | Format email |
@@ -221,7 +221,7 @@ class NewDemandeDto {
 | `QUOTA_EPUISE` | "Quota épuisé pour cette mesure. Soumission impossible. Contactez l'organe gestionnaire." |
 | `ETAPES_WORKFLOW_INCOMPLETES` | "Toutes les étapes d'instruction doivent être validées avant approbation finale." |
 | `ANOMALIE_CRITIQUE_NON_RESOLUE` | "Une anomalie critique non résolue bloque l'approbation : {anomalie_id}." |
-| `NIF_DEJA_UTILISE` | "Ce NIF est déjà associé à un compte bénéficiaire." |
+| `NIF_DEJA_UTILISE` | "Ce NIF est déjà associé à un compte contribuable." |
 | `FICHIER_TROP_VOLUMINEUX` | "Fichier refusé — taille maximale : 10 MB." |
 
 ---

@@ -1,4 +1,4 @@
-# OASE-28 — Flux utilisateur détaillé par persona
+﻿# OASE-28 — Flux utilisateur détaillé par persona
 
 > **Issue Plane :** OASE-28  
 > **Date :** 2026-06-16  
@@ -25,12 +25,12 @@ Tous les utilisateurs :
 
 Rôles avec MFA obligatoire : P2 (agent), P3 (agence), P4 (décideur),
                              P5 (contrôle), P7 (admin)
-Rôles sans MFA : P1 (bénéficiaire), P6 (public — sans auth)
+Rôles sans MFA : P1 (contribuable), P6 (public — sans auth)
 ```
 
 ---
 
-## P1 — Opérateur économique (Bénéficiaire)
+## P1 — Opérateur économique (contribuable)
 
 ### Flux 1a : Dépôt d'une nouvelle demande
 
@@ -67,7 +67,7 @@ B-01 Dashboard
 ### Flux 1b : Répondre à une demande de complément
 
 ```
-Email notification → /beneficiaire/demandes/:id (statut: action_requise)
+Email notification → /CONTRIBUABLE/demandes/:id (statut: action_requise)
    │
    └─[Voir le motif]──► B-03 Détail demande
                               │  "Motif : RCCM expiré — fournir RCCM renouvelé"
@@ -207,7 +207,7 @@ G-01 Portail (sans authentification)
    │
    ├─[Statistiques]──► KPIs anonymisés (GET /public/stats)
    │
-   ├─[Catalogue]──► G-02 Bases juridiques publiques (sans données bénéficiaires)
+   ├─[Catalogue]──► G-02 Bases juridiques publiques (sans données contribuables)
    │
    └─[Vérifier attestation]──► G-03 Saisir hash QR Code
                                       │
