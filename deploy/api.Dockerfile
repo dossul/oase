@@ -43,6 +43,10 @@ COPY --from=builder --chown=oase:oase /app/dist ./dist
 COPY --from=builder --chown=oase:oase /app/prisma ./prisma
 COPY --from=builder --chown=oase:oase /app/package.json ./package.json
 
+# Dossiers de fichiers (pièces jointes + attestations PDF) — accessibles en
+# écriture par l'utilisateur non-root, persistés via volumes Docker.
+RUN mkdir -p /app/uploads /app/attestations && chown -R oase:oase /app/uploads /app/attestations
+
 USER oase
 
 EXPOSE 3000

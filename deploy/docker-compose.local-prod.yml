@@ -53,6 +53,9 @@ services:
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
       CORS_ORIGINS: ${CORS_ORIGINS}
       LOG_LEVEL: ${LOG_LEVEL}
+    volumes:
+      - oase_uploads_data:/app/uploads
+      - oase_attestations_data:/app/attestations
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy-network"
@@ -93,3 +96,7 @@ networks:
 volumes:
   oase_db_data:
     name: oase_db_data
+  oase_uploads_data:
+    name: oase_uploads_data
+  oase_attestations_data:
+    name: oase_attestations_data
