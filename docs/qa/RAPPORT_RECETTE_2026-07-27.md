@@ -34,6 +34,20 @@
 
 ---
 
+## 1bis. Validation EN PRODUCTION (2026-07-27 soir)
+
+Recette rejouée intégralement contre `https://oase.ulia.site` après déploiement (local → prod : code + dump DB) :
+
+| Contrôle prod | Résultat |
+|---|---|
+| Recette Playwright complète (P1→P7 + permissions) | ✅ **29/29 PASS** |
+| Logins UI des 7 personas + redirections | ✅ 7/7 |
+| Logins API des 16 comptes | ✅ 16/16 |
+| Sélecteur persona (switcher démo) | ✅ **Absent** (impossible en build prod) |
+| Bugs trouvés pendant la recette prod | 3 corrigés : boucle 401 au boot (#8.12), EACCES uploads Docker (#8.13), audit/DossiersView mockée (#8.14) |
+
+---
+
 ## 2. Infrastructure de test
 
 - L'ancien backend (processus du 15/07, build obsolète, **intuable** — session élevée) a été contourné : backend reconstruit sur **:3001**, frontend de test Vite sur **:5174** (`VITE_API_TARGET`, cf. `maquette/vite.config.ts`).
