@@ -1,6 +1,12 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
-export const CurrentUser = createParamDecorator((data: unknown, ctx: ExecutionContext) => {
+/**
+ * Injecte l'utilisateur authentifié (req.user) ou l'une de ses propriétés.
+ * - `@CurrentUser()` → l'objet AuthUser complet
+ * - `@CurrentUser('id')` → user.id (string)
+ */
+export const CurrentUser = createParamDecorator((data: string | undefined, ctx: ExecutionContext) => {
   const request = ctx.switchToHttp().getRequest();
-  return request.user;
+  const user = request.user;
+  return data ? user?.[data] : user;
 });

@@ -59,7 +59,7 @@ export class AnomaliesService {
         baseJuridiqueVersionId: dto.baseJuridiqueVersionId,
         conventionId: dto.conventionId,
         utilisateurId: dto.utilisateurId ?? utilisateurId,
-        detecteeParCode: 'manuel',
+        detecteeParCode: 'auditeur',
         regleId: dto.regleId,
         commentaire: dto.commentaire,
         statutCode: 'nouvelle',
@@ -114,7 +114,7 @@ export class AnomaliesService {
     if (dto.statut === 'escaladee') {
       await this.notifications.envoyer({
         utilisateurId,
-        typeNotificationCode: 'anomalie_escalade',
+        typeNotificationCode: 'ANOMALIE',
         canalCode: 'inapp',
         titre: 'Anomalie escaladée',
         corps: `L'anomalie ${id} a été escaladée pour traitement.`,

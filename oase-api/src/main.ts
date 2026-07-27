@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
+import { BigIntSerializerInterceptor } from './common/interceptors/bigint-serializer.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -17,6 +18,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  // Sérialisation globale BigInt → string (champs Prisma BigInt : montant_fcfa, quotas…)
+  app.useGlobalInterceptors(new BigIntSerializerInterceptor());
 
   const config = new DocumentBuilder()
     .setTitle('OASE API')

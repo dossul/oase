@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards, ParseUUIDPipe, Param } from '@nestjs/common';
+import { Controller, Get, Post, Query, UseGuards, ParseUUIDPipe, Param } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RbacGuard } from '../common/guards/rbac.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -31,6 +31,12 @@ export class AuditController {
   @Get('verify-chain')
   @Roles(Role.AUDITEUR, Role.ADMIN_SI)
   async verifyChain() {
+    return this.audit.verifyChain();
+  }
+
+  @Post('verify-chain')
+  @Roles(Role.AUDITEUR, Role.ADMIN_SI)
+  async verifyChainPost() {
     return this.audit.verifyChain();
   }
 

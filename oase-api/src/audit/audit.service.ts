@@ -18,11 +18,27 @@ export interface CreateAuditDto {
 
 @Injectable()
 export class AuditService {
+  /**
+   * Mutex applicatif (file de promesses) sérialisant le chaînage SHA-256.
+   * Sans lui, deux createEntry concurrents lisent le même « dernier hash »
+   * avant que l'un des deux n'insère → deux entrées avec le même
+   * hashPrecedent → rupture de chaîne dans verify-chain.
+   * Fiable en contexte mono-instance (une seule node process par base).
+   */
+  private chainMutex: Promise<unknown> = Promise.resolve();
+
   constructor(private prisma: PrismaService) {}
 
   async createEntry(dto: CreateAuditDto): Promise<void> {
+    const run = this.chainMutex.then(() => this.createEntryChained(dto));
+    // Une entrée en échec ne doit pas bloquer les suivantes.
+    this.chainMutex = run.catch(() => undefined);
+    return run;
+  }
+
+  private async createEntryChained(dto: CreateAuditDto): Promise<void> {
     const last = await this.prisma.auditLog.findFirst({
-      orderBy: { horodatage: 'desc' },
+      orderBy: [{ horodatage: 'desc' }, { id: 'desc' }],
       select: { empreinteSha256: true },
     });
 
@@ -88,7 +104,7 @@ export class AuditService {
 
   async verifyChain(): Promise<{ verified: number; breaks: string[] }> {
     const logs = await this.prisma.auditLog.findMany({
-      orderBy: { horodatage: 'asc' },
+      orderBy: [{ horodatage: 'asc' }, { id: 'asc' }],
     });
 
     const breaks: string[] = [];

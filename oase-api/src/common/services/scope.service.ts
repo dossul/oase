@@ -16,6 +16,13 @@ const ORGANE_CI = 'CI';
 const ORGANE_CDDI = 'CDDI';
 const ORGANE_CDDI_CI = 'CDDI_CI';
 
+/** Types de texte relevant du périmètre des agences (SAZOF / API-ZF). */
+const TYPES_TEXTE_AGENCE = ['Zone Franche', 'Code des Investissements', 'Code Investissements'];
+/** Types de texte relevant du périmètre MAE (accords de siège). */
+const TYPES_TEXTE_MAE = ['Accord de siège', 'Accord de siege'];
+/** Types de texte relevant du périmètre DGMG (mines & hydrocarbures). */
+const TYPES_TEXTE_DGMG = ['Code Minier', 'Code des Hydrocarbures'];
+
 export interface ScopedWhere {
   [key: string]: any;
 }
@@ -60,7 +67,7 @@ export class ScopeService {
         case 'demande':
           const demande = await this.prisma.demande.findUnique({
             where: { id: resourceId },
-            include: { contribuables: true },
+            include: { contribuables: true, baseJuridiqueVersions: true },
           });
           if (!demande) return false;
           return this.demandeMatchesScope(demande, user);
@@ -87,39 +94,32 @@ export class ScopeService {
         return { contribuables: { userId: user.id } };
       case Role.AGENT_CI:
         return {
-          baseJuridiqueVersion: { baseJuridique: { organeGestionCode: ORGANE_CI } },
+          baseJuridiqueVersions: { organeGestionCode: ORGANE_CI },
           statutCode: { not: 'brouillon' },
         };
       case Role.AGENT_CDDI:
         return {
-          baseJuridiqueVersion: {
-            baseJuridique: {
-              organeGestionCode: { in: [ORGANE_CDDI, ORGANE_CDDI_CI] },
-            },
+          baseJuridiqueVersions: {
+            organeGestionCode: { in: [ORGANE_CDDI, ORGANE_CDDI_CI] },
           },
           statutCode: { not: 'brouillon' },
         };
       case Role.AGENT_AGENCE:
         return {
-          baseJuridiqueVersion: {
-            baseJuridique: {
-              typeTexte1: { in: ['Zone Franche', 'Code des Investissements'] },
-            },
+          baseJuridiqueVersions: {
+            typeTexte1: { in: TYPES_TEXTE_AGENCE },
           },
-          institutionId: user.institutionId,
         };
       case Role.AGENT_MAE:
         return {
-          baseJuridiqueVersion: {
-            baseJuridique: { typeTexte1: 'Accord de siège' },
+          baseJuridiqueVersions: {
+            typeTexte1: { in: TYPES_TEXTE_MAE },
           },
         };
       case Role.AGENT_DGMG:
         return {
-          baseJuridiqueVersion: {
-            baseJuridique: {
-              typeTexte1: { in: ['Code Minier', 'Code des Hydrocarbures'] },
-            },
+          baseJuridiqueVersions: {
+            typeTexte1: { in: TYPES_TEXTE_DGMG },
           },
         };
       case Role.AGENT_MINISTERE:
@@ -129,10 +129,12 @@ export class ScopeService {
         };
       case Role.AGENT_DGBF:
         return {
-          demandeWorkflowEtapes: {
-            some: {
-              acteurRole: 'agent_dgbf',
-              statutCode: { in: ['en_attente', 'en_cours'] },
+          demandeWorkflowInstances: {
+            demandeWorkflowEtapes: {
+              some: {
+                acteurRole: Role.AGENT_DGBF,
+                statutCode: { in: ['en_attente', 'en_cours'] },
+              },
             },
           },
         };
@@ -181,25 +183,63 @@ export class ScopeService {
     return { id: user.id };
   }
 
+  /**
+   * Vérifie qu'une demande précise appartient au périmètre de l'agent.
+   * Miroir de buildDemandeScope() : toutes les conditions du rôle doivent
+   * être satisfaites (logique ET, jamais OU).
+   * `demande` doit être chargée avec `contribuables` et `baseJuridiqueVersions`.
+   */
   private async demandeMatchesScope(demande: any, user: AuthUser): Promise<boolean> {
-    const where = await this.buildWhereClause(user, 'demande');
-    if (Object.keys(where).length === 0) return true;
+    const role = user.role as Role;
+    const bjv = demande.baseJuridiqueVersions;
 
-    const conditions: boolean[] = [];
-    if (where.contribuables?.userId) {
-      conditions.push(demande.contribuables?.userId === user.id);
-    }
-    if (where.statutCode?.not) {
-      conditions.push(demande.statutCode !== where.statutCode.not);
-    }
-    if (where.secteur) {
-      conditions.push(demande.secteur === where.secteur);
-    }
-    if (where.id === '__FORBIDDEN__') {
-      return false;
-    }
+    switch (role) {
+      case Role.CONTRIBUABLE:
+        return demande.contribuables?.userId === user.id;
 
-    return conditions.length === 0 || conditions.some(Boolean);
+      case Role.AGENT_CI:
+        return bjv?.organeGestionCode === ORGANE_CI && demande.statutCode !== 'brouillon';
+
+      case Role.AGENT_CDDI:
+        return (
+          [ORGANE_CDDI, ORGANE_CDDI_CI].includes(bjv?.organeGestionCode) &&
+          demande.statutCode !== 'brouillon'
+        );
+
+      case Role.AGENT_AGENCE:
+        return TYPES_TEXTE_AGENCE.includes(bjv?.typeTexte1);
+
+      case Role.AGENT_MAE:
+        return TYPES_TEXTE_MAE.includes(bjv?.typeTexte1);
+
+      case Role.AGENT_DGMG:
+        return TYPES_TEXTE_DGMG.includes(bjv?.typeTexte1);
+
+      case Role.AGENT_MINISTERE:
+        return demande.secteur === user.secteurAffecte && demande.statutCode === 'en_instruction';
+
+      case Role.AGENT_DGBF: {
+        // Le dossier doit avoir une étape de workflow en attente/en cours pour le rôle DGBF.
+        const etape = await this.prisma.demandeWorkflowEtape.findFirst({
+          where: {
+            acteurRole: Role.AGENT_DGBF,
+            statutCode: { in: ['en_attente', 'en_cours'] },
+            demandeWorkflowInstances: { demandeId: demande.id },
+          },
+          select: { id: true },
+        });
+        return etape !== null;
+      }
+
+      case Role.DECIDEUR:
+      case Role.AGENT_CONEDEF:
+      case Role.AUDITEUR:
+      case Role.ADMIN_SI:
+        return true;
+
+      default:
+        return false;
+    }
   }
 
   private async contribuableMatchesScope(contribuable: any, user: AuthUser): Promise<boolean> {

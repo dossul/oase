@@ -118,7 +118,7 @@ export class ConventionsService {
     for (const convention of conventions) {
       await this.notifications.envoyer({
         utilisateurId,
-        typeNotificationCode: 'convention_echeance_j30',
+        typeNotificationCode: 'ECHEANCE',
         canalCode: 'inapp',
         titre: 'Convention proche de l’échéance',
         corps: `La convention ${convention.reference} expire le ${convention.dateFin.toISOString().split('T')[0]}.`,

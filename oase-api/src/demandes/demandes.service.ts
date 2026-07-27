@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ScopeService } from '../common/services/scope.service';
-import { AuthUser } from '../auth/auth.service';
+import { AuthService, AuthUser } from '../auth/auth.service';
 import { CreerDemandeDto } from './dto/creer-demande.dto';
 import { FiltrerDemandesDto } from './dto/filtrer-demandes.dto';
 import { StateMachineService, TransitionAction } from './state-machine.service';
@@ -15,6 +15,7 @@ export class DemandesService {
     private audit: AuditService,
     private scope: ScopeService,
     private stateMachine: StateMachineService,
+    private auth: AuthService,
   ) {}
 
   async creer(user: AuthUser, dto: CreerDemandeDto) {
@@ -95,8 +96,28 @@ export class DemandesService {
   }
 
   async transition(user: AuthUser, id: string, action: TransitionAction, payload?: any) {
+    // SÉCURITÉ : l'approbation finale doit passer par POST /demandes/:id/decisions/approuver
+    // (PIN de signature + règles de blocage + génération d'acte + notification).
+    // La transition directe contournerait toute la chaîne de contrôle.
+    if (action === 'approuver') {
+      throw new BadRequestException({
+        code: 'APPROBATION_VIA_DECISIONS',
+        message: "L'approbation doit passer par POST /demandes/:id/decisions/approuver (PIN + contrôles requis).",
+      });
+    }
+
     const demande = await this.detail(user, id);
     if (!demande) throw new NotFoundException({ code: 'DEMANDE_INEXISTANTE' });
+
+    // DÉFENSE EN PROFONDEUR : le rejet engage la responsabilité de l'agent —
+    // le PIN de signature est vérifié côté serveur (le frontend le vérifie déjà
+    // via /auth/verify-pin, mais le client HTTP peut être contourné).
+    if (action === 'rejeter') {
+      const pin = payload?.pin;
+      if (!pin) throw new BadRequestException({ code: 'PIN_REQUIS' });
+      const pinOk = await this.auth.verifyPin(user.id, pin);
+      if (!pinOk) throw new UnauthorizedException({ code: 'PIN_INVALIDE' });
+    }
 
     const newStatut = this.stateMachine.transition(demande.statutCode as StatutDemande, action);
 
@@ -104,7 +125,7 @@ export class DemandesService {
     if (action === 'prendre_en_charge') updateData.instructeurId = user.id;
     if (action === 'soumettre') updateData.dateDepot = new Date();
     if (action === 'rejeter') updateData.motifRejet = payload?.motifRejet;
-    if (action === 'approuver' || action === 'rejeter') updateData.dateArchivage = null;
+    if (action === 'rejeter') updateData.dateArchivage = null;
     if (action === 'archiver') updateData.dateArchivage = new Date();
 
     const updated = await this.prisma.demande.update({

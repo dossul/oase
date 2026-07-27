@@ -33,6 +33,26 @@ export class NotificationsController {
     return this.service.lister(user, parsedLues);
   }
 
+  @Get('unread-count')
+  @Roles(
+    Role.CONTRIBUABLE,
+    Role.AGENT_CI,
+    Role.AGENT_CDDI,
+    Role.AGENT_DGBF,
+    Role.AGENT_DGTCP,
+    Role.AGENT_AGENCE,
+    Role.AGENT_MAE,
+    Role.AGENT_DGMG,
+    Role.AGENT_MINISTERE,
+    Role.DECIDEUR,
+    Role.AGENT_CONEDEF,
+    Role.AUDITEUR,
+    Role.ADMIN_SI,
+  )
+  compterNonLues(@CurrentUser() user: AuthUser) {
+    return this.service.compterNonLues(user);
+  }
+
   @Post()
   @Roles(Role.ADMIN_SI)
   envoyer(@CurrentUser() user: AuthUser, @Body() dto: EnvoyerNotificationDto) {

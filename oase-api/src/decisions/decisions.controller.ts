@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, ParseUUIDPipe, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RbacGuard } from '../common/guards/rbac.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -6,11 +6,7 @@ import { Role } from '../common/enums/generated';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthUser } from '../auth/auth.service';
 import { DecisionsService } from './decisions.service';
-
-class DecisionDto {
-  pin: string;
-  motif?: string;
-}
+import { DecisionDto } from './dto/decision.dto';
 
 @Controller('demandes/:demandeId/decisions')
 @UseGuards(JwtAuthGuard, RbacGuard)
@@ -43,7 +39,7 @@ export class DecisionsController {
     @Param('demandeId', ParseUUIDPipe) demandeId: string,
     @Body() dto: DecisionDto,
   ) {
-    if (!dto.motif) throw new Error('Motif requis');
+    if (!dto.motif) throw new BadRequestException({ code: 'MOTIF_REQUIS' });
     return this.service.rejeter(user, demandeId, dto.pin, dto.motif);
   }
 

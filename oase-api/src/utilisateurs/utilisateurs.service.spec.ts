@@ -91,4 +91,63 @@ describe('UtilisateursService', () => {
     expect(result.meta.page).toBe(1);
     expect(result.meta.limit).toBe(10);
   });
+
+  describe('garde-fou DERNIER_ADMIN', () => {
+    const dernierAdmin = {
+      id: 'u-admin',
+      email: 'admin@oase.tg',
+      role: 'admin_si',
+      statutCode: 'actif',
+      institutions: { id: 'i-1', nom: 'DSI', code: 'DSI' },
+    };
+
+    it('rejette la désactivation du dernier admin actif (409 DERNIER_ADMIN)', async () => {
+      mockPrisma.utilisateur.findUnique.mockResolvedValue(dernierAdmin);
+      mockPrisma.utilisateur.count.mockResolvedValue(0);
+
+      await expect(
+        service.modifier('admin-1', 'u-admin', { statutCode: 'inactif' } as any),
+      ).rejects.toThrow(ConflictException);
+      expect(mockPrisma.utilisateur.update).not.toHaveBeenCalled();
+    });
+
+    it('rejette la rétrogradation du dernier admin actif (409 DERNIER_ADMIN)', async () => {
+      mockPrisma.utilisateur.findUnique.mockResolvedValue(dernierAdmin);
+      mockPrisma.utilisateur.count.mockResolvedValue(0);
+
+      await expect(
+        service.modifier('admin-1', 'u-admin', { role: Role.AUDITEUR } as any),
+      ).rejects.toThrow(ConflictException);
+      expect(mockPrisma.utilisateur.update).not.toHaveBeenCalled();
+    });
+
+    it('autorise la désactivation si un autre admin actif existe', async () => {
+      mockPrisma.utilisateur.findUnique.mockResolvedValue(dernierAdmin);
+      mockPrisma.utilisateur.count.mockResolvedValue(1);
+      mockPrisma.utilisateur.update.mockResolvedValue({
+        ...dernierAdmin,
+        statutCode: 'inactif',
+      });
+
+      const result = await service.modifier('admin-1', 'u-admin', { statutCode: 'inactif' } as any);
+      expect(result.statutCode).toBe('inactif');
+    });
+
+    it('ne bloque pas la modification d\'un non-admin', async () => {
+      mockPrisma.utilisateur.findUnique.mockResolvedValue({
+        ...dernierAdmin,
+        id: 'u-agent',
+        role: 'agent_ci',
+      });
+      mockPrisma.utilisateur.update.mockResolvedValue({
+        ...dernierAdmin,
+        id: 'u-agent',
+        role: 'agent_ci',
+        statutCode: 'inactif',
+      });
+
+      await service.modifier('admin-1', 'u-agent', { statutCode: 'inactif' } as any);
+      expect(mockPrisma.utilisateur.count).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -476,3 +476,32 @@ OK - Demande soumise
 **Impact :** Refactor majeur a planifier dans une session dediee
 **Estimation :** 2-4 heures de travail
 
+
+---
+
+## Session BUG #8 — Recette E2E complète Playwright (2026-07-27) — ✅ FIXED
+
+Campagne de recette exhaustive (workflows, formulaires, uploads, profils, permissions — hors SI externes et Open Data) exécutée contre le backend réel. **31 bugs applicatifs trouvés et corrigés** (18 backend, 10 frontend, 3 outillage/tests). Détail complet : `docs/qa/RAPPORT_RECETTE_2026-07-27.md`.
+
+### Bugs critiques corrigés (sélection)
+
+| # | Bug | Fix |
+|---|---|---|
+| #8.1 | Taxonomie rôles frontend ≠ backend → boucle de redirection, aucun agent/admin ne pouvait se connecter | `useDefaultRoute.ts`, garde `router.ts`, sidebar alignés sur les rôles canoniques — 7/7 logins OK |
+| #8.2 | ScopeService : relations Prisma erronées → `GET /demandes` 500 pour tous les agents | `scope.service.ts` corrigé |
+| #8.3 | **Fuite RLS** : lecture + transition de dossiers cross-périmètre (200 au lieu de 403) | `demandeMatchesScope()` applique organe/agence/DGBF |
+| #8.4 | **Contournement des contrôles** : `POST /demandes/:id/approuver` sans PIN ni quota ni acte | transition bloquée (`APPROBATION_VIA_DECISIONS`) ; approbation via `decisions/approuver` (PIN + blocages + acte PDF + notification) |
+| #8.5 | `DecisionDto` sans validateurs (400 avec pin / 500 sans corps) ; quota 400 au lieu de 422 `QUOTA_EPUISE` | DTO + `UnprocessableEntityException` |
+| #8.6 | BigInt non sérialisable → 500 `/anomalies`, `/quotas` (+ `@CurrentUser('id')` qui ignorait la clé) | intercepteur global `BigIntSerializerInterceptor` |
+| #8.7 | Chaîne d'audit SHA-256 rompue (115 lignes) + forks sous concurrence | re-chaînage + mutex applicatif `createEntry` + alias POST `verify-chain` |
+| #8.8 | Vues P1/P2/P3/P4/P5/P7 100 % mock (dépôt non persisté, pas de PIN, désactivation fictive, uploads factices) | câblage API complet (services `portail.ts`, `backoffice.ts`, `decideur.ts`, `audit.ts`, `admin.ts`) |
+| #8.9 | Seeds ids non-UUID vs `ParseUUIDPipe` (400 partout) | remapping UUID déterministe, 16 comptes préservés |
+| #8.10 | **Fuite mode démo en build Docker** : switcher persona actif en prod via `.env.local` copié dans l'image | `.dockerignore` racine + double garde `import.meta.env.DEV && VITE_DEMO_MODE` — vérifié 4/4 sur build prod |
+| #8.11 | PIN non vérifié serveur sur rejet ; dernier admin désactivable ; `verify-pin` et `unread-count` absents ; attestation .txt ; agrégats dashboards à zéro | correctifs backend + tests unitaires (314/314) |
+
+### Résultat final de la recette
+
+- **29/29** tests Playwright recette (backend réel) — TC-AUTH + TC-P1..P7 + matrice permissions
+- **36/36** tests e2e API (`oase-api/e2e`)
+- **314/314** tests unitaires Jest (23 suites)
+- Builds backend/frontend propres ; chaîne d'audit `breaks: []` ; zéro erreur console sur les parcours

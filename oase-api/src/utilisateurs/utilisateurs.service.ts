@@ -114,6 +114,8 @@ export class UtilisateursService {
       if (existing) throw new ConflictException({ code: 'EMAIL_EXISTANT' });
     }
 
+    await this.assertNotLastActiveAdmin(user, dto);
+
     const updated = await this.prisma.utilisateur.update({
       where: { id },
       data: { ...dto },
@@ -130,6 +132,37 @@ export class UtilisateursService {
     });
 
     return this.toResponse(updated);
+  }
+
+  /**
+   * Garde-fou DERNIER_ADMIN : interdit de désactiver ou de rétrograder
+   * le dernier administrateur actif (admin / admin_si) de la plateforme.
+   * Le référentiel est le rôle canonique admin_si : un compte legacy 'admin'
+   * ne suffit pas à garantir l'administration de la plateforme.
+   */
+  private async assertNotLastActiveAdmin(user: any, dto: ModifierUtilisateurDto) {
+    const ADMIN_ROLES = ['admin', 'admin_si'];
+    const isAdmin = ADMIN_ROLES.includes(user.role) && user.statutCode === 'actif';
+    if (!isAdmin) return;
+
+    const desactivation = dto.statutCode !== undefined && dto.statutCode !== 'actif';
+    const retrogradation = dto.role !== undefined && !ADMIN_ROLES.includes(dto.role);
+    if (!desactivation && !retrogradation) return;
+
+    const autresAdminsActifs = await this.prisma.utilisateur.count({
+      where: {
+        id: { not: user.id },
+        role: 'admin_si',
+        statutCode: 'actif',
+      },
+    });
+
+    if (autresAdminsActifs === 0) {
+      throw new ConflictException({
+        code: 'DERNIER_ADMIN',
+        message: 'Impossible de désactiver ou rétrograder le dernier administrateur actif.',
+      });
+    }
   }
 
   async resetMfa(adminId: string, id: string) {

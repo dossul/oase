@@ -44,7 +44,7 @@ export class NotificationsService {
       const notif = await this.envoyer({
         utilisateurId,
         demandeId,
-        typeNotificationCode: 'transition_demande',
+        typeNotificationCode: 'INSTRUCTION',
         canalCode: 'inapp',
         titre: `Demande ${demandeId}: ${action}`,
         corps: `La demande est passee au statut ${statut} par ${user.email}.`,
@@ -70,6 +70,13 @@ export class NotificationsService {
       where: { id: notificationId },
       data: { estLue: true, dateLecture: new Date() },
     });
+  }
+
+  async compterNonLues(user: AuthUser) {
+    const count = await this.prisma.notification.count({
+      where: { utilisateurId: user.id, estLue: false },
+    });
+    return { count };
   }
 
   private async trouverDestinataires(demandeId: string): Promise<string[]> {

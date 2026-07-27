@@ -1,9 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AttestationsService } from './attestations.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ScopeService } from '../common/services/scope.service';
 
 const mockPrisma = {
   acte: { findUnique: jest.fn(), findFirst: jest.fn(), update: jest.fn() },
+} as any;
+
+const mockScope = {
+  isAllowed: jest.fn(),
 } as any;
 
 describe('AttestationsService', () => {
@@ -11,7 +16,11 @@ describe('AttestationsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AttestationsService, { provide: PrismaService, useValue: mockPrisma }],
+      providers: [
+        AttestationsService,
+        { provide: PrismaService, useValue: mockPrisma },
+        { provide: ScopeService, useValue: mockScope },
+      ],
     }).compile();
 
     service = module.get<AttestationsService>(AttestationsService);
@@ -44,5 +53,24 @@ describe('AttestationsService', () => {
     });
     const result = await service.verifier('qr-hash');
     expect(result.valide).toBe(true);
+  });
+
+  describe('telechargerParDemande', () => {
+    const user: any = { id: 'user-1', role: 'contribuable' };
+
+    it('rejette 403 si la demande est hors perimetre', async () => {
+      mockScope.isAllowed.mockResolvedValue(false);
+      await expect(service.telechargerParDemande(user, 'dem-1')).rejects.toMatchObject({
+        response: { code: 'PERIMETRE_NON_AUTORISE' },
+      });
+    });
+
+    it('rejette 404 si aucune attestation pour la demande', async () => {
+      mockScope.isAllowed.mockResolvedValue(true);
+      mockPrisma.acte.findFirst.mockResolvedValue(null);
+      await expect(service.telechargerParDemande(user, 'dem-1')).rejects.toMatchObject({
+        response: { code: 'ATTESTATION_NON_TROUVEE' },
+      });
+    });
   });
 });

@@ -151,7 +151,7 @@ export class QuotasService {
     if (alerte80) {
       await this.notifications.envoyer({
         utilisateurId,
-        typeNotificationCode: 'alerte_80_quota',
+        typeNotificationCode: 'QUOTA_ALERTE',
         canalCode: 'inapp',
         titre: `Quota à ${quota.alerteSeuilPct}% atteint`,
         corps: `Le quota ${quota.id} a atteint ${pct}% de son plafond.`,
@@ -160,7 +160,7 @@ export class QuotasService {
     if (alerte100) {
       await this.notifications.envoyer({
         utilisateurId,
-        typeNotificationCode: 'alerte_100_quota',
+        typeNotificationCode: 'QUOTA_ALERTE',
         canalCode: 'inapp',
         titre: 'Quota épuisé',
         corps: `Le quota ${quota.id} est épuisé (${consomme.toString()} / ${quota.total.toString()}).`,

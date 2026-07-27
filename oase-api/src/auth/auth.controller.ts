@@ -9,6 +9,7 @@ import { LoginDto } from './dto/login.dto';
 import { VerifyMfaDto } from './dto/verify-mfa.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { SetPinDto } from './dto/set-pin.dto';
+import { VerifyPinDto } from './dto/verify-pin.dto';
 import { UpdateMeDto } from './dto/update-me.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -59,6 +60,16 @@ export class AuthController {
   @ApiOperation({ summary: 'Définir ou modifier le PIN de signature' })
   setPin(@CurrentUser() user: AuthUser, @Body() dto: SetPinDto) {
     return this.authService.setPin(user.id, dto);
+  }
+
+  @Post('verify-pin')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Vérifier le PIN de signature — répond toujours 200 {valid: true|false}' })
+  async verifyPin(@CurrentUser() user: AuthUser, @Body() dto: VerifyPinDto) {
+    const valid = await this.authService.verifyPin(user.id, dto.pin);
+    return { valid };
   }
 
   @Get('me')

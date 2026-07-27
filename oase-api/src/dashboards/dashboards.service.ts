@@ -35,7 +35,7 @@ export class DashboardsService {
     const demandesAccordees = await this.prisma.demande.findMany({
       where,
       include: {
-        decisions: { where: { typeCode: 'accord' } },
+        decisions: { where: { typeCode: 'approbation' } },
         baseJuridiqueVersions: { select: { impotConcerne: true } },
       },
     });

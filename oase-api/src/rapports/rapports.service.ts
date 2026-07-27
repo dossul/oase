@@ -3,6 +3,7 @@ import { createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { GenererRapportDto } from './dto/generer-rapport.dto';
+import { bigintReplacer } from '../common/utils/bigint.util';
 
 @Injectable()
 export class RapportsService {
@@ -32,7 +33,7 @@ export class RapportsService {
         periodeAnnee: dto.periodeAnnee,
         periodeMois: dto.periodeMois ?? null,
         parametres: { format: dto.format },
-        statutCode: 'en_cours',
+        statutCode: 'running',
       },
     });
 
@@ -46,7 +47,7 @@ export class RapportsService {
         data: {
           fichierUrl,
           hashFichier,
-          statutCode: 'termine',
+          statutCode: 'completed',
           dateFin: new Date(),
         },
       });
@@ -64,7 +65,7 @@ export class RapportsService {
       const message = e instanceof Error ? e.message : 'Erreur inconnue';
       await this.prisma.reportingExecution.update({
         where: { id: execution.id },
-        data: { statutCode: 'echoue', messageErreur: message, dateFin: new Date() },
+        data: { statutCode: 'failed', messageErreur: message, dateFin: new Date() },
       });
       throw e;
     }
@@ -127,7 +128,7 @@ export class RapportsService {
     const fin = mois ? new Date(annee, mois, 0, 23, 59, 59) : new Date(annee, 11, 31, 23, 59, 59);
 
     const demandes = await this.prisma.demande.findMany({
-      where: { createdAt: { gte: debut, lte: fin }, statutCode: 'accordee' },
+      where: { createdAt: { gte: debut, lte: fin }, statutCode: 'approuve' },
       include: { baseJuridiqueVersions: { select: { impotConcerne: true } } },
     });
 
@@ -167,7 +168,7 @@ export class RapportsService {
       case 'json':
       default:
         return {
-          contenu: JSON.stringify(rows, null, 2),
+          contenu: JSON.stringify(rows, bigintReplacer, 2),
           contentType: 'application/json',
         };
     }

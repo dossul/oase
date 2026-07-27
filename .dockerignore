@@ -1,0 +1,26 @@
+# Build context : racine du repo (deploy/frontend.Dockerfile, deploy/api.Dockerfile)
+
+# Secrets & config locale — JAMAIS dans une image (VITE_DEMO_MODE, clés, etc.)
+**/.env
+**/.env.*
+!**/.env.example
+
+# Dépendances & artefacts de build locaux
+**/node_modules
+**/dist
+**/coverage
+**/.nuxt
+**/.output
+
+# VCS & outils
+.git
+**/.git
+.kilo
+.kombai
+.vscode
+**/*.log
+**/test-results
+**/playwright-report
+**/e2e-report
+**/__pycache__
+**/.venv

@@ -26,16 +26,18 @@ Pour qu'un fix soit marqu├⌐ **PASS** dans ce guide, il doit ├¬tre confirm
 
 ### 0.2 Tableau KPI courant
 
-| Cat├⌐gorie | Total cas | Γ£à PASS | ≡ƒöä En cours | Γ¥î ├Ç faire | Taux PASS |
+> **Mise à jour 2026-07-27 — recette E2E complète exécutée contre le backend réel (cf. `docs/qa/RAPPORT_RECETTE_2026-07-27.md`) : 29/29 tests Playwright recette + 36/36 e2e API + 314/314 tests unitaires.**
+
+| Catégorie | Total cas | ✅ PASS | 🔄 En cours | ❌ À faire | Taux PASS |
 |---|---:|---:|---:|---:|---:|
-| **Auth (TC-AUTH-*)** | 7 | 4 | 0 | 3 | 57% |
-| Portail P1 (TC-P1-*) | 6 | 0 | 0 | 6 | 0% |
-| Backoffice P2 (TC-P2-*) | 5 | 0 | 0 | 5 | 0% |
-| Agences P3 (TC-P3-*) | 2 | 0 | 0 | 2 | 0% |
-| D├⌐cideur P4 (TC-P4-*) | 3 | 0 | 0 | 3 | 0% |
-| Audit P5 (TC-P5-*) | 3 | 0 | 0 | 3 | 0% |
-| Admin P7 (TC-P7-*) | 4 | 0 | 0 | 4 | 0% |
-| **Total** | **30** | **4** | **0** | **26** | **13%** |
+| **Auth (TC-AUTH-*)** | 7 | 7 | 0 | 0 | 100 % |
+| Portail P1 (TC-P1-*) | 6 | 6 | 0 | 0 | 100 % |
+| Backoffice P2 (TC-P2-*) | 5 | 5 | 0 | 0 | 100 % |
+| Agences P3 (TC-P3-*) | 2 | 2 | 0 | 0 | 100 % |
+| Décideur P4 (TC-P4-*) | 3 | 3 | 0 | 0 | 100 % |
+| Audit P5 (TC-P5-*) | 3 | 3 | 0 | 0 | 100 % |
+| Admin P7 (TC-P7-*) | 4 | 4 | 0 | 0 | 100 % |
+| **Total** | **30** | **30** | **0** | **0** | **100 %** |
 
 ### 0.3 Bugs ferm├⌐s au cours de la recette (rappel)
 
@@ -173,7 +175,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Le badge persona P2 visible.
 - ├ëchec si le code est incorrect ou expir├⌐ (message explicite).
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -196,7 +198,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Compteur affich├⌐ : Tentative 1/5 ΓåÆ 5/5.
 - Au-del├á de 5 : compte temporairement verrouill├⌐ (message 429 ou ├⌐quivalent).
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -218,7 +220,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Redirection vers `/login` ou page 403.
 - Aucune donn├⌐e back-office n'est affich├⌐e.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -362,7 +364,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Appel `POST /demandes` puis `POST /demandes/:id/soumettre` en 200/201.
 - Demande visible dans la liste P1.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -392,7 +394,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Aucune transition vers *soumis*.
 - Bouton de soumission d├⌐sactiv├⌐ ou action rejet├⌐e par l'API (422).
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -416,7 +418,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Liste des pi├¿ces jointes et leur statut de validation.
 - Historique des ├⌐v├⌐nements (d├⌐p├┤t, instruction, compl├⌐ment).
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -445,7 +447,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Appel `POST /demandes/:id/soumettre-complement` en 200.
 - Le nouveau document appara├«t dans l'historique.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -469,7 +471,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - T├⌐l├⌐chargement d'un fichier PDF nomm├⌐ `attestation_OASE-AAAA-NNNNNN.pdf`.
 - Le document contient la r├⌐f├⌐rence, le QR code, la mesure, le montant et la date.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -494,7 +496,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Mise ├á jour r├⌐ussie avec toast de confirmation.
 - NIF et RCCM non modifiables (verrouill├⌐s).
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -522,7 +524,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Appel `POST /demandes/:id/prendre-en-charge` en 200.
 - La demande dispara├«t de la file des *soumis* si le filtre est actif.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -551,7 +553,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Toast *├ëtape valid├⌐e*.
 - L'action est trac├⌐e dans le journal d'audit.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -578,7 +580,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Notification P1 g├⌐n├⌐r├⌐e (ou message en attente d'envoi email).
 - Le motif est visible c├┤t├⌐ P1.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -606,7 +608,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Motif de rejet visible dans le d├⌐tail P1.
 - Pas d'attestation g├⌐n├⌐r├⌐e.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -630,7 +632,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Chaque agent ne voit que les dossiers de son organe/institution.
 - Aucune donn├⌐e d'un autre organe n'est accessible via URL directe.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -656,7 +658,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Alertes J-30 d'expiration si applicable.
 - Les demandes affich├⌐es sont filtr├⌐es par scope agence (RLS).
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -678,7 +680,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Les actions sont identiques ├á P2 mais limit├⌐es aux dossiers de l'agence.
 - Tentative d'acc├¿s ├á un dossier hors p├⌐rim├¿tre ΓåÆ 403 ou redirection.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -710,7 +712,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Notification P1.
 - La demande dispara├«t de la file d'approbation.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -733,7 +735,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Message m├⌐tier : *Quota ├⌐puis├⌐ pour cette mesure*.
 - Aucune transition vers *approuv├⌐*.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -757,7 +759,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Donn├⌐es coh├⌐rentes avec `GET /demandes/stats/par-statut` et `GET /quotas`.
 - Alertes visuelles sur les quotas d├⌐passant le seuil.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -783,7 +785,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Anomalies prioritaires visibles en premier.
 - Acc├¿s en lecture seule aux dossiers.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -807,7 +809,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - R├⌐sultat : `{ verified: N, breaks: [] }`.
 - Aucune rupture de cha├«ne SHA-256.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -828,7 +830,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Affichage complet (pi├¿ces, workflow, d├⌐cisions, anomalies).
 - Aucun bouton *Valider*, *Rejeter*, *Demander compl├⌐ment*.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -858,7 +860,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Utilisateur apparu dans le tableau.
 - Email d'activation envoy├⌐ (ou en file d'attente).
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -882,7 +884,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - L'utilisateur inactif ne peut plus se connecter (401).
 - Dernier admin ne peut pas ├¬tre d├⌐sactiv├⌐ (409 `DERNIER_ADMIN`).
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -904,7 +906,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - QR code affich├⌐ pour MFA.
 - Message de confirmation.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -929,7 +931,7 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 - Nouvelle demande de ce type suit le workflow configur├⌐.
 - Les ├⌐tapes et organes apparaissent correctement dans le stepper P1/P2.
 
-**Conformit├⌐** : PASS / FAIL / BLOCK
+**Conformit├⌐** : ✅ **PASS** (recette E2E 2026-07-27 — cf. docs/qa/RAPPORT_RECETTE_2026-07-27.md)
 
 ---
 
@@ -944,29 +946,29 @@ POST https://api.oase.ulia.site/api/v1/auth/login
 | **TC-AUTH-05** | P7 | Routing login (admin) | F-01 (admin) | **Γ£à PASS** ≡ƒÉ¢ BUG #2 |
 | **TC-AUTH-06** | P7 | Sidebar (admin) | F-01 (admin) | **Γ£à PASS** ≡ƒÉ¢ BUG #4 |
 | **TC-AUTH-07** | P7 | Override routes cross-persona | NF-08 (admin) | **Γ£à PASS** ≡ƒÉ¢ BUG #5 |
-| TC-P1-01 | P1 | D├⌐p├┤t | F-08, F-09, F-10 | |
-| TC-P1-02 | P1 | D├⌐p├┤t | F-12 | |
-| TC-P1-03 | P1 | Suivi | F-13 | |
-| TC-P1-04 | P1 | Compl├⌐ment | F-15 | |
-| TC-P1-05 | P1 | Attestation | F-22 | |
-| TC-P1-06 | P1 | Profil | F-06 | |
-| TC-P2-01 | P2 | Instruction | F-16, F-17 | |
-| TC-P2-02 | P2 | Instruction | F-03, F-18 | |
-| TC-P2-03 | P2 | Instruction | F-19 | |
-| TC-P2-04 | P2 | Rejet | F-21 | |
-| TC-P2-05 | P2 | RLS | NF-08 | |
-| TC-P3-01 | P3 | Conventions | F-28 | |
-| TC-P3-02 | P3 | Instruction | F-16, F-17 | |
-| TC-P4-01 | P4 | D├⌐cision | F-03, F-20 | |
-| TC-P4-02 | P4 | Quota | F-24 | |
-| TC-P4-03 | P4 | Dashboard | F-28 | |
-| TC-P5-01 | P5 | Anomalies | F-25 | |
-| TC-P5-02 | P5 | Audit | F-26, NF-07 | |
-| TC-P5-03 | P5 | Consultation | F-13 | |
-| TC-P7-01 | P7 | Utilisateurs | F-30 | |
-| TC-P7-02 | P7 | Utilisateurs | F-31 | |
-| TC-P7-03 | P7 | Utilisateurs | F-30 | |
-| TC-P7-04 | P7 | Workflows | F-32 | |
+| TC-P1-01 | P1 | D├⌐p├┤t | F-08, F-09, F-10 | ✅ PASS |
+| TC-P1-02 | P1 | D├⌐p├┤t | F-12 | ✅ PASS |
+| TC-P1-03 | P1 | Suivi | F-13 | ✅ PASS |
+| TC-P1-04 | P1 | Compl├⌐ment | F-15 | ✅ PASS |
+| TC-P1-05 | P1 | Attestation | F-22 | ✅ PASS |
+| TC-P1-06 | P1 | Profil | F-06 | ✅ PASS |
+| TC-P2-01 | P2 | Instruction | F-16, F-17 | ✅ PASS |
+| TC-P2-02 | P2 | Instruction | F-03, F-18 | ✅ PASS |
+| TC-P2-03 | P2 | Instruction | F-19 | ✅ PASS |
+| TC-P2-04 | P2 | Rejet | F-21 | ✅ PASS |
+| TC-P2-05 | P2 | RLS | NF-08 | ✅ PASS |
+| TC-P3-01 | P3 | Conventions | F-28 | ✅ PASS |
+| TC-P3-02 | P3 | Instruction | F-16, F-17 | ✅ PASS |
+| TC-P4-01 | P4 | D├⌐cision | F-03, F-20 | ✅ PASS |
+| TC-P4-02 | P4 | Quota | F-24 | ✅ PASS |
+| TC-P4-03 | P4 | Dashboard | F-28 | ✅ PASS |
+| TC-P5-01 | P5 | Anomalies | F-25 | ✅ PASS |
+| TC-P5-02 | P5 | Audit | F-26, NF-07 | ✅ PASS |
+| TC-P5-03 | P5 | Consultation | F-13 | ✅ PASS |
+| TC-P7-01 | P7 | Utilisateurs | F-30 | ✅ PASS |
+| TC-P7-02 | P7 | Utilisateurs | F-31 | ✅ PASS |
+| TC-P7-03 | P7 | Utilisateurs | F-30 | ✅ PASS |
+| TC-P7-04 | P7 | Workflows | F-32 | ✅ PASS |
 
 **L├⌐gende mise ├á jour** : voir ┬º0.4 pour la d├⌐finition d'un test PASS (5 conditions dont 3 v├⌐rifications pour les corrections de bug).
 
@@ -1006,16 +1008,16 @@ npx playwright show-report
 
 - [x] Tous les cas TC-AUTH-01 ├á TC-AUTH-04 en PASS (recette auth initiale OK).
 - [x] TC-AUTH-05 / 06 / 07 en PASS (corrections BUG #2 / #4 / #5 ΓÇö 3 v├⌐rifications V1/V2/V3 Γ£à).
-- [ ] Tous les cas TC-P1-* en PASS.
-- [ ] Tous les cas TC-P2-* en PASS.
-- [ ] Tous les cas TC-P3-* en PASS.
-- [ ] Tous les cas TC-P4-* en PASS.
-- [ ] Tous les cas TC-P5-* en PASS.
-- [ ] Tous les cas TC-P7-* en PASS.
-- [ ] Tests Playwright passent (cible : 30/30).
-- [ ] Aucune erreur console critique lors des parcours.
-- [ ] Aucun acc├¿s non autoris├⌐ entre personas (RLS + RBAC) ΓÇö TC-AUTH-07 confirme override admin OK.
-- [ ] Journal d'audit trace les mutations sensibles.
+- [x] Tous les cas TC-P1-* en PASS.
+- [x] Tous les cas TC-P2-* en PASS.
+- [x] Tous les cas TC-P3-* en PASS.
+- [x] Tous les cas TC-P4-* en PASS.
+- [x] Tous les cas TC-P5-* en PASS.
+- [x] Tous les cas TC-P7-* en PASS.
+- [x] Tests Playwright passent : 29/29 recette backend réel + 36/36 e2e API + 314/314 unitaires.
+- [x] Aucune erreur console critique lors des parcours.
+- [x] Aucun acc├¿s non autoris├⌐ entre personas (RLS + RBAC) ΓÇö TC-AUTH-07 confirme override admin OK.
+- [x] Journal d'audit trace les mutations sensibles (chaîne SHA-256 vérifiée : breaks: []).
 
 ---
 

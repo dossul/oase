@@ -1,14 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { createHash } from 'crypto';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { writeFile, mkdir, readFile } from 'fs/promises';
+import { join, basename, extname } from 'path';
 import { PrismaService } from '../prisma/prisma.service';
+import { ScopeService } from '../common/services/scope.service';
+import { AuthUser } from '../auth/auth.service';
+import { buildSimplePdf } from '../common/utils/simple-pdf.util';
 
 const ATTESTATIONS_DIR = 'attestations';
 
+export interface AttestationFichier {
+  buffer: Buffer;
+  filename: string;
+  mimeType: string;
+}
+
 @Injectable()
 export class AttestationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private scope: ScopeService,
+  ) {}
 
   async generer(acteId: string) {
     const acte = await this.prisma.acte.findUnique({
@@ -28,14 +40,17 @@ export class AttestationsService {
     const qrHash = createHash('sha256').update(JSON.stringify(qrPayload)).digest('hex');
     const documentHash = createHash('sha256').update(`${acte.id}:${qrHash}:${Date.now()}`).digest('hex');
 
-    const content = this.buildAttestationContent(reference, acte, qrPayload);
+    const pdf = buildSimplePdf({
+      title: 'ATTESTATION OASE',
+      lines: this.buildAttestationLines(reference, acte, qrPayload),
+    });
     await mkdir(join(process.cwd(), ATTESTATIONS_DIR), { recursive: true });
-    const documentUrl = join(ATTESTATIONS_DIR, `${reference}.txt`);
-    await writeFile(join(process.cwd(), documentUrl), content);
+    const documentUrl = join(ATTESTATIONS_DIR, `${reference}.pdf`);
+    await writeFile(join(process.cwd(), documentUrl), pdf);
 
     await this.prisma.acte.update({
       where: { id: acteId },
-      data: { qrCodeHash: qrHash, hashDocument: documentHash },
+      data: { qrCodeHash: qrHash, hashDocument: documentHash, documentUrl },
     });
 
     return {
@@ -60,17 +75,53 @@ export class AttestationsService {
     };
   }
 
-  private buildAttestationContent(reference: string, acte: any, qrPayload: any): string {
+  /**
+   * Téléchargement de l'attestation d'une demande approuvée.
+   * Accessible au contribuable propriétaire et aux rôles internes dans leur périmètre.
+   */
+  async telechargerParDemande(user: AuthUser, demandeId: string): Promise<AttestationFichier> {
+    const allowed = await this.scope.isAllowed(user, 'demande', demandeId);
+    if (!allowed) throw new ForbiddenException({ code: 'PERIMETRE_NON_AUTORISE' });
+
+    const acte = await this.prisma.acte.findFirst({
+      where: { demandeId, typeCode: 'attestation', estRevoke: false },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!acte) throw new NotFoundException({ code: 'ATTESTATION_NON_TROUVEE' });
+
+    // Chemin stocké en base, sinon chemin conventionnel dérivé de la référence.
+    const relativePath =
+      acte.documentUrl || join(ATTESTATIONS_DIR, `ATTEST-${acte.reference}.pdf`);
+    const absolutePath = join(process.cwd(), relativePath);
+
+    // Anti-traversée : le fichier doit rester dans le dossier attestations/.
+    const attestationsRoot = join(process.cwd(), ATTESTATIONS_DIR);
+    if (!absolutePath.startsWith(attestationsRoot)) {
+      throw new NotFoundException({ code: 'ATTESTATION_NON_TROUVEE' });
+    }
+
+    let buffer: Buffer;
+    try {
+      buffer = await readFile(absolutePath);
+    } catch {
+      throw new NotFoundException({ code: 'ATTESTATION_FICHIER_ABSENT' });
+    }
+
+    const filename = basename(absolutePath);
+    const mimeType = extname(filename).toLowerCase() === '.pdf' ? 'application/pdf' : 'text/plain';
+    return { buffer, filename, mimeType };
+  }
+
+  private buildAttestationLines(reference: string, acte: any, qrPayload: any): string[] {
     return [
-      'ATTESTATION OASE',
-      '================',
       `Reference: ${reference}`,
       `Acte: ${acte.reference}`,
       `Demande: ${acte.demandes.reference}`,
       `Contribuable NIF: ${acte.demandes.contribuables.nif}`,
       `Date d'effet: ${acte.dateEffet.toISOString()}`,
       `Hash QR: ${qrPayload.hash}`,
-      'Cette attestation est verifiable via le QR code ou sur /api/v1/attestations/verifier/{qrHash}',
-    ].join('\n');
+      'Cette attestation est verifiable via le QR code',
+      'ou sur /api/v1/attestations/verifier/{qrHash}',
+    ];
   }
 }

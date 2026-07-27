@@ -73,7 +73,7 @@ export class JobsService {
 
     await this.notifications.envoyer({
       utilisateurId,
-      typeNotificationCode: 'archivage_termine',
+      typeNotificationCode: 'SYSTEME',
       canalCode: 'inapp',
       titre: 'Archivage terminé',
       corps: `${archivages.length} demandes archivées.`,
