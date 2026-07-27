@@ -512,3 +512,19 @@ Campagne de recette exhaustive (workflows, formulaires, uploads, profils, permis
 - **Cause racine** : l'app était montée AVANT la résolution de la route initiale → App.vue rendait transitoirement le layout par défaut (AppLayout) même sur /login → appel anonyme 401 → purge + reload. Masqué en dev car le mode démo court-circuite l'appel réel.
 - **Fix** (maquette `09921f5`) : `main.ts` mount après `router.isReady()` ; AppLayout n'appelle `unread-count` que si authentifié ; `api.ts` ne purge/redirige sur 401 que si une session existait.
 - **Vérifié en ligne** : 0 appel API anonyme au boot, login UI P1 OK, sélecteur persona absent (double garde DEV + .dockerignore), bundle `index-Wj3YHmuV.js` → nouveau bundle après fix.
+
+### BUG #8.13 — Uploads impossibles en prod Docker (2026-07-27, recette prod) — ✅ FIXED
+
+- **Symptôme** : `POST /demandes/:id/pieces-jointes` → 500 `EACCES: permission denied, mkdir '/app/uploads'` en production (le conteneur tourne en user non-root `oase`).
+- **Fix** : `deploy/api.Dockerfile` crée `/app/uploads` + `/app/attestations` (chown oase) ; volumes persistants `oase_uploads_data` / `oase_attestations_data` dans `docker-compose.local-prod.yml`. Attestation seed régénérée (chemin Windows `\` en base → régénération via POST /attestations/actes/:id).
+
+### BUG #8.14 — audit/DossiersView 100 % mock → vide en prod (2026-07-27, recette prod) — ✅ FIXED
+
+- **Symptôme** : en prod (mode démo OFF), les mocks retournent `[]` → la « Consultation des dossiers » de l'auditeur affichait une table vide (TC-P5-03 FAIL en prod uniquement).
+- **Fix** : vue câblée sur `GET /demandes` + `GET /demandes/:id/pieces-jointes` (liste, détail drawer, pièces réelles, filtre statuts canoniques).
+
+### Validation finale — recette E2E EN PRODUCTION (2026-07-27)
+
+- **29/29** tests Playwright recette PASS sur `https://oase.ulia.site` (26 parallèles + 3 P4 séquentiels)
+- **7/7** personas : login UI en ligne + redirection correcte + sidebar sans sélecteur persona
+- **16/16** comptes : login API prod OK
