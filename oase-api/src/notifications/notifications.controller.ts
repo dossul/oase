@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, ParseUUIDPipe, NotFoundException } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RbacGuard } from '../common/guards/rbac.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -84,7 +84,14 @@ export class NotificationsController {
     Role.AUDITEUR,
     Role.ADMIN_SI,
   )
-  marquerLue(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
-    return this.service.marquerLue(user, id);
+  async marquerLue(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
+    // OASE [BUG #13] fix : 404 uniforme quand la notification n'existe pas OU
+    // appartient à un autre utilisateur. Auparavant le service renvoyait `null`
+    // et NestJS répondait 200 + body null — ce qui permettait de distinguer
+    // « existe mais pas à moi » (200 null) de « à moi » (200 objet), fuite
+    // d'information inter-utilisateurs (détecté par notifications.spec.ts).
+    const notif = await this.service.marquerLue(user, id);
+    if (!notif) throw new NotFoundException('Notification introuvable');
+    return notif;
   }
 }
