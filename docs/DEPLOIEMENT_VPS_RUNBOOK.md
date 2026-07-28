@@ -5,6 +5,8 @@
 > **URLs :** app `https://oase.ulia.site` · API `https://api.oase.ulia.site/api/v1`.
 > **Principe directeur :** **le local remplace la prod** (code + base de données), avec sauvegarde préalable systématique.
 
+> ⛔ **POLITIQUE DE DÉPLOIEMENT (décision projet, 2026-07-27) :** le déploiement **Vercel est INTERDIT** pour ce projet. Le **VPS Docker est le SEUL canal autorisé**. Les artefacts Vercel (`maquette/vercel.json`, lien `.vercel/`) ont été supprimés ; ne pas les réintroduire. Toute mise en ligne passe par ce runbook.
+
 ---
 
 ## 0. Prérequis (poste Windows de déploiement)
