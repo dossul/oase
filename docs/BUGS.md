@@ -528,3 +528,22 @@ Campagne de recette exhaustive (workflows, formulaires, uploads, profils, permis
 - **29/29** tests Playwright recette PASS sur `https://oase.ulia.site` (26 parallèles + 3 P4 séquentiels)
 - **7/7** personas : login UI en ligne + redirection correcte + sidebar sans sélecteur persona
 - **16/16** comptes : login API prod OK
+
+---
+
+## Session BUG #9 — Programme « 0 mocked data » (2026-07-27) — ✅ FIXED
+
+Objectif utilisateur : **aucune donnée fictive affichée, tout doit provenir de la DB**. Inventaire : ~30 vues avec données codées en dur visibles en prod + 3 vues cassées (mocks vidés). Traitement en 3 vagues :
+
+- **Vague A (frontend)** : démockage de ~30 vues sur endpoints existants ; urgences prod supprimées (fausse attestation DocumentViewer OASE-2026-0039, fausse identité TOGO STEEL pré-remplie, faux KPIs 847,3 Mds/724 Mds, faux hashes TSA, faux logs HTTP connecteurs, date acte en dur). Règle : donnée API, calcul réel, ou état vide honnête + TODO.
+- **Vague B (backend, 367/367 tests)** : 16 nouveaux endpoints adossés aux tables existantes — RBAC élargi (agent_dgtcp → conventions/rapports/stats ; agent_ci/cddi → conventions), GET /utilisateurs/annuaire, GET /connecteurs(+status/logs), GET+PUT /admin/parametres (system_config), GET /notifications/templates, GET /registre-central/mesures (agrégats réels), GET /rapports/opendata PUBLIC enrichi, module missions + migration 006 (+ champs anomalies montantEnCause/baseLegaleViolee), GET /admin/monitoring, délai moyen traitement dans /dashboards/p4, GET+PUT /referentiels/inseed.
+- **Vague C (frontend)** : câblage des vues sur ces endpoints (missions audit, connecteurs SI, registre central, paramètres, monitoring, trésor, opendata anonyme, simulation INSEED).
+
+Bugs connexes corrigés en route : client Prisma généré désynchronisé du schema (build Docker KO), balise `</div>` en trop (AgrementsView) cassant le build Vite, mocks e2e complétés (missions, registre-central, inseed, connecteurs…).
+
+### Validation finale (prod, 2026-07-27)
+
+- **29/29** tests recette Playwright sur https://oase.ulia.site
+- **10/10** vues clés scannées sans marqueur fictif (connecteurs, monitoring, paramètres, missions, registre central, dashboards, nouvelle demande, notifications)
+- **7/7** nouveaux endpoints prod 200 (dont opendata en accès anonyme) ; 3 missions seedées en prod
+- **367/367** tests unitaires backend
