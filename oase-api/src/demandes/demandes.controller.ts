@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, Res, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RbacGuard } from '../common/guards/rbac.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -44,6 +45,23 @@ export class DemandesController {
   )
   lister(@CurrentUser() user: AuthUser, @Query() dto: FiltrerDemandesDto) {
     return this.service.lister(user, dto);
+  }
+
+  @Get('export/mes-demandes')
+  @Roles(Role.CONTRIBUABLE, Role.ADMIN_SI)
+  async exporterMesDemandes(
+    @CurrentUser() user: AuthUser,
+    @Query('format') format: string,
+    @Res() res: Response,
+  ) {
+    const fmt = format === 'xlsx' ? 'xlsx' : 'csv';
+    const file = await this.service.exporterMesDemandes(user, fmt);
+    res.set({
+      'Content-Type': file.contentType,
+      'Content-Disposition': `attachment; filename="${file.filename}"`,
+      'Content-Length': file.buffer.length,
+    });
+    res.send(file.buffer);
   }
 
   @Get('stats/par-statut')

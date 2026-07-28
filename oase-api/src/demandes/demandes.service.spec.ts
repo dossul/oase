@@ -5,6 +5,7 @@ import { AuditService } from '../audit/audit.service';
 import { ScopeService } from '../common/services/scope.service';
 import { AuthService } from '../auth/auth.service';
 import { StateMachineService } from './state-machine.service';
+import { WorkflowService } from '../workflow/workflow.service';
 import { Role } from '../common/enums/generated';
 
 const mockPrisma = {
@@ -20,6 +21,12 @@ const mockPrisma = {
   contribuable: {
     findFirst: jest.fn(),
   },
+  demandeWorkflowInstance: {
+    findUnique: jest.fn(),
+  },
+  workflowTemplate: {
+    findFirst: jest.fn(),
+  },
 } as any;
 
 const mockAudit = { createEntry: jest.fn() } as any;
@@ -28,6 +35,7 @@ const mockScope = {
   isAllowed: jest.fn().mockResolvedValue(true),
 } as any;
 const mockAuth = { verifyPin: jest.fn() } as any;
+const mockWorkflow = { demarrerInstance: jest.fn().mockResolvedValue({ id: 'wf-1' }) } as any;
 
 describe('DemandesService', () => {
   let service: DemandesService;
@@ -41,6 +49,7 @@ describe('DemandesService', () => {
         { provide: AuditService, useValue: mockAudit },
         { provide: ScopeService, useValue: mockScope },
         { provide: AuthService, useValue: mockAuth },
+        { provide: WorkflowService, useValue: mockWorkflow },
       ],
     }).compile();
 
@@ -48,6 +57,8 @@ describe('DemandesService', () => {
     jest.clearAllMocks();
     mockScope.isAllowed.mockResolvedValue(true);
     mockAuth.verifyPin.mockResolvedValue(true);
+    mockPrisma.demandeWorkflowInstance.findUnique.mockResolvedValue(null);
+    mockPrisma.workflowTemplate.findFirst.mockResolvedValue(null);
   });
 
   const user = (role: Role) =>
@@ -108,6 +119,60 @@ describe('DemandesService', () => {
 
     const result = await service.transition(user(Role.CONTRIBUABLE), 'd-1', 'soumettre');
     expect(result.statutCode).toBe('soumis');
+  });
+
+  it('US-P1-03 : la soumission démarre le workflow d\u2019instruction (template lié à la base juridique)', async () => {
+    mockPrisma.demande.findUnique.mockResolvedValue({
+      id: 'd-1',
+      statutCode: 'brouillon',
+      baseJuridiqueVersionId: 'bjv-1',
+      montantFcfa: BigInt(1000000),
+      contribuables: null,
+      baseJuridiqueVersions: null,
+      utilisateurs: null,
+    });
+    mockPrisma.demande.update.mockResolvedValue({
+      id: 'd-1',
+      statutCode: 'soumis',
+      dateDepot: new Date(),
+      montantFcfa: BigInt(1000000),
+      contribuables: null,
+      baseJuridiqueVersions: null,
+      utilisateurs: null,
+    });
+    mockPrisma.workflowTemplate.findFirst.mockResolvedValue({ id: 'tpl-1', estActif: true });
+
+    await service.transition(user(Role.CONTRIBUABLE), 'd-1', 'soumettre');
+
+    expect(mockPrisma.workflowTemplate.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ estActif: true, baseJuridiqueVersionId: 'bjv-1' }) }),
+    );
+    expect(mockWorkflow.demarrerInstance).toHaveBeenCalledWith(expect.any(Object), 'd-1', 'tpl-1');
+  });
+
+  it('US-P1-03 : idempotent — ne redémarre pas le workflow si une instance existe déjà', async () => {
+    mockPrisma.demande.findUnique.mockResolvedValue({
+      id: 'd-1',
+      statutCode: 'brouillon',
+      montantFcfa: BigInt(1000000),
+      contribuables: null,
+      baseJuridiqueVersions: null,
+      utilisateurs: null,
+    });
+    mockPrisma.demande.update.mockResolvedValue({
+      id: 'd-1',
+      statutCode: 'soumis',
+      montantFcfa: BigInt(1000000),
+      contribuables: null,
+      baseJuridiqueVersions: null,
+      utilisateurs: null,
+    });
+    mockPrisma.demandeWorkflowInstance.findUnique.mockResolvedValue({ id: 'wf-existante' });
+
+    await service.transition(user(Role.CONTRIBUABLE), 'd-1', 'soumettre');
+
+    expect(mockPrisma.workflowTemplate.findFirst).not.toHaveBeenCalled();
+    expect(mockWorkflow.demarrerInstance).not.toHaveBeenCalled();
   });
 
   it('devrait interdire une transition invalide', async () => {

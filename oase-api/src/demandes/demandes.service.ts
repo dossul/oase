@@ -6,6 +6,8 @@ import { AuthService, AuthUser } from '../auth/auth.service';
 import { CreerDemandeDto } from './dto/creer-demande.dto';
 import { FiltrerDemandesDto } from './dto/filtrer-demandes.dto';
 import { StateMachineService, TransitionAction } from './state-machine.service';
+import { WorkflowService } from '../workflow/workflow.service';
+import { buildSimpleXlsx } from '../common/utils/simple-xlsx.util';
 import { StatutDemande } from '../common/enums/generated';
 
 @Injectable()
@@ -16,6 +18,7 @@ export class DemandesService {
     private scope: ScopeService,
     private stateMachine: StateMachineService,
     private auth: AuthService,
+    private workflow: WorkflowService,
   ) {}
 
   async creer(user: AuthUser, dto: CreerDemandeDto) {
@@ -144,7 +147,101 @@ export class DemandesService {
       nouvelleValeur: { statutCode: newStatut, ...payload },
     });
 
+    // US-P1-03 : la soumission définitive démarre le workflow d'instruction.
+    // Idempotent : si une instance existe déjà (anciennes demandes corrigées
+    // par script), on ne fait rien. Sans template actif correspondant, la
+    // soumission reste valide et le workflow pourra être démarré manuellement.
+    if (action === 'soumettre') {
+      await this.demarrerWorkflowAutomatique(user, id, demande.baseJuridiqueVersionId);
+    }
+
     return this.toResponse(updated);
+  }
+
+  /**
+   * Démarre l'instance de workflow d'instruction après soumission.
+   * Template choisi : actif, lié à la base juridique de la demande si possible,
+   * sinon le premier template actif ayant des étapes (version la plus récente).
+   */
+  private async demarrerWorkflowAutomatique(user: AuthUser, demandeId: string, baseJuridiqueVersionId?: string | null) {
+    const existante = await this.prisma.demandeWorkflowInstance.findUnique({ where: { demandeId } });
+    if (existante) return;
+
+    const template = await this.prisma.workflowTemplate.findFirst({
+      where: {
+        estActif: true,
+        workflowTemplateEtapes: { some: {} },
+        ...(baseJuridiqueVersionId ? { baseJuridiqueVersionId } : {}),
+      },
+      orderBy: { versionTemplate: 'desc' },
+    });
+    const templateFallback = template
+      ? template
+      : await this.prisma.workflowTemplate.findFirst({
+          where: { estActif: true, workflowTemplateEtapes: { some: {} } },
+          orderBy: { versionTemplate: 'desc' },
+        });
+    if (!templateFallback) return;
+
+    await this.workflow.demarrerInstance(user, demandeId, templateFallback.id);
+  }
+
+  /**
+   * US-P1-11 — Export serveur de la liste des demandes (CSV ou XLSX).
+   * Périmètre : celui de l'utilisateur connecté (même scope que lister()).
+   * Limite : 5 000 lignes. Nom de fichier : oase_demandes_P1_<userId>_<YYYYMMDD>.<ext>
+   */
+  async exporterMesDemandes(user: AuthUser, format: 'csv' | 'xlsx') {
+    const scope = await this.scope.buildWhereClause(user, 'demande');
+    const demandes = await this.prisma.demande.findMany({
+      where: scope,
+      orderBy: { createdAt: 'desc' },
+      take: 5000,
+      include: { baseJuridiqueVersions: true },
+    });
+
+    const headers = ['N° demande', 'Type', 'Statut', 'Date dépôt', 'Date décision', 'Montant (FCFA)', 'Base juridique'];
+    const rows = demandes.map((d) => {
+      const bj = (d as any).baseJuridiqueVersions;
+      return [
+        d.reference,
+        bj?.impotConcerne ?? '',
+        d.statutCode,
+        d.dateDepot ? new Date(d.dateDepot).toLocaleDateString('fr-FR') : '',
+        (d as any).dateDecision ? new Date((d as any).dateDecision).toLocaleDateString('fr-FR') : '',
+        Number(d.montantFcfa),
+        bj ? `${bj.libelle}${bj.article ? ` — ${bj.article}` : ''}` : '',
+      ] as (string | number)[];
+    });
+
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const filename = `oase_demandes_P1_${user.id}_${date}.${format}`;
+
+    await this.audit.createEntry({
+      action: 'DEMANDES_EXPORTEES',
+      entite: 'demandes',
+      entiteId: user.id,
+      utilisateurId: user.id,
+      roleAuMoment: user.role,
+      nouvelleValeur: { format, lignes: rows.length },
+    });
+
+    if (format === 'xlsx') {
+      const buffer = buildSimpleXlsx(headers, rows);
+      return {
+        filename,
+        buffer,
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      };
+    }
+
+    // CSV compatible Excel FR (séparateur ';' + BOM UTF-8)
+    const escapeCsv = (v: string | number) => {
+      const s = String(v);
+      return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const csv = '﻿' + [headers, ...rows].map((r) => r.map(escapeCsv).join(';')).join('\r\n');
+    return { filename, buffer: Buffer.from(csv, 'utf8'), contentType: 'text/csv; charset=utf-8' };
   }
 
   async statsParStatut(user: AuthUser) {
