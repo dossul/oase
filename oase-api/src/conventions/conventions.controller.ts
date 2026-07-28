@@ -15,6 +15,9 @@ export class ConventionsController {
   @Get()
   @Roles(
     Role.CONTRIBUABLE,
+    Role.AGENT_CI,
+    Role.AGENT_CDDI,
+    Role.AGENT_DGTCP,
     Role.AGENT_AGENCE,
     Role.AGENT_MAE,
     Role.AGENT_DGMG,
@@ -29,6 +32,9 @@ export class ConventionsController {
   @Get(':id')
   @Roles(
     Role.CONTRIBUABLE,
+    Role.AGENT_CI,
+    Role.AGENT_CDDI,
+    Role.AGENT_DGTCP,
     Role.AGENT_AGENCE,
     Role.AGENT_MAE,
     Role.AGENT_DGMG,

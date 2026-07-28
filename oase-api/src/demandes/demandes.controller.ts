@@ -47,7 +47,7 @@ export class DemandesController {
   }
 
   @Get('stats/par-statut')
-  @Roles(Role.DECIDEUR, Role.AGENT_CONEDEF, Role.AUDITEUR, Role.ADMIN_SI)
+  @Roles(Role.DECIDEUR, Role.AGENT_CONEDEF, Role.AGENT_DGTCP, Role.AUDITEUR, Role.ADMIN_SI)
   statsParStatut(@CurrentUser() user: AuthUser) {
     return this.service.statsParStatut(user);
   }

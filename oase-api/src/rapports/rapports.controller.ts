@@ -13,19 +13,13 @@ export class RapportsController {
   constructor(private readonly service: RapportsService) {}
 
   @Get()
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR, Role.AUDITEUR)
+  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_DGTCP, Role.DECIDEUR, Role.AUDITEUR)
   async lister() {
     return this.service.lister();
   }
 
-  @Get('opendata')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR, Role.AUDITEUR, Role.PUBLIC)
-  async openData() {
-    return this.service.openData();
-  }
-
   @Get(':id')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR, Role.AUDITEUR)
+  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_DGTCP, Role.DECIDEUR, Role.AUDITEUR)
   async trouverParId(@Param('id') id: string) {
     return this.service.trouverParId(id);
   }

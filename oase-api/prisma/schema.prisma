@@ -117,6 +117,8 @@ model Anomalie {
   utilisateurId            String? @map("utilisateur_id")                  @db.Char(36)
   regleId                  String? @map("regle_id")                  @db.VarChar(100)
   commentaire               String?                  @db.Text
+  montantEnCause           BigInt? @map("montant_en_cause")
+  baseLegaleViolee         String? @map("base_legale_violee")         @db.VarChar(200)
   dateResolution           DateTime? @map("date_resolution")
   createdAt                DateTime @map("created_at")                 @default(now())
   updatedAt                DateTime @map("updated_at")                 @default(now())
@@ -630,6 +632,7 @@ model Demande {
   decisions                  Decision[]
   demandeComplements        DemandeComplement[]
   demandeSyncExterne       DemandeSyncExterne[]
+  missions                  Mission[]
   demandeWorkflowInstances DemandeWorkflowInstance?
   baseJuridiqueVersions    BaseJuridiqueVersion     @relation(fields: [baseJuridiqueVersionId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_1")
   contribuables              Contribuable               @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "demandes_ibfk_2")
@@ -1603,6 +1606,7 @@ model Utilisateur {
   demandeWorkflowEtapes  DemandeWorkflowEtape[]
   demandes                 Demande[]
   importsMrd              ImportMrd[]
+  missions                 Mission[]
   notificationPreferences NotificationPreference[]
   notificationQueue       NotificationQueue[]
   notifications            Notification[]
@@ -1731,4 +1735,29 @@ model MfaChallenge {
   @@index([utilisateurId, canal, estUtilise], map: "idx_mfa_challenge_actif")
   @@index([expiresAt], map: "idx_mfa_challenge_expires")
   @@map("mfa_challenges")
+}
+
+/// Missions de contrôle / audit (vague B — programme « 0 mocked data »)
+model Mission {
+  id               String       @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  reference        String       @unique(map: "reference") @db.VarChar(20)
+  titre            String       @db.VarChar(200)
+  type             String       @db.VarChar(20) // audit | controle
+  statut           String       @default("planifiee") @db.VarChar(20) // planifiee | en_cours | terminee
+  organe           String?      @db.VarChar(100)
+  auditeurId       String       @map("auditeur_id") @db.Char(36)
+  demandeId        String?      @map("demande_id") @db.Char(36)
+  dateDebut        DateTime?    @map("date_debut") @db.Date
+  dateFin          DateTime?    @map("date_fin") @db.Date
+  constats         String?      @db.Text
+  recommandations  String?      @db.Text
+  createdAt        DateTime     @map("created_at") @default(now())
+  updatedAt        DateTime     @map("updated_at") @default(now())
+  auditeur         Utilisateur  @relation(fields: [auditeurId], references: [id], onUpdate: NoAction, map: "missions_ibfk_1")
+  demande          Demande?     @relation(fields: [demandeId], references: [id], onUpdate: NoAction, map: "missions_ibfk_2")
+
+  @@index([auditeurId], map: "idx_missions_auditeur")
+  @@index([demandeId], map: "idx_missions_demande")
+  @@index([statut], map: "idx_missions_statut")
+  @@map("missions")
 }

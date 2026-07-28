@@ -27,6 +27,9 @@ import { DashboardsModule } from './dashboards/dashboards.module';
 import { RapportsModule } from './rapports/rapports.module';
 import { JobsModule } from './jobs/jobs.module';
 import { OtpModule } from './otp/otp.module';
+import { AdminModule } from './admin/admin.module';
+import { RegistreCentralModule } from './registre-central/registre-central.module';
+import { MissionsModule } from './missions/missions.module';
 import { ContribuablesModule } from './contribuables/contribuables.module';
 
 @Module({
@@ -70,6 +73,9 @@ import { ContribuablesModule } from './contribuables/contribuables.module';
     RapportsModule,
     JobsModule,
     OtpModule,
+    AdminModule,
+    RegistreCentralModule,
+    MissionsModule,
     ContribuablesModule,
   ],
   controllers: [AppController],

@@ -186,6 +186,8 @@ exports.Prisma.AnomalieScalarFieldEnum = {
   utilisateurId: 'utilisateurId',
   regleId: 'regleId',
   commentaire: 'commentaire',
+  montantEnCause: 'montantEnCause',
+  baseLegaleViolee: 'baseLegaleViolee',
   dateResolution: 'dateResolution',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1244,6 +1246,23 @@ exports.Prisma.MfaChallengeScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.MissionScalarFieldEnum = {
+  id: 'id',
+  reference: 'reference',
+  titre: 'titre',
+  type: 'type',
+  statut: 'statut',
+  organe: 'organe',
+  auditeurId: 'auditeurId',
+  demandeId: 'demandeId',
+  dateDebut: 'dateDebut',
+  dateFin: 'dateFin',
+  constats: 'constats',
+  recommandations: 'recommandations',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1316,7 +1335,8 @@ exports.Prisma.AnomalieOrderByRelevanceFieldEnum = {
   detecteeParCode: 'detecteeParCode',
   utilisateurId: 'utilisateurId',
   regleId: 'regleId',
-  commentaire: 'commentaire'
+  commentaire: 'commentaire',
+  baseLegaleViolee: 'baseLegaleViolee'
 };
 
 exports.Prisma.ArchivageOrderByRelevanceFieldEnum = {
@@ -2045,6 +2065,19 @@ exports.Prisma.MfaChallengeOrderByRelevanceFieldEnum = {
   sel: 'sel'
 };
 
+exports.Prisma.MissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  reference: 'reference',
+  titre: 'titre',
+  type: 'type',
+  statut: 'statut',
+  organe: 'organe',
+  auditeurId: 'auditeurId',
+  demandeId: 'demandeId',
+  constats: 'constats',
+  recommandations: 'recommandations'
+};
+
 
 exports.Prisma.ModelName = {
   AccordSiege: 'AccordSiege',
@@ -2134,7 +2167,8 @@ exports.Prisma.ModelName = {
   WorkflowTemplate: 'WorkflowTemplate',
   PhoneOtpCode: 'PhoneOtpCode',
   SystemConfig: 'SystemConfig',
-  MfaChallenge: 'MfaChallenge'
+  MfaChallenge: 'MfaChallenge',
+  Mission: 'Mission'
 };
 
 /**

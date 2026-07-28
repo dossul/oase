@@ -59,12 +59,18 @@ describe('RapportsService', () => {
   it('devrait retourner les données open data', async () => {
     baseJuridique.findMany.mockResolvedValue([{ id: 'bj-1', codeMesure: 'MRD-001' }]);
     baseJuridiqueVersion.findMany.mockResolvedValue([
-      { baseJuridiqueId: 'bj-1', libelle: 'Test', impotConcerne: 'DD' },
+      { id: 'bjv-1', baseJuridiqueId: 'bj-1', libelle: 'Test', impotConcerne: 'DD' },
+    ]);
+    demande.findMany.mockResolvedValue([
+      { baseJuridiqueVersionId: 'bjv-1', montantFcfa: 2000000n, updatedAt: new Date('2026-03-15') },
     ]);
 
     const result = await service.openData();
 
     expect(result).toHaveLength(1);
     expect(result[0].codeMesure).toBe('MRD-001');
+    expect(result[0].agregats.nombreDemandesApprouvees).toBe(1);
+    expect(result[0].agregats.montantTotalAccorde).toBe('2000000');
+    expect(result[0].agregats.montantParAnnee).toEqual([{ annee: 2026, montant: '2000000' }]);
   });
 });

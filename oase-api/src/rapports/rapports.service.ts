@@ -76,6 +76,7 @@ export class RapportsService {
     const versions = await this.prisma.baseJuridiqueVersion.findMany({
       where: { versionCouranteFlag: 1 },
       select: {
+        id: true,
         baseJuridiqueId: true,
         libelle: true,
         impotConcerne: true,
@@ -85,14 +86,45 @@ export class RapportsService {
     });
 
     const versionsParBase = new Map<string, (typeof versions)[0]>();
+    const versionsParId = new Map<string, (typeof versions)[0]>();
     for (const v of versions) {
       versionsParBase.set(v.baseJuridiqueId, v);
+      versionsParId.set(v.id, v);
     }
 
-    return bases.map((b) => ({
-      codeMesure: b.codeMesure,
-      version: versionsParBase.get(b.id) ?? null,
-    }));
+    // Agrégats financiers réels par mesure : demandes approuvées + montants par année.
+    const demandesApprouvees = await this.prisma.demande.findMany({
+      where: { statutCode: 'approuve', deletedAt: null },
+      select: { baseJuridiqueVersionId: true, montantFcfa: true, updatedAt: true },
+    });
+    const aggParBase = new Map<string, { nombre: number; montant: bigint; parAnnee: Map<number, bigint> }>();
+    for (const d of demandesApprouvees) {
+      const v = versionsParId.get(d.baseJuridiqueVersionId);
+      if (!v) continue;
+      const agg = aggParBase.get(v.baseJuridiqueId) ?? { nombre: 0, montant: 0n, parAnnee: new Map() };
+      agg.nombre++;
+      agg.montant += d.montantFcfa ?? 0n;
+      const annee = d.updatedAt.getFullYear();
+      agg.parAnnee.set(annee, (agg.parAnnee.get(annee) ?? 0n) + (d.montantFcfa ?? 0n));
+      aggParBase.set(v.baseJuridiqueId, agg);
+    }
+
+    return bases.map((b) => {
+      const agg = aggParBase.get(b.id);
+      return {
+        codeMesure: b.codeMesure,
+        version: versionsParBase.get(b.id) ?? null,
+        agregats: {
+          nombreDemandesApprouvees: agg?.nombre ?? 0,
+          montantTotalAccorde: (agg?.montant ?? 0n).toString(),
+          montantParAnnee: agg
+            ? [...agg.parAnnee.entries()]
+                .sort(([a], [b2]) => a - b2)
+                .map(([annee, montant]) => ({ annee, montant: montant.toString() }))
+            : [],
+        },
+      };
+    });
   }
 
   private async construireRapport(dto: GenererRapportDto) {

@@ -8,7 +8,7 @@ export class DashboardsService {
   async kpisP4(dateDebut?: string, dateFin?: string) {
     const where = this.dateWhere(dateDebut, dateFin);
 
-    const [totalDemandes, demandesParStatut, demandesTraiteesMois] = await Promise.all([
+    const [totalDemandes, demandesParStatut, demandesTraiteesMois, demandesDecidees] = await Promise.all([
       this.prisma.demande.count({ where }),
       this.prisma.demande.groupBy({
         by: ['statutCode'],
@@ -20,12 +20,28 @@ export class DashboardsService {
         where: { ...where, statutCode: { not: 'brouillon' } },
         _count: { id: true },
       }),
+      // Demandes décidées (approuvées / rejetées) pour le délai moyen de traitement.
+      this.prisma.demande.findMany({
+        where: { ...where, statutCode: { in: ['approuve', 'rejete'] } },
+        select: { createdAt: true, updatedAt: true },
+      }),
     ]);
+
+    let delaiMoyenTraitementHeures: number | null = null;
+    if (demandesDecidees.length > 0) {
+      const totalMs = demandesDecidees.reduce(
+        (acc, d) => acc + (d.updatedAt.getTime() - d.createdAt.getTime()),
+        0,
+      );
+      delaiMoyenTraitementHeures = Math.round((totalMs / demandesDecidees.length / 3_600_000) * 10) / 10;
+    }
 
     return {
       totalDemandes,
       repartitionParStatut: demandesParStatut,
       evolutionJournaliere: demandesTraiteesMois,
+      delaiMoyenTraitementHeures,
+      nombreDemandesDecidees: demandesDecidees.length,
     };
   }
 

@@ -5,7 +5,7 @@ import { join, basename, extname } from 'path';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScopeService } from '../common/services/scope.service';
 import { AuthUser } from '../auth/auth.service';
-import { buildSimplePdf } from '../common/utils/simple-pdf.util';
+import { buildAttestationPdf } from '../common/utils/simple-pdf.util';
 
 const ATTESTATIONS_DIR = 'attestations';
 
@@ -40,9 +40,50 @@ export class AttestationsService {
     const qrHash = createHash('sha256').update(JSON.stringify(qrPayload)).digest('hex');
     const documentHash = createHash('sha256').update(`${acte.id}:${qrHash}:${Date.now()}`).digest('hex');
 
-    const pdf = buildSimplePdf({
-      title: 'ATTESTATION OASE',
-      lines: this.buildAttestationLines(reference, acte, qrPayload),
+    const pdf = buildAttestationPdf({
+      reference,
+      acte: {
+        reference: acte.reference,
+        dateEffet: acte.dateEffet,
+        dateExpiration: acte.dateExpiration,
+        typeActe: acte.typeActe || 'Attestation d’exoneration',
+        numeroOfficiel: acte.numeroOfficiel,
+      },
+      demande: {
+        reference: acte.demandes.reference,
+        objet: acte.demandes.objet,
+        montantDemande: acte.demandes.montantDemande,
+        devise: acte.demandes.devise,
+        dateDepot: acte.demandes.dateDepot,
+      },
+      contribuable: {
+        raisonSociale: acte.demandes.contribuables.raisonSociale,
+        nif: acte.demandes.contribuables.nif,
+        rccm: acte.demandes.contribuables.rccm,
+        formeJuridique: acte.demandes.contribuables.formeJuridique,
+        adresse: acte.demandes.contribuables.adresse,
+      },
+      baseJuridique: acte.demandes.baseJuridiqueVersions
+        ? await this.prisma.baseJuridiqueVersion
+            .findUnique({
+              where: { id: acte.demandes.baseJuridiqueVersionId },
+            })
+            .then((v) =>
+              v
+                ? {
+                    code: v.code,
+                    libelle: v.libelle,
+                    referenceTexte: v.referenceTexte,
+                  }
+                : null,
+            )
+        : null,
+      qrPayload: { hash: qrHash },
+      signature: {
+        nomSignataire: acte.signataireNom,
+        qualite: acte.signataireQualite,
+        dateSignature: acte.dateSignature,
+      },
     });
     await mkdir(join(process.cwd(), ATTESTATIONS_DIR), { recursive: true });
     const documentUrl = join(ATTESTATIONS_DIR, `${reference}.pdf`);

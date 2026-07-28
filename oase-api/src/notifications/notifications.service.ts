@@ -79,6 +79,13 @@ export class NotificationsService {
     return { count };
   }
 
+  /** Templates de notification (admin). */
+  async templates() {
+    return this.prisma.notificationTemplate.findMany({
+      orderBy: [{ typeNotificationCode: 'asc' }, { canalCode: 'asc' }],
+    });
+  }
+
   private async trouverDestinataires(demandeId: string): Promise<string[]> {
     const demande = await this.prisma.demande.findUnique({
       where: { id: demandeId },

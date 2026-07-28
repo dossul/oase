@@ -105,6 +105,33 @@ export class UtilisateursService {
     return this.toResponse(user);
   }
 
+  /**
+   * Annuaire interne (rôles internes uniquement) : identité + rôle + institution,
+   * sans aucune donnée sensible (pas d'email, téléphone, statut MFA…).
+   */
+  async annuaire() {
+    const users = await this.prisma.utilisateur.findMany({
+      where: { statutCode: 'actif' },
+      select: {
+        id: true,
+        nom: true,
+        prenom: true,
+        role: true,
+        institutions: { select: { id: true, nom: true, code: true } },
+      },
+      orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
+    });
+    return users.map((u) => ({
+      id: u.id,
+      nom: u.nom,
+      prenom: u.prenom,
+      role: u.role,
+      institution: u.institutions
+        ? { id: u.institutions.id, nom: u.institutions.nom, code: u.institutions.code }
+        : null,
+    }));
+  }
+
   async modifier(adminId: string, id: string, dto: ModifierUtilisateurDto) {
     const user = await this.prisma.utilisateur.findUnique({ where: { id } });
     if (!user) throw new NotFoundException({ code: 'UTILISATEUR_INEXISTANT' });

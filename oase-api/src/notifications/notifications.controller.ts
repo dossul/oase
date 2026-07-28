@@ -53,6 +53,12 @@ export class NotificationsController {
     return this.service.compterNonLues(user);
   }
 
+  @Get('templates')
+  @Roles(Role.ADMIN_SI)
+  templates() {
+    return this.service.templates();
+  }
+
   @Post()
   @Roles(Role.ADMIN_SI)
   envoyer(@CurrentUser() user: AuthUser, @Body() dto: EnvoyerNotificationDto) {
