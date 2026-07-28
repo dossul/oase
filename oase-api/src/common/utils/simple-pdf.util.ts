@@ -229,15 +229,19 @@ export interface AttestationPdfInput {
     reference: string;
     dateEffet: Date;
     dateExpiration?: Date | null;
-    typeActe?: string;
+    typeActe?: string | null;
     numeroOfficiel?: string | null;
+    signataireNom?: string | null;
+    signataireQualite?: string | null;
+    dateSignature?: Date | null;
   };
   demande: {
     reference: string;
     objet?: string | null;
     montantDemande?: number | null;
     devise?: string | null;
-    dateDepot: Date;
+    dateDepot?: Date | null;
+    secteur?: string | null;
   };
   contribuable: {
     raisonSociale: string;
@@ -252,20 +256,31 @@ export interface AttestationPdfInput {
     referenceTexte?: string | null;
   } | null;
   qrPayload: { hash: string };
-  signature?: {
-    nomSignataire?: string;
-    qualite?: string;
-    dateSignature?: Date;
-  };
 }
 
 export function buildAttestationPdf(input: AttestationPdfInput): Buffer {
   const fmtDate = (d?: Date | null) =>
     d ? d.toISOString().slice(0, 10).split('-').reverse().join('/') : '—';
-  const fmtMontant = (m?: number | null, devise = 'FCFA') =>
+  const fmtMontant = (m?: number | null, devise = 'XOF') =>
     m == null
       ? '—'
       : new Intl.NumberFormat('fr-FR').format(m) + ' ' + devise;
+
+  const legalLines: string[] = [
+    'La presente attestation est verifiable par QR code ou en ligne a l’adresse :',
+    'https://api.oase.ulia.site/api/v1/attestations/verifier/' + input.qrPayload.hash,
+    '',
+    'Toute alteration, reproduction frauduleuse ou usage abusif est passible des',
+    'sanctions prevues par la legislation fiscale togolaise en vigueur.',
+  ];
+  if (input.acte.signataireNom || input.acte.signataireQualite) {
+    legalLines.push('');
+    legalLines.push(
+      'Signee par : ' +
+        (input.acte.signataireNom || '—') +
+        (input.acte.signataireQualite ? ' (' + input.acte.signataireQualite + ')' : ''),
+    );
+  }
 
   return buildSimplePdf({
     title: 'ATTESTATION D’EXONERATION FISCALE',
@@ -290,7 +305,7 @@ export function buildAttestationPdf(input: AttestationPdfInput): Buffer {
         rows: [
           { label: 'Reference', value: input.demande.reference },
           { label: 'Date de depot', value: fmtDate(input.demande.dateDepot) },
-          { label: 'Objet', value: input.demande.objet || '—' },
+          { label: 'Secteur', value: input.demande.secteur || '—' },
           { label: 'Montant demande', value: fmtMontant(input.demande.montantDemande, input.demande.devise || undefined) },
         ],
       },
@@ -314,13 +329,7 @@ export function buildAttestationPdf(input: AttestationPdfInput): Buffer {
       },
       {
         title: 'Authentification',
-        lines: [
-          'La presente attestation est verifiable par QR code ou en ligne a l’adresse :',
-          'https://api.oase.ulia.site/api/v1/attestations/verifier/' + input.qrPayload.hash,
-          '',
-          'Toute alteration, reproduction frauduleuse ou usage abusif est passible des',
-          'sanctions prevues par la legislation fiscale togolaise en vigueur.',
-        ],
+        lines: legalLines,
       },
     ],
     footer: {
@@ -328,7 +337,7 @@ export function buildAttestationPdf(input: AttestationPdfInput): Buffer {
       hash: input.qrPayload.hash,
       legal:
         'Document genere par OASE · ' +
-        (input.signature?.dateSignature ? fmtDate(input.signature.dateSignature) : fmtDate(new Date())),
+        (input.acte.dateSignature ? fmtDate(input.acte.dateSignature) : fmtDate(new Date())),
       page: 1,
     },
   });

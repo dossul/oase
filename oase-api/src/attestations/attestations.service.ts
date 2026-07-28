@@ -25,7 +25,15 @@ export class AttestationsService {
   async generer(acteId: string) {
     const acte = await this.prisma.acte.findUnique({
       where: { id: acteId },
-      include: { demandes: { include: { contribuables: true } }, decisions: true },
+      include: {
+        demandes: {
+          include: {
+            contribuables: true,
+            baseJuridiqueVersions: { include: { basesJuridiques: true } },
+          },
+        },
+        decisions: { include: { utilisateurs: true } },
+      },
     });
     if (!acte) throw new NotFoundException({ code: 'ACTE_INEXISTANT' });
 
@@ -40,50 +48,48 @@ export class AttestationsService {
     const qrHash = createHash('sha256').update(JSON.stringify(qrPayload)).digest('hex');
     const documentHash = createHash('sha256').update(`${acte.id}:${qrHash}:${Date.now()}`).digest('hex');
 
+    const bj = acte.demandes.baseJuridiqueVersions;
+    const decisionUser = acte.decisions?.utilisateurs;
+    const signataire = decisionUser
+      ? (decisionUser.prenom ? decisionUser.prenom + ' ' : '') + decisionUser.nom
+      : null;
+
     const pdf = buildAttestationPdf({
       reference,
       acte: {
         reference: acte.reference,
         dateEffet: acte.dateEffet,
-        dateExpiration: acte.dateExpiration,
-        typeActe: acte.typeActe || 'Attestation d’exoneration',
-        numeroOfficiel: acte.numeroOfficiel,
+        dateExpiration: null,
+        typeActe: acte.typeCode,
+        numeroOfficiel: acte.reference,
+        signataireNom: signataire || decisionUser?.email || null,
+        signataireQualite: decisionUser?.role || null,
+        dateSignature: acte.createdAt,
       },
       demande: {
         reference: acte.demandes.reference,
-        objet: acte.demandes.objet,
-        montantDemande: acte.demandes.montantDemande,
+        montantDemande: acte.demandes.montantFcfa
+          ? Number(acte.demandes.montantFcfa)
+          : null,
         devise: acte.demandes.devise,
         dateDepot: acte.demandes.dateDepot,
+        secteur: acte.demandes.secteur,
       },
       contribuable: {
         raisonSociale: acte.demandes.contribuables.raisonSociale,
         nif: acte.demandes.contribuables.nif,
         rccm: acte.demandes.contribuables.rccm,
-        formeJuridique: acte.demandes.contribuables.formeJuridique,
+        formeJuridique: null,
         adresse: acte.demandes.contribuables.adresse,
       },
-      baseJuridique: acte.demandes.baseJuridiqueVersions
-        ? await this.prisma.baseJuridiqueVersion
-            .findUnique({
-              where: { id: acte.demandes.baseJuridiqueVersionId },
-            })
-            .then((v) =>
-              v
-                ? {
-                    code: v.code,
-                    libelle: v.libelle,
-                    referenceTexte: v.referenceTexte,
-                  }
-                : null,
-            )
+      baseJuridique: bj
+        ? {
+            code: bj.basesJuridiques?.codeMesure ?? null,
+            libelle: bj.libelle,
+            referenceTexte: bj.articleCgi2025 || bj.article || null,
+          }
         : null,
       qrPayload: { hash: qrHash },
-      signature: {
-        nomSignataire: acte.signataireNom,
-        qualite: acte.signataireQualite,
-        dateSignature: acte.dateSignature,
-      },
     });
     await mkdir(join(process.cwd(), ATTESTATIONS_DIR), { recursive: true });
     const documentUrl = join(ATTESTATIONS_DIR, `${reference}.pdf`);
@@ -153,16 +159,4 @@ export class AttestationsService {
     return { buffer, filename, mimeType };
   }
 
-  private buildAttestationLines(reference: string, acte: any, qrPayload: any): string[] {
-    return [
-      `Reference: ${reference}`,
-      `Acte: ${acte.reference}`,
-      `Demande: ${acte.demandes.reference}`,
-      `Contribuable NIF: ${acte.demandes.contribuables.nif}`,
-      `Date d'effet: ${acte.dateEffet.toISOString()}`,
-      `Hash QR: ${qrPayload.hash}`,
-      'Cette attestation est verifiable via le QR code',
-      'ou sur /api/v1/attestations/verifier/{qrHash}',
-    ];
-  }
 }
