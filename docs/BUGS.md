@@ -591,3 +591,26 @@ Objectif utilisateur : **tous les workflows de P1 fonctionnels, 0 erreur** (cons
 - **0 erreur console réelle** sur l'audit Playwright complet P1 (`webbridge/p1-audit-complet.js`, rapport `webbridge/audit-p1-2026-07-28T19-57-16.md`)
 - **29/29** tests recette Playwright sur https://oase.ulia.site (dont p4-decideur isolé, fixtures partagées)
 - Les 2 échecs TC-P5-03 / TC-P7-03 observés pendant la fenêtre de redéploiement (API en restart) ont disparu dès la stack stabilisée — repro manuel headed sain, 9/9 puis 29/29 PASS.
+
+### BUG #10.5 — GET /rapports → 403 pour agent_conedef (2026-07-28, smoke E2E) — ✅ FIXED
+
+- **Symptôme** : le tableau de bord CONEDEF (`/conedef/dashboard`, mission « synchronisation avec le rapport annuel ») recevait un 403 sur `GET /rapports` — détecté par le nouveau smoke E2E `roles-secondaires.spec.ts`.
+- **Fix** (`3eea9e9`) : `Role.AGENT_CONEDEF` ajouté en lecture sur `GET /rapports` et `GET /rapports/:id` (contrôleur + `rbac.spec.ts`). Jest 369/369.
+
+### BUG #10.6 — GET /dashboards/p5 → 403 pour agent_dgbf (2026-07-28, smoke headed) — ✅ FIXED
+
+- **Symptôme** : la page budget DGBF (`/backoffice/budget`) appelle `GET /dashboards/p5` et recevait 403 — le code frontend portait un commentaire admettant le blocage et affichait un message d'erreur à la place des KPIs de dépenses fiscales, pourtant le cœur de mission DGBF.
+- **Détection** : uniquement en run **headed** (plus lent) — en headless la réponse 403 arrivait après l'assertion finale (race). Le smoke a été rendu déterministe (`waitForLoadState('networkidle')`).
+- **Fix** (`07ac711`) : `Role.AGENT_DGBF` ajouté sur `GET /dashboards/p5` (contrôleur + `rbac.spec.ts`). Jest 369/369.
+
+### BUG #10.7 — /opendata/rapports tirait un appel authentifié en accès anonyme (2026-07-28, TC-P6-04) — ✅ FIXED
+
+- **Symptôme** : la page PUBLIQUE `/opendata/rapports` appelait systématiquement `GET /rapports` (endpoint authentifié) même sans session → 401 garanti, capturé par la nouvelle spec P6.
+- **Fix** (maquette `da7a074`) : l'appel n'est déclenché que si `auth.isAuthenticated` ; sinon état « connexion requise » affiché sans appel réseau.
+
+### Couverture élargie (2026-07-28 ~23h) — P6 + rôles secondaires
+
+- Nouvelles specs : `p6-opendata.spec.ts` (5 tests, portail public anonyme) et `roles-secondaires.spec.ts` (7 rôles × écrans métier, 0 erreur console, 0 API ≥ 400).
+- **Recette complète : 41/41 PASS headless (1,3 min) + 16/16 PASS headed** sur les specs nouvelles/modifiées.
+- Fragilités de test corrigées : TC-P1-03/TC-P1-04 dépendaient de la présence d'une seed dans la liste paginée du dashboard (~10 plus récentes) → accès détail direct par id.
+- Reste honnêtement non couvert : rôle `agent_dsi_mef` (aucun compte provisionné), vérification publique d'attestation (fonction absente du routeur), MFA réel, notifications réelles, intégrations SI, charge, sécurité offensive. Détail : `docs/qa/RAPPORT_COUVERTURE_TESTS_2026-07-28.md` v2.

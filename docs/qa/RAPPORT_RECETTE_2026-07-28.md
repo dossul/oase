@@ -35,3 +35,18 @@ TEST_BASE_URL=https://oase.ulia.site TEST_API_URL=https://api.oase.ulia.site/api
 ## Note sur les échecs transitoires
 
 TC-P5-03 et TC-P7-03 ont échoué 2× pendant la fenêtre de redéploiement (API en restart / ancien bundle). Repro headed sain dès stack stabilisée, puis 9/9 et 29/29 PASS. Non reproductibles hors fenêtre de déploiement — aucun correctif produit requis.
+
+---
+
+## Mise à jour v2 — 2026-07-28 ~23h : 41/41 headless + 16/16 headed
+
+Suite élargie à la demande de l'utilisateur (« rien sans test E2E headless ET headed ») :
+
+| Spec | Tests | Résultat |
+|---|---|---|
+| p6-opendata (NOUVEAU) | TC-P6-01 à TC-P6-05 — portail public anonyme, 0 erreur, API publique 200 | ✅ 5/5 |
+| roles-secondaires (NOUVEAU) | smoke E2E agent_cddi/dgbf/dgtcp/mae/dgmg/ministere/conedef — écrans métier, 0 erreur console, 0 API ≥ 400 | ✅ 7/7 |
+| recette complète (29 + 12) | headless | ✅ **41/41 (1,3 min)** |
+| specs nouvelles + p1-suivi | **headed (navigateur visible)** | ✅ **16/16 (47 s)** |
+
+Bugs réels détectés et corrigés dans cette passe : BUG #10.5 (403 CONEDEF sur /rapports), BUG #10.6 (403 DGBF sur /dashboards/p5), BUG #10.7 (401 anonyme garanti sur /opendata/rapports). Détail : `RAPPORT_COUVERTURE_TESTS_2026-07-28.md` §5 et `docs/BUGS.md`.
