@@ -126,7 +126,7 @@ const endpoints: EndpointSpec[] = [
 
   // Dashboards
   { controller: DashboardsController, methodName: 'p4', allowedRoles: [Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR, Role.AGENT_CONEDEF], label: 'GET /dashboards/p4' },
-  { controller: DashboardsController, methodName: 'p5', allowedRoles: [Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR, Role.AUDITEUR], label: 'GET /dashboards/p5' },
+  { controller: DashboardsController, methodName: 'p5', allowedRoles: [Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_DGBF, Role.DECIDEUR, Role.AUDITEUR], label: 'GET /dashboards/p5' },
 
   // Conventions
   { controller: ConventionsController, methodName: 'lister', allowedRoles: [Role.CONTRIBUABLE, Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /conventions' },

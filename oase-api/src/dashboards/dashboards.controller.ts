@@ -17,7 +17,7 @@ export class DashboardsController {
   }
 
   @Get('p5')
-  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR, Role.AUDITEUR)
+  @Roles(Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_DGBF, Role.DECIDEUR, Role.AUDITEUR)
   async p5(@Query('dateDebut') dateDebut?: string, @Query('dateFin') dateFin?: string) {
     return this.service.kpisP5(dateDebut, dateFin);
   }
