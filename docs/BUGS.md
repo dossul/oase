@@ -547,3 +547,47 @@ Bugs connexes corrigés en route : client Prisma généré désynchronisé du sc
 - **10/10** vues clés scannées sans marqueur fictif (connecteurs, monitoring, paramètres, missions, registre central, dashboards, nouvelle demande, notifications)
 - **7/7** nouveaux endpoints prod 200 (dont opendata en accès anonyme) ; 3 missions seedées en prod
 - **367/367** tests unitaires backend
+
+---
+
+## Session BUG #10 — Workflows P1 (contribuable) en production (2026-07-28) — ✅ FIXED
+
+Objectif utilisateur : **tous les workflows de P1 fonctionnels, 0 erreur** (console + réseau) en production, détecté via audit Playwright piloté (navigateur visible).
+
+### BUG #10.1 — Sidebar « Mes demandes » menait à une vue détail sans liste — ✅ FIXED
+
+- **Symptôme** : le lien « Mes demandes » de la sidebar portail pointait vers une route sans vue liste ; le contribuable ne pouvait pas retrouver ses demandes après dépôt.
+- **Fix** (maquette `60b0b07`) : nouvelle `MesDemandesView.vue` (liste paginée, statuts canoniques, export), route `/portail/demandes` déclarée AVANT `/portail/demandes/:id`, sidebar corrigée.
+
+### BUG #10.2 — Bouton EXPORTER mort sur Mes demandes — ✅ FIXED
+
+- **Symptôme** : le bouton EXPORTER était câblé sur `@export="() => {}"` — aucun effet.
+- **Fix** : endpoint serveur `GET /demandes/export/mes-demandes?format=csv|xlsx` (backend `1a8c26d`, util `src/common/utils/simple-xlsx.util.ts` sans dépendance, CSV avec BOM Excel) + `exporterMesDemandes` dans `portail.ts` côté frontend. Vérifié en prod : XLSX 200 valide (19 lignes, bon `Content-Disposition`), CSV 200 avec BOM.
+
+### BUG #10.3 — Workflow jamais démarré à la soumission (404 sur /workflow/demandes/:id/etapes) — ✅ FIXED
+
+- **Symptôme** : `GET /workflow/demandes/:id/etapes` → 404 pour toute demande soumise ; le stepper du suivi restait vide (erreur initiale de l'audit : `index-CKUD8jN2.js:13 GET .../etapes 404`).
+- **Cause racine double** :
+  1. le démarrage de l'instance de workflow n'était pas déclenché à la soumission de la demande ;
+  2. **aucun template de workflow actif en base prod** → même démarré, rien à instancier.
+- **Fix backend** (`1a8c26d`) : démarrage auto idempotent dans `demandes.service.ts` à la soumission (template lié à la base juridique, fallback template actif), `demandes.module.ts` importe `WorkflowModule` ; 2 nouveaux tests Jest.
+- **Fix données** : template canonique `STD-EXONERATION-01` créé (3 étapes : Vérification recevabilité/agent_ci/2j → Instruction/agent_ci/10j → Décision-Signature/decideur/pinRequis/3j) + **48 instances rattrapées** en prod (47 en local, 141 étapes). Script idempotent : `webbridge/seed-workflow-template.js`. Backup BDD préalable : `/opt/oase/backups/oase_pre_20260728_p1fixes.sql.gz`.
+- **Preuve en conditions réelles** : `DEM-2026-00050` (créée + soumise par la recette p1-depot) démarre son workflow automatiquement — `/etapes` → 200.
+- **Garde frontend** : `DemandeDetailView.vue` n'appelle plus `/etapes` pour un brouillon non soumis.
+
+### BUG #10.4 — Favicon générique — ✅ FIXED
+
+- Favicon remplacé par le blason OASE, servi en prod.
+
+### Non-bugs confirmés (audit)
+
+- **US-P1-05 upload de pièces** : PAS de bug — `DocumentUploadModal.vue:707` effectue le vrai `uploadPieceJointe` ; l'`input[type=file]` est dans la modale.
+- **2 × 401** capturés par l'audit : attendus (tentative de login KO volontaire du scénario).
+
+### Validation finale (prod, 2026-07-28)
+
+- **369/369** tests unitaires Jest backend (2 nouveaux)
+- **vue-tsc** 0 erreur + build Vite OK ; nouveau bundle `index-pWw9Bvs3.js` déployé
+- **0 erreur console réelle** sur l'audit Playwright complet P1 (`webbridge/p1-audit-complet.js`, rapport `webbridge/audit-p1-2026-07-28T19-57-16.md`)
+- **29/29** tests recette Playwright sur https://oase.ulia.site (dont p4-decideur isolé, fixtures partagées)
+- Les 2 échecs TC-P5-03 / TC-P7-03 observés pendant la fenêtre de redéploiement (API en restart) ont disparu dès la stack stabilisée — repro manuel headed sain, 9/9 puis 29/29 PASS.
