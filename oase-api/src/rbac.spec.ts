@@ -99,8 +99,8 @@ const endpoints: EndpointSpec[] = [
   { controller: UtilisateursController, methodName: 'resetPin', allowedRoles: [Role.ADMIN_SI], label: 'POST /utilisateurs/:id/reset-pin' },
 
   // Rapports
-  { controller: RapportsController, methodName: 'lister', allowedRoles: [Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_DGTCP, Role.DECIDEUR, Role.AUDITEUR], label: 'GET /rapports' },
-  { controller: RapportsController, methodName: 'trouverParId', allowedRoles: [Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_DGTCP, Role.DECIDEUR, Role.AUDITEUR], label: 'GET /rapports/:id' },
+  { controller: RapportsController, methodName: 'lister', allowedRoles: [Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_DGTCP, Role.AGENT_CONEDEF, Role.DECIDEUR, Role.AUDITEUR], label: 'GET /rapports' },
+  { controller: RapportsController, methodName: 'trouverParId', allowedRoles: [Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_DGTCP, Role.AGENT_CONEDEF, Role.DECIDEUR, Role.AUDITEUR], label: 'GET /rapports/:id' },
   { controller: RapportsController, methodName: 'generer', allowedRoles: [Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.DECIDEUR], label: 'POST /rapports/generer' },
 
   // Quotas
