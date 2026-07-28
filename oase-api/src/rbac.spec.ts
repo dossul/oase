@@ -63,6 +63,13 @@ const INSTRUCTION_AGENTS: Role[] = [
 
 const ALL_ROLES_EXCEPT_PUBLIC: Role[] = [...ALL_BUISNESS_ROLES];
 
+// Notifications : même ordre que le contrôleur (AGENT_DSI_MEF inséré après AGENT_CONEDEF).
+const NOTIFS_ROLES: Role[] = [
+  ...ALL_ROLES_EXCEPT_PUBLIC.slice(0, 11), // … jusqu'à AGENT_CONEDEF inclus
+  Role.AGENT_DSI_MEF,
+  ...ALL_ROLES_EXCEPT_PUBLIC.slice(11), // AUDITEUR, ADMIN_SI
+];
+
 const endpoints: EndpointSpec[] = [
   // Demandes
   { controller: DemandesController, methodName: 'creer', allowedRoles: [Role.CONTRIBUABLE, Role.ADMIN_SI], label: 'POST /demandes' },
@@ -116,9 +123,9 @@ const endpoints: EndpointSpec[] = [
   { controller: PiecesJointesController, methodName: 'invalider', allowedRoles: INSTRUCTION_AGENTS, label: 'PATCH /demandes/:id/pieces-jointes/:pieceId/invalider' },
 
   // Notifications
-  { controller: NotificationsController, methodName: 'lister', allowedRoles: ALL_ROLES_EXCEPT_PUBLIC, label: 'GET /notifications' },
+  { controller: NotificationsController, methodName: 'lister', allowedRoles: NOTIFS_ROLES, label: 'GET /notifications' },
   { controller: NotificationsController, methodName: 'envoyer', allowedRoles: [Role.ADMIN_SI], label: 'POST /notifications' },
-  { controller: NotificationsController, methodName: 'marquerLue', allowedRoles: ALL_ROLES_EXCEPT_PUBLIC, label: 'PATCH /notifications/:id/lue' },
+  { controller: NotificationsController, methodName: 'marquerLue', allowedRoles: NOTIFS_ROLES, label: 'PATCH /notifications/:id/lue' },
 
   // Jobs
   { controller: JobsController, methodName: 'heartbeat', allowedRoles: [Role.ADMIN_SI], label: 'GET /jobs/heartbeat' },

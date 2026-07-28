@@ -25,6 +25,7 @@ export class NotificationsController {
     Role.AGENT_MINISTERE,
     Role.DECIDEUR,
     Role.AGENT_CONEDEF,
+    Role.AGENT_DSI_MEF,
     Role.AUDITEUR,
     Role.ADMIN_SI,
   )
@@ -46,6 +47,7 @@ export class NotificationsController {
     Role.AGENT_MINISTERE,
     Role.DECIDEUR,
     Role.AGENT_CONEDEF,
+    Role.AGENT_DSI_MEF,
     Role.AUDITEUR,
     Role.ADMIN_SI,
   )
@@ -78,6 +80,7 @@ export class NotificationsController {
     Role.AGENT_MINISTERE,
     Role.DECIDEUR,
     Role.AGENT_CONEDEF,
+    Role.AGENT_DSI_MEF,
     Role.AUDITEUR,
     Role.ADMIN_SI,
   )

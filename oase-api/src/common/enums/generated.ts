@@ -97,6 +97,7 @@ export enum Role {
   AGENT_DGMG = 'agent_dgmg',
   AGENT_MINISTERE = 'agent_ministere',
   AGENT_CONEDEF = 'agent_conedef',
+  AGENT_DSI_MEF = 'agent_dsi_mef',
   PUBLIC = 'public',
   SYSTEM = 'system',
 }

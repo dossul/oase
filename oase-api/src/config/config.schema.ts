@@ -21,6 +21,14 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+  // SMTP pour l'envoi réel des codes MFA par e-mail (canal email).
+  // Absentes en dev/test → l'adaptateur email retombe sur un log placeholder.
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(465),
+  SMTP_SECURE: z.enum(['true', 'false']).default('true'),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
 });
 
 export type Config = z.infer<typeof configSchema>;
