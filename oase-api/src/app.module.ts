@@ -32,6 +32,7 @@ import { RegistreCentralModule } from './registre-central/registre-central.modul
 import { MissionsModule } from './missions/missions.module';
 import { ContribuablesModule } from './contribuables/contribuables.module';
 import { PermisMiniersModule } from './permis-miniers/permis-miniers.module';
+import { FluxExtractifsModule } from './flux-extractifs/flux-extractifs.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { PermisMiniersModule } from './permis-miniers/permis-miniers.module';
     MissionsModule,
     ContribuablesModule,
     PermisMiniersModule,
+    FluxExtractifsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

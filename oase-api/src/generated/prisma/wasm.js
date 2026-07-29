@@ -420,6 +420,66 @@ exports.Prisma.PermisMinierScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ProductionExtractiveScalarFieldEnum = {
+  id: 'id',
+  contribuableId: 'contribuableId',
+  permisId: 'permisId',
+  annee: 'annee',
+  mois: 'mois',
+  substance: 'substance',
+  volumeProduitT: 'volumeProduitT',
+  volumeVenduT: 'volumeVenduT',
+  volumeTraiteT: 'volumeTraiteT',
+  valeurMarchandeFcfa: 'valeurMarchandeFcfa',
+  valeurMarchandeUsd: 'valeurMarchandeUsd',
+  chiffreAffairesFcfa: 'chiffreAffairesFcfa',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExportationExtractiveScalarFieldEnum = {
+  id: 'id',
+  contribuableId: 'contribuableId',
+  annee: 'annee',
+  mois: 'mois',
+  substance: 'substance',
+  volumeT: 'volumeT',
+  valeurFcfa: 'valeurFcfa',
+  valeurUsd: 'valeurUsd',
+  destination: 'destination',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RedevanceMiniereScalarFieldEnum = {
+  id: 'id',
+  contribuableId: 'contribuableId',
+  annee: 'annee',
+  trimestre: 'trimestre',
+  substance: 'substance',
+  baseAssietteFcfa: 'baseAssietteFcfa',
+  taux: 'taux',
+  montantDuFcfa: 'montantDuFcfa',
+  montantPayeFcfa: 'montantPayeFcfa',
+  datePaiement: 'datePaiement',
+  referencePaiement: 'referencePaiement',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TransfertCommuneCfldrScalarFieldEnum = {
+  id: 'id',
+  contribuableId: 'contribuableId',
+  annee: 'annee',
+  commune: 'commune',
+  chiffreAffairesAnnuelFcfa: 'chiffreAffairesAnnuelFcfa',
+  montantDuFcfa: 'montantDuFcfa',
+  montantEncaisseFcfa: 'montantEncaisseFcfa',
+  dateEncaissement: 'dateEncaissement',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.DecisionScalarFieldEnum = {
   id: 'id',
   demandeId: 'demandeId',
@@ -1524,6 +1584,33 @@ exports.Prisma.PermisMinierOrderByRelevanceFieldEnum = {
   statut: 'statut'
 };
 
+exports.Prisma.ProductionExtractiveOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contribuableId: 'contribuableId',
+  permisId: 'permisId',
+  substance: 'substance'
+};
+
+exports.Prisma.ExportationExtractiveOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contribuableId: 'contribuableId',
+  substance: 'substance',
+  destination: 'destination'
+};
+
+exports.Prisma.RedevanceMiniereOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contribuableId: 'contribuableId',
+  substance: 'substance',
+  referencePaiement: 'referencePaiement'
+};
+
+exports.Prisma.TransfertCommuneCfldrOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contribuableId: 'contribuableId',
+  commune: 'commune'
+};
+
 exports.Prisma.DecisionOrderByRelevanceFieldEnum = {
   id: 'id',
   demandeId: 'demandeId',
@@ -2133,6 +2220,10 @@ exports.Prisma.ModelName = {
   ConventionEngagement: 'ConventionEngagement',
   Convention: 'Convention',
   PermisMinier: 'PermisMinier',
+  ProductionExtractive: 'ProductionExtractive',
+  ExportationExtractive: 'ExportationExtractive',
+  RedevanceMiniere: 'RedevanceMiniere',
+  TransfertCommuneCfldr: 'TransfertCommuneCfldr',
   Decision: 'Decision',
   DemandeComplement: 'DemandeComplement',
   DemandeSyncExterne: 'DemandeSyncExterne',

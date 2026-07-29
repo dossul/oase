@@ -354,6 +354,10 @@ model Contribuable {
   utilisateurs                   Utilisateur?                    @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "contribuables_ibfk_4")
   conventions                    Convention[]
   permisMiniers                 PermisMinier[]
+  productionsExtractives       ProductionExtractive[]
+  exportationsExtractives      ExportationExtractive[]
+  redevancesMinieres           RedevanceMiniere[]
+  transfertsCommunesCfldr      TransfertCommuneCfldr[]
   demandes                       Demande[]
   quotas                         Quota[]
   piecesJointes                 PieceJointe[]  @relation("ContribuablePiecesJointes")
@@ -509,12 +513,95 @@ model PermisMinier {
   updatedAt        DateTime @map("updated_at") @default(now())
   contribuables    Contribuable @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "permis_miniers_ibfk_1")
   conventions      Convention?  @relation(fields: [conventionId], references: [id], onUpdate: NoAction, map: "permis_miniers_ibfk_2")
+  productionsExtractives ProductionExtractive[]
 
   @@index([contribuableId], map: "idx_permis_contribuable")
   @@index([conventionId], map: "idx_permis_convention")
   @@index([typePermis], map: "idx_permis_type")
   @@index([statut], map: "idx_permis_statut")
   @@map("permis_miniers")
+}
+
+model ProductionExtractive {
+  id                  String   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  contribuableId     String @map("contribuable_id") @db.Char(36)
+  permisId           String? @map("permis_id") @db.Char(36)
+  annee               Int
+  mois                Int
+  substance           String   @db.VarChar(100)
+  volumeProduitT      Decimal? @map("volume_produit_t") @db.Decimal(14, 2)
+  volumeVenduT        Decimal? @map("volume_vendu_t") @db.Decimal(14, 2)
+  volumeTraiteT       Decimal? @map("volume_traite_t") @db.Decimal(14, 2)
+  valeurMarchandeFcfa BigInt? @map("valeur_marchande_fcfa")
+  valeurMarchandeUsd  BigInt? @map("valeur_marchande_usd")
+  chiffreAffairesFcfa BigInt? @map("chiffre_affaires_fcfa")
+  createdAt           DateTime @map("created_at") @default(now())
+  updatedAt           DateTime @map("updated_at") @default(now())
+  contribuables       Contribuable @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "productions_extractives_ibfk_1")
+  permisMiniers       PermisMinier? @relation(fields: [permisId], references: [id], onUpdate: NoAction, map: "productions_extractives_ibfk_2")
+
+  @@unique([contribuableId, annee, mois, substance], map: "uq_production_periode")
+  @@index([permisId], map: "idx_production_permis")
+  @@index([annee], map: "idx_production_annee")
+  @@map("productions_extractives")
+}
+
+model ExportationExtractive {
+  id               String   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  contribuableId  String @map("contribuable_id") @db.Char(36)
+  annee            Int
+  mois             Int
+  substance        String   @db.VarChar(100)
+  volumeT          Decimal? @map("volume_t") @db.Decimal(14, 2)
+  valeurFcfa       BigInt? @map("valeur_fcfa")
+  valeurUsd        BigInt? @map("valeur_usd")
+  destination      String?  @db.VarChar(100)
+  createdAt        DateTime @map("created_at") @default(now())
+  updatedAt        DateTime @map("updated_at") @default(now())
+  contribuables    Contribuable @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "exportations_extractives_ibfk_1")
+
+  @@unique([contribuableId, annee, mois, substance], map: "uq_exportation_periode")
+  @@index([annee], map: "idx_exportation_annee")
+  @@map("exportations_extractives")
+}
+
+model RedevanceMiniere {
+  id                 String   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  contribuableId    String @map("contribuable_id") @db.Char(36)
+  annee              Int
+  trimestre          Int
+  substance          String   @db.VarChar(100)
+  baseAssietteFcfa   BigInt? @map("base_assiette_fcfa")
+  taux               Decimal? @db.Decimal(5, 2)
+  montantDuFcfa      BigInt? @map("montant_du_fcfa")
+  montantPayeFcfa    BigInt? @map("montant_paye_fcfa")
+  datePaiement       DateTime? @map("date_paiement") @db.Date
+  referencePaiement  String? @map("reference_paiement") @db.VarChar(50)
+  createdAt          DateTime @map("created_at") @default(now())
+  updatedAt          DateTime @map("updated_at") @default(now())
+  contribuables      Contribuable @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "redevances_minieres_ibfk_1")
+
+  @@unique([contribuableId, annee, trimestre, substance], map: "uq_redevance_periode")
+  @@index([annee], map: "idx_redevance_annee")
+  @@map("redevances_minieres")
+}
+
+model TransfertCommuneCfldr {
+  id                        String   @id @default(dbgenerated("(uuid())")) @db.Char(36)
+  contribuableId           String @map("contribuable_id") @db.Char(36)
+  annee                     Int
+  commune                   String   @db.VarChar(100)
+  chiffreAffairesAnnuelFcfa BigInt? @map("chiffre_affaires_annuel_fcfa")
+  montantDuFcfa             BigInt? @map("montant_du_fcfa")
+  montantEncaisseFcfa       BigInt? @map("montant_encaisse_fcfa")
+  dateEncaissement          DateTime? @map("date_encaissement") @db.Date
+  createdAt                 DateTime @map("created_at") @default(now())
+  updatedAt                 DateTime @map("updated_at") @default(now())
+  contribuables             Contribuable @relation(fields: [contribuableId], references: [id], onUpdate: NoAction, map: "transferts_communes_cfldr_ibfk_1")
+
+  @@unique([contribuableId, annee, commune], map: "uq_transfert_periode")
+  @@index([annee], map: "idx_transfert_annee")
+  @@map("transferts_communes_cfldr")
 }
 
 model Decision {
