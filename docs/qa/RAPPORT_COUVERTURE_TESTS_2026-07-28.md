@@ -5,6 +5,7 @@
 **Principe de rédaction :** ce document distingue strictement ce qui est **prouvé par un test exécuté** de ce qui est **non vérifié**. Aucune affirmation sans exécution correspondante.
 **v2 :** ajout des specs P6 et rôles secondaires exigées par l'utilisateur (« rien ne doit être affirmé sans test E2E, headless ET headed »). 3 vrais bugs produit trouvés et corrigés dans cette passe (voir §5).
 **v3 :** MFA réel (TOTP testé E2E, email bloqué par credentials SMTP/IMAP invalides), notifications in-app réelles, rôle `agent_dsi_mef` provisionné et testé, Open Data/SI externes confirmés **volontairement hors scope** par l'utilisateur. 3 nouveaux bugs trouvés et corrigés (BUG #11 à #13, §5).
+**v3.1 :** MFA email **DÉBLOQUÉ et PROUVÉ** (29/07 ~0h30) après réinitialisation du mot de passe de la boîte dans le cPanel o2switch — chaîne SMTP → IMAP → code accepté, API + UI, headless + headed. Le MFA (TOTP + email) est donc entièrement couvert ; il est **désactivé après les tests** et réactivable depuis Admin → Paramètres.
 
 ---
 
@@ -17,7 +18,7 @@
 | Tous les personas ont-ils été testés ? | **OUI — 14/14 rôles depuis v3.** Parcours UI complets P1-P5/P7 + smoke E2E des 8 rôles secondaires dont `agent_dsi_mef` (compte provisionné en v3). ⚠️ La vue DSI est statique (aucun appel API) : le test prouve le rendu sans erreur, pas des données réelles |
 | Le backend est-il régressé ? | **Non — 369/369 tests unitaires Jest PASS** |
 | Tous les comptes peuvent-ils se connecter en prod ? | **OUI — 16/16 logins API OK** (2026-07-27) |
-| MFA testé ? | **TOTP : OUI — API + UI, headless + headed (v3).** Email : backend SMTP réel livré et déployé, **E2E bloqué — credentials `no_reply@il7.info` refusés par o2switch** (vérifié IMAP 993 + SMTP 465, voir §3.3) |
+| MFA testé ? | **TOTP : OUI — API + UI, headless + headed (v3).** **Email : OUI depuis v3.1 (29/07 ~0h30)** — chaîne SMTP o2switch → boîte réelle → lecture IMAP → code accepté, API + UI, headless + headed, après réinitialisation du mot de passe de la boîte dans le cPanel o2switch |
 | Notifications testées ? | **Canal in-app : OUI (v3)** — liste, compteur = base, marquage lu, isolation inter-utilisateurs, UI. Email de notification : log `[MOCK EMAIL]` assumé (seul le MFA utilise le SMTP) |
 | Modes d'exécution | **Headless : 44/44 PASS (~1 min). Headed (visible) : 15/15 PASS sur les specs nouvelles/modifiées v3** (7 auth-mfa/notifications/p5 + 8 rôles secondaires) |
 
@@ -93,7 +94,7 @@ Specs `e2e/recette/auth-mfa.spec.ts` (TOTP) et `auth-mfa-email.spec.ts` (email),
 
 - **API TOTP** : `login → mfa_required + mfa_token (pas d'access_token)` → faux code **401** → vrai code (généré RFC 6238 côté test) **200 + paire de tokens utilisable immédiatement** (`/utilisateurs/me` 200)
 - **UI TOTP** : formulaire login → redirection `/mfa` → saisie dans le v-otp-input → dashboard du rôle, 0 erreur console — **headless ET headed** (après BUG #11 et #12)
-- **Email** : backend nodemailer branché sur SMTP o2switch réel (plus de placeholder log) — **E2E bloqué, voir §3.3**
+- **Email** : chaîne réelle complète — backend nodemailer → SMTP o2switch (`kilo.o2switch.net:465`) → boîte réelle → lecture IMAP (993) → extraction du code → vérification — **API + UI, headless ET headed : 2/2 + 2/2 PASS (v3.1)**
 - **Post-tests** : MFA global **désactivé** (`GET /admin/mfa/config → enabled:false` vérifié par API) ; réactivation prévue depuis Admin → Paramètres (toggle livré, non encore couvert par un test E2E dédié — §3.3)
 
 ### 2.9 Notifications in-app réelles (v3, 2026-07-29 ~1h)
@@ -120,7 +121,7 @@ Le plan de recette mentionne une « vérification d'attestation publique (P6) »
 
 ### 3.3 Fonctionnalités transverses non couvertes
 
-- **MFA email — E2E bloqué (credentials invalides)** : le backend SMTP réel (nodemailer, `kilo.o2switch.net:465`) est livré et déployé, la spec `auth-mfa-email.spec.ts` est écrite (lecture IMAP réelle de la boîte), MAIS les credentials fournis pour `no_reply@il7.info` sont **refusés par le serveur o2switch** — `[AUTHENTICATIONFAILED]` Dovecot en IMAP (993) et `535 Incorrect authentication data` Exim en SMTP (465), reproduit via imapflow ET via curl indépendamment (2 outils, 2 protocoles). Le mot de passe doit être vérifié/réinitialisé dans le cPanel o2switch, puis la spec rejouée (elle passera sans modification si les credentials sont valides). **Tant que ce test n'a pas tourné, le MFA email n'est PAS affirmé fonctionnel.**
+- **MFA email — ✅ PROUVÉ E2E (v3.1, 29/07 ~0h30)** : après réinitialisation du mot de passe dans le cPanel o2switch, la chaîne complète est testée et verte (API + UI, headless + headed) : login → code généré → envoi SMTP réel → réception boîte `no_reply@il7.info` → lecture IMAP → extraction du code → vérification 200 → session. Fragilité de la spec corrigée : parsing MIME via `mailparser` au lieu de la source brute (le quoted-printable encodait les accents et masquait le texte recherché).
 - **Toggle MFA dans Admin → Paramètres** : livré (`updateMfaConfig` + UI switch/select) mais pas couvert par un test E2E dédié — vérifié indirectement par les specs MFA qui pilotent `PATCH /admin/mfa/config` en API (200).
 - **Notifications email** : log `[MOCK EMAIL]` assumé à ce stade (seul le MFA email utilise le SMTP). SMS/WhatsApp : non implémentés (config `whatsappEnabled:false`).
 - **Intégrations Open Data / SI externes** : **volontairement abandonnées à cette étape du projet** (décision utilisateur 28/07) — hors scope assumé, pas un oubli.
@@ -140,7 +141,7 @@ Le plan de recette mentionne une « vérification d'attestation publique (P6) »
 1. ~~Spec E2E P6~~ → **FAIT (v2)**. ~~Smoke rôles secondaires~~ → **FAIT (v2)**.
 2. ~~Provisionner un compte `agent_dsi_mef`~~ → **FAIT (v3)**. Reste : brancher la vue DSI sur de vrais endpoints si le métier l'exige.
 3. Trancher l'exigence « vérification publique d'attestation » : implémenter ou retirer du plan.
-4. ~~Réactiver MFA sur un compte dédié et automatiser TC-AUTH-02~~ → **FAIT pour TOTP (v3)**. Reste : **fournir des credentials o2switch valides pour `no_reply@il7.info`** et rejouer `auth-mfa-email.spec.ts`.
+4. ~~Réactiver MFA sur un compte dédié et automatiser TC-AUTH-02~~ → **FAIT pour TOTP (v3) et pour email (v3.1)**.
 5. Ajouter un test E2E du toggle MFA dans Admin → Paramètres (actuellement couvert en API seulement).
 6. Planifier un test de charge avant ouverture réelle aux usagers.
 7. Rejouer la recette complète après **chaque** déploiement (jamais pendant). Commande :
@@ -165,4 +166,4 @@ Le plan de recette mentionne une « vérification d'attestation publique (P6) »
 
 ---
 
-*Document généré le 2026-07-28, mis à jour le 2026-07-29 ~1h après exécution réelle des tests cités. Toute ligne de ce rapport est traçable vers une exécution (rapports Playwright, Jest, commits cités). v2 : 41/41 headless + 16/16 headed. v3 : 44/44 headless + 15/15 headed + Jest 369/369 ; MFA TOTP prouvé, MFA email bloqué par credentials o2switch invalides (non affirmé tant que non testé).*
+*Document généré le 2026-07-28, mis à jour le 2026-07-29 ~0h45 après exécution réelle des tests cités. Toute ligne de ce rapport est traçable vers une exécution (rapports Playwright, Jest, commits cités). v2 : 41/41 headless + 16/16 headed. v3 : 44/44 headless + 15/15 headed + Jest 369/369. v3.1 : MFA email prouvé E2E (2/2 headless + 2/2 headed) — MFA TOTP + email entièrement couverts.*

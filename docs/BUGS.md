@@ -639,3 +639,10 @@ Objectif utilisateur : **tous les workflows de P1 fonctionnels, 0 erreur** (cons
 - **agent_dsi_mef** : compte provisionné, rôle inséré en base + enum backend, RBAC notifications ouvert, smoke E2E `/dsi/dashboard` PASS. ⚠️ La vue `DsiMefDashboardView` est statique (aucun appel API) — le test prouve le rendu sans erreur, pas des données réelles.
 - **Recette complète : 44/44 headless + 15/15 headed** (specs nouvelles/corrigées), Jest 369/369.
 - **MFA global DÉSACTIVÉ après les tests** (`enabled:false` vérifié via API) — réactivable depuis Admin → Paramètres (toggle livré dans `ParametresView`).
+
+### MFA email — DÉBLOQUÉ et PROUVÉ (2026-07-29 ~0h30)
+
+- **Credentials** : après réinitialisation du mot de passe dans le cPanel o2switch, IMAP (993) et SMTP (465) acceptent `no_reply@il7.info` — vérifié par curl (`A002 OK Logged in`, `235 Authentication succeeded`, mail test livré `250 OK`).
+- **Chaîne complète prouvée E2E** : login → backend génère le code → nodemailer → SMTP o2switch → boîte réelle → lecture IMAP → extraction du code à 6 chiffres → `POST /auth/mfa/verify` 200 → session. **API + UI, headless ET headed : 2/2 + 2/2 PASS** (`auth-mfa-email.spec.ts`).
+- **Fragilité de test corrigée** (maquette `17a2598`) : la spec cherchait « code de vérification » dans la source MIME brute — l'encodage quoted-printable (`v=C3=A9rification`) empêchait le match alors que les mails arrivaient bien. Lecture désormais via `mailparser` (sujet + corps décodés).
+- **Post-tests** : MFA global désactivé (`enabled:false` vérifié par API). Réactivable depuis Admin → Paramètres.
