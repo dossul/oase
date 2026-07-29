@@ -167,3 +167,42 @@ Le plan de recette mentionne une « vérification d'attestation publique (P6) »
 ---
 
 *Document généré le 2026-07-28, mis à jour le 2026-07-29 ~0h45 après exécution réelle des tests cités. Toute ligne de ce rapport est traçable vers une exécution (rapports Playwright, Jest, commits cités). v2 : 41/41 headless + 16/16 headed. v3 : 44/44 headless + 15/15 headed + Jest 369/369. v3.1 : MFA email prouvé E2E (2/2 headless + 2/2 headed) — MFA TOTP + email entièrement couverts.*
+
+---
+
+## 6. v3.2 — Module extractif (DGMG/ITIE) E1→E4 complet + fix auth login (2026-07-29 ~2h→14h)
+
+Portée : lecture intégrale de `kb/itie` (5 documents) et du cahier des charges, plan E1→E4 validé (`docs/specs/MODULE_EXTRACTIF_ATTENTES_CLIENT.md`), exécution complète avec la règle d'or « chaque test exige des données réelles non vides et des valeurs précises ».
+
+### Livré et testé (3 modes : API E2E + headless + headed — 8/8 specs extractif dans chaque mode)
+
+| Phase | Contenu | Preuves |
+|---|---|---|
+| **E1 Conventions** | 10 sociétés extractives ITIE en base (NIF réels du formulaire de cadrage), 10 conventions via POST /conventions ; dashboard enrichi (KPIs, alerte échéance POMAR 31/12/2026, dialog détail NIF/montant/emplois) | TC-EXTR-01/02 ; valeur exacte SNPT 15 Mds FCFA / 1200 engagés / 80 créés ; doublon → 409 |
+| **E2 Répertoire minier** | Table `permis_miniers` (migration 007), module CRUD + RBAC, écran `/extractif/repertoire` (KPIs, filtres serveur, détail) ; 10 permis réalistes rattachés aux conventions | TC-EXTR-03/04 ; SNPT exploitation phosphates 25 ans 35,5 km² ; RBAC écriture 403 contribuable |
+| **E3 Flux financiers** | 4 tables (productions, exportations, redevances, transferts CFLDR — migration 008, Annexes 1.1 feuilles 3-6), 8 endpoints, écran `/extractif/flux` 4 onglets avec soldes calculés ; 11 lignes 2024 SNPT/STM | TC-EXTR-05/06 ; redevance SNPT T1 122,5 M soldée ; CFLDR STM partiel (reste 30,75 M affiché) |
+| **E4 Rapportage ITIE** | `GET /itie/statistiques` (agrégats réels + **non-calculables déclarés avec source requise, jamais inventés**) + `GET /itie/export-declaration` (CSV format Annexe 1.1 feuille 1) ; écran `/extractif/itie` ; bouton « Croiser ITIE » réactivé (vraie action) | TC-EXTR-07/08 ; phosphates 193 000 t / 2,54 Mds ; redevances 100 % ; CFLDR 80 % ; téléchargement CSV réel vérifié |
+
+### Vérifications globales de fin de session
+
+- **Suite recette complète : 52/52 headless** (hors MFA) + **4/4 specs MFA isolées** (`--workers=1`, toggles de config globale)
+- **Headed** : 8/8 extractif + 2/2 auth-login-ui
+- **Jest backend : 427/427** (27→29 suites, +58 tests depuis v3.1 : permis-miniers, flux-extractifs, itie, RBAC étendu)
+- **MFA global `enabled:false`** vérifié en base après le run
+- Type-check frontend (vue-tsc) : 0 erreur
+
+### Incidents et bugs de la session (détails dans BUGS.md)
+
+- **INCIDENT prod résolu** : compose dev lancé par erreur sur le VPS a remplacé les conteneurs prod (même nom de projet) — API down ~10 min, données intactes, règle absolue documentée : uniquement `docker-compose.local-prod.yml` sur le VPS.
+- **BUG #14 (fix utilisateur-visible)** : le formulaire de login affichait « mot de passe incorrect X/5 » pendant les coupures serveur — corrigé et prouvé par `auth-login-ui.spec.ts`.
+- **BUG #15** : `ParseIntPipe({optional:true})` → 400 sans query `annee` sur `/flux-extractifs/*` — corrigé.
+
+### Reste hors scope (assumé)
+
+- Indicateurs ITIE exigeant des sources externes (PIB INSEED, exportations nationales, emploi sectoriel, réconciliation régies) : **déclarés non calculables dans l'API et l'UI**, à brancher quand les sources seront rattachées.
+- Open Data / SI externes : hors scope confirmé par l'utilisateur.
+- Vue DSI statique : inchangée depuis v3.
+
+---
+
+*v3.2 : 8/8 extractif (3 modes) + 52/52 suite headless + 4/4 MFA + Jest 427/427. Module extractif E1→E4 livré, testé et documenté.*

@@ -142,3 +142,20 @@ Moteur des 8 statistiques + export du formulaire de déclaration (format des Ann
 ---
 
 *Document rédigé après lecture intégrale des 5 fichiers `kb/itie/` et des passages extractif/mines/conventions des 4 documents du cahier des charges `kb/`. Extraits bruts conservés dans `webbridge/itie-contenu-complet.txt` et `webbridge/kb-racine-itie.txt` pour vérification.*
+
+---
+
+## 6. Statut d'implémentation — 2026-07-29 : E1→E4 LIVRÉES ET TESTÉES
+
+L'utilisateur a ordonné l'exécution complète (29/07 1h57 : « suis un ordre cohérent pour atteindre une complétude 100% de ce module et fais les 3 tests »). État final :
+
+| Phase | Statut | Tests (3 modes : API E2E + headless + headed) |
+|---|---|---|
+| E1 — Conventions du périmètre ITIE | **IMPLÉMENTÉ** — 10 sociétés NIF réels, 10 conventions, dashboard alimenté (KPIs, échéances, détail) | TC-EXTR-01/02 verts ×3 modes |
+| E2 — Répertoire minier | **IMPLÉMENTÉ** — table `permis_miniers`, CRUD + RBAC, écran `/extractif/repertoire`, 10 permis réalistes | TC-EXTR-03/04 verts ×3 modes |
+| E3 — Flux financiers | **IMPLÉMENTÉ** — 4 tables Annexes 1.1 feuilles 3-6, 8 endpoints, écran `/extractif/flux`, 11 lignes 2024 | TC-EXTR-05/06 verts ×3 modes |
+| E4 — Rapportage ITIE | **IMPLÉMENTÉ** — `/itie/statistiques` (calculées vs non calculables déclarées), export CSV Annexe 1.1, écran `/extractif/itie` | TC-EXTR-07/08 verts ×3 modes |
+
+- Vérifications globales : suite recette 52/52 headless, 4/4 MFA isolées, Jest 427/427, MFA global désactivé post-run.
+- Limites assumées (§3 du présent document, inchangées) : les indicateurs exigeant des sources externes (PIB INSEED, exportations nationales douanières, emploi sectoriel, réconciliation régies OTR/DGTCP) sont **déclarés non calculables** dans l'API et l'UI — pas de valeurs fictives.
+- Les données 2024 (sociétés, conventions, permis, flux) constituent le **jeu de recette** ; la bascule vers des données de production réelles suppose l'apport DGMG (question ouverte n°2).
