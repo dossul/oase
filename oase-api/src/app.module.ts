@@ -31,6 +31,7 @@ import { AdminModule } from './admin/admin.module';
 import { RegistreCentralModule } from './registre-central/registre-central.module';
 import { MissionsModule } from './missions/missions.module';
 import { ContribuablesModule } from './contribuables/contribuables.module';
+import { PermisMiniersModule } from './permis-miniers/permis-miniers.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { ContribuablesModule } from './contribuables/contribuables.module';
     RegistreCentralModule,
     MissionsModule,
     ContribuablesModule,
+    PermisMiniersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

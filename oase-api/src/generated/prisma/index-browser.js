@@ -398,6 +398,28 @@ exports.Prisma.ConventionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PermisMinierScalarFieldEnum = {
+  id: 'id',
+  reference: 'reference',
+  contribuableId: 'contribuableId',
+  conventionId: 'conventionId',
+  typePermis: 'typePermis',
+  substance: 'substance',
+  dateDemande: 'dateDemande',
+  dateOctroi: 'dateOctroi',
+  dureeAnnees: 'dureeAnnees',
+  superficieKm2: 'superficieKm2',
+  localite: 'localite',
+  longitude: 'longitude',
+  latitude: 'latitude',
+  rapportEiePublic: 'rapportEiePublic',
+  lienRapportEie: 'lienRapportEie',
+  modeOctroi: 'modeOctroi',
+  statut: 'statut',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.DecisionScalarFieldEnum = {
   id: 'id',
   demandeId: 'demandeId',
@@ -1489,6 +1511,19 @@ exports.Prisma.ConventionOrderByRelevanceFieldEnum = {
   objet: 'objet'
 };
 
+exports.Prisma.PermisMinierOrderByRelevanceFieldEnum = {
+  id: 'id',
+  reference: 'reference',
+  contribuableId: 'contribuableId',
+  conventionId: 'conventionId',
+  typePermis: 'typePermis',
+  substance: 'substance',
+  localite: 'localite',
+  lienRapportEie: 'lienRapportEie',
+  modeOctroi: 'modeOctroi',
+  statut: 'statut'
+};
+
 exports.Prisma.DecisionOrderByRelevanceFieldEnum = {
   id: 'id',
   demandeId: 'demandeId',
@@ -2097,6 +2132,7 @@ exports.Prisma.ModelName = {
   Connecteur: 'Connecteur',
   ConventionEngagement: 'ConventionEngagement',
   Convention: 'Convention',
+  PermisMinier: 'PermisMinier',
   Decision: 'Decision',
   DemandeComplement: 'DemandeComplement',
   DemandeSyncExterne: 'DemandeSyncExterne',
