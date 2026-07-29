@@ -614,3 +614,28 @@ Objectif utilisateur : **tous les workflows de P1 fonctionnels, 0 erreur** (cons
 - **Recette complète : 41/41 PASS headless (1,3 min) + 16/16 PASS headed** sur les specs nouvelles/modifiées.
 - Fragilités de test corrigées : TC-P1-03/TC-P1-04 dépendaient de la présence d'une seed dans la liste paginée du dashboard (~10 plus récentes) → accès détail direct par id.
 - Reste honnêtement non couvert : rôle `agent_dsi_mef` (aucun compte provisionné), vérification publique d'attestation (fonction absente du routeur), MFA réel, notifications réelles, intégrations SI, charge, sécurité offensive. Détail : `docs/qa/RAPPORT_COUVERTURE_TESTS_2026-07-28.md` v2.
+
+### BUG #11 — Flux MFA UI cassé (2026-07-28, specs auth-mfa) — ✅ FIXED
+
+- **Symptôme** : avec MFA activé, le login UI affichait « identifiants incorrects » alors que le backend renvoyait bien `{mfa_required, mfa_token, canal}`. Cause : `LoginView` testait `res.mfa_required && res.user` (champ `user` absent dans la réponse MFA) ; `MfaView` était un mock qui redirigeait après 700 ms sans appel API.
+- **Fix** (maquette `8c13ab7`) : `LoginView` stocke `oase_mfa_token`/`oase_mfa_canal` en sessionStorage et route vers `/mfa` ; `MfaView` appelle réellement `POST /auth/mfa/verify` puis `auth.setSession` + redirection par rôle.
+
+### BUG #12 — Route /mfa inaccessible : rebouclage vers /login (2026-07-28, TC-AUTH-02 UI) — ✅ FIXED
+
+- **Symptôme** : après un login MFA réussi (mfa_token stocké), `router.push('/mfa')` était intercepté par le garde global (`!isPublic && !isAuthenticated → /login`) — la session n'existant pas encore, l'utilisateur retombait sur /login. Flux MFA UI impossible.
+- **Fix** (maquette `4115b65`) : `'mfa'` ajouté aux `publicRoutes` du garde (la page gère déjà l'absence de token). Vérifié en prod : TOTP UI 2/2 PASS.
+- **Note déploiement** : le service compose `oase-frontend` n'a pas de section `build:` — `docker compose up -d --build` ne rebuild PAS l'image. Procédure correcte : `docker build -f deploy/frontend.Dockerfile -t oase-frontend:latest .` puis `up -d --force-recreate`.
+
+### BUG #13 — PATCH /notifications/:id/lue fuitait l'existence inter-utilisateurs (2026-07-28, notifications.spec) — ✅ FIXED
+
+- **Symptôme** : marquer lue la notification d'un AUTRE utilisateur renvoyait `200 + null` au lieu de 404. L'isolation en base était correcte (`findFirst` filtré par `utilisateurId`, aucune modification croisée possible), mais la réponse 200-null vs 200-objet permettait de distinguer « existe mais pas à moi ».
+- **Fix** (`843097c`) : le contrôleur jette `NotFoundException` uniforme quand le service renvoie null. Jest 369/369, E2E isolation PASS.
+
+### Session MFA réel + notifications réelles (2026-07-28 ~23h→29/07 1h)
+
+- **MFA TOTP** : backend réel + UI réelle testés — API (faux code 401, vrai code 200 + tokens fonctionnels) et UI (login → /mfa → v-otp-input → dashboard). 2/2 headless, 2/2 headed.
+- **MFA email** : backend nodemailer branché sur SMTP o2switch (`kilo.o2switch.net:465`) — code livré, rebuild déployé. **Test E2E bloqué** : les credentials fournis (`no_reply@il7.info`) sont refusés par le serveur en IMAP (993) ET en SMTP (465) — `[AUTHENTICATIONFAILED]` Dovecot + `535 Incorrect authentication data` Exim, vérifié via imapflow ET curl indépendamment. En attente d'un mot de passe valide (à vérifier/réinitialiser dans le cPanel o2switch).
+- **Notifications in-app** : liste, compteur = non lues en base, marquage lu (décrément exact de 1), isolation inter-utilisateurs (404 après BUG #13), UI Centre de notifications avec données réelles (compte p1b, 24 notifications). 2/2 headless + headed.
+- **agent_dsi_mef** : compte provisionné, rôle inséré en base + enum backend, RBAC notifications ouvert, smoke E2E `/dsi/dashboard` PASS. ⚠️ La vue `DsiMefDashboardView` est statique (aucun appel API) — le test prouve le rendu sans erreur, pas des données réelles.
+- **Recette complète : 44/44 headless + 15/15 headed** (specs nouvelles/corrigées), Jest 369/369.
+- **MFA global DÉSACTIVÉ après les tests** (`enabled:false` vérifié via API) — réactivable depuis Admin → Paramètres (toggle livré dans `ParametresView`).
