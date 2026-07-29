@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RbacGuard } from '../common/guards/rbac.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -38,9 +38,9 @@ export class FluxExtractifsController {
   @Roles(...ROLES_LECTURE)
   async listerProductions(
     @Query('contribuableId') contribuableId?: string,
-    @Query('annee', new ParseIntPipe({ optional: true })) annee?: number,
+    @Query('annee') annee?: string,
   ) {
-    return this.service.listerProductions({ contribuableId, annee });
+    return this.service.listerProductions({ contribuableId, annee: annee ? parseInt(annee, 10) : undefined });
   }
 
   @Post('productions')
@@ -55,9 +55,9 @@ export class FluxExtractifsController {
   @Roles(...ROLES_LECTURE)
   async listerExportations(
     @Query('contribuableId') contribuableId?: string,
-    @Query('annee', new ParseIntPipe({ optional: true })) annee?: number,
+    @Query('annee') annee?: string,
   ) {
-    return this.service.listerExportations({ contribuableId, annee });
+    return this.service.listerExportations({ contribuableId, annee: annee ? parseInt(annee, 10) : undefined });
   }
 
   @Post('exportations')
@@ -72,9 +72,9 @@ export class FluxExtractifsController {
   @Roles(...ROLES_LECTURE)
   async listerRedevances(
     @Query('contribuableId') contribuableId?: string,
-    @Query('annee', new ParseIntPipe({ optional: true })) annee?: number,
+    @Query('annee') annee?: string,
   ) {
-    return this.service.listerRedevances({ contribuableId, annee });
+    return this.service.listerRedevances({ contribuableId, annee: annee ? parseInt(annee, 10) : undefined });
   }
 
   @Post('redevances')
@@ -89,9 +89,9 @@ export class FluxExtractifsController {
   @Roles(...ROLES_LECTURE)
   async listerTransferts(
     @Query('contribuableId') contribuableId?: string,
-    @Query('annee', new ParseIntPipe({ optional: true })) annee?: number,
+    @Query('annee') annee?: string,
   ) {
-    return this.service.listerTransferts({ contribuableId, annee });
+    return this.service.listerTransferts({ contribuableId, annee: annee ? parseInt(annee, 10) : undefined });
   }
 
   @Post('transferts-communes')
