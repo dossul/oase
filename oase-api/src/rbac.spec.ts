@@ -15,6 +15,7 @@ import { DashboardsController } from './dashboards/dashboards.controller';
 import { ConventionsController } from './conventions/conventions.controller';
 import { PermisMiniersController } from './permis-miniers/permis-miniers.controller';
 import { FluxExtractifsController } from './flux-extractifs/flux-extractifs.controller';
+import { ItieController } from './itie/itie.controller';
 import { ContribuableController } from './contribuables/contribuable.controller';
 import { BasesJuridiquesController } from './bases-juridiques/bases-juridiques.controller';
 import { AnomaliesController } from './anomalies/anomalies.controller';
@@ -159,6 +160,10 @@ const endpoints: EndpointSpec[] = [
   { controller: FluxExtractifsController, methodName: 'creerRedevance', allowedRoles: [Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.ADMIN_SI], label: 'POST /flux-extractifs/redevances' },
   { controller: FluxExtractifsController, methodName: 'listerTransferts', allowedRoles: [Role.CONTRIBUABLE, Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /flux-extractifs/transferts-communes' },
   { controller: FluxExtractifsController, methodName: 'creerTransfert', allowedRoles: [Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.ADMIN_SI], label: 'POST /flux-extractifs/transferts-communes' },
+
+  // Rapportage ITIE (statistiques + export déclaration)
+  { controller: ItieController, methodName: 'statistiques', allowedRoles: [Role.CONTRIBUABLE, Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /itie/statistiques' },
+  { controller: ItieController, methodName: 'exportDeclaration', allowedRoles: [Role.CONTRIBUABLE, Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /itie/export-declaration' },
 
   // Contribuables
   { controller: ContribuableController, methodName: 'getMe', allowedRoles: [Role.CONTRIBUABLE, Role.ADMIN_SI], label: 'GET /contribuables/me' },

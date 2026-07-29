@@ -33,6 +33,7 @@ import { MissionsModule } from './missions/missions.module';
 import { ContribuablesModule } from './contribuables/contribuables.module';
 import { PermisMiniersModule } from './permis-miniers/permis-miniers.module';
 import { FluxExtractifsModule } from './flux-extractifs/flux-extractifs.module';
+import { ItieModule } from './itie/itie.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { FluxExtractifsModule } from './flux-extractifs/flux-extractifs.module';
     ContribuablesModule,
     PermisMiniersModule,
     FluxExtractifsModule,
+    ItieModule,
   ],
   controllers: [AppController],
   providers: [AppService],
