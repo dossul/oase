@@ -206,3 +206,44 @@ Portée : lecture intégrale de `kb/itie` (5 documents) et du cahier des charges
 ---
 
 *v3.2 : 8/8 extractif (3 modes) + 52/52 suite headless + 4/4 MFA + Jest 427/427. Module extractif E1→E4 livré, testé et documenté.*
+
+---
+
+## 7. v4 — Complétude du périmètre : tout ce qui était statique/mocké est désormais réel (2026-07-30)
+
+Demande utilisateur : « corriger 100% tout ce qui est dans le périmètre » — rendre réel/fonctionnel tout ce qui restait statique, mocké, simulé ou avec boutons morts, Open Data et SI externes exclus (décision confirmée). Règle appliquée : chaque correction prouvée en **3 modes** (Jest / E2E API, Playwright headless, Playwright headed), données réelles non vides, valeurs précises.
+
+### 7.1 Livré et testé (3 modes pour chaque ligne)
+
+| Module | Avant | Après | Preuves |
+|---|---|---|---|
+| **A — Reset/activation mot de passe** | Formulaires fictifs (aucun envoi) | Module `password-reset/` : code à 6 chiffres en table `mfa_challenges` (canal dédié), envoi SMTP réel o2switch, réponse uniforme anti-énumération ; `ResetPasswordView` + `ActivateView` réécrites | TC-AUTH-03 : vrai email lu par IMAP, faux code rejeté, reset complet API + UI ; mot de passe du compte de test restauré en fin de spec. 10 Jest, 2/2 headless + 2/2 headed |
+| **B1 — Accords de siège (MAE)** | Vue statique | Module `accords-siege/` : CRUD, doublon 409, type inconnu 400, lecture sans CONTRIBUABLE, écriture AGENT_MAE/ADMIN_SI ; 5 accords réels (PNUD, UNICEF, Ambassades France/Allemagne, UE) ; vue branchée + création/retrait | 8 Jest, spec 3/3 headless + headed |
+| **B2 — Dashboards institutions** | 3 vues statiques (`DsiMef`, `Ministeres`, `ConeDef`) | DSI MEF → `/connecteurs/status` + `/health` ; Ministères → `/demandes` + `/conventions` ; CONEDEF → KPIs rapports + conventions. RBAC élargi en cohérence (`rbac.spec.ts` à jour) | spec 4/4 headless + headed |
+| **B3 — Simulation décideur** | `setTimeout` simulé, export mort | Calcul instantané réel + export rapport téléchargeable (`simulation-oase-*.txt`) | spec 2/2 headless + headed |
+| **C — Rapprochements trésor (DGTCP)** | Coquille vide (boutons morts) | `GET /rapprochements` : rapprochement réel demandes approuvées ↔ actes d'attestation (écarts budgétaires/documentaires) ; vue branchée + filtres + détail + relance | 6 Jest ; KPIs prod vérifiés (31 approuvées, 28 réconciliées, 3 à justifier au 30/07) ; spec 2/2 headless + headed |
+| **D — Matrice RBAC admin** | Matrice CRUD locale éditable **jamais persistée** (faux), onglets Modules/Profils fictifs, bouton « Créer un rôle » mort | `GET /admin/rbac/matrice` : matrice **réelle** dérivée des métadonnées `@Roles` des 28 contrôleurs (même source de vérité que le RbacGuard, auto-cohérente) ; `RolesView` réécrite : matrice lecture seule endpoints × rôles + filtre + export CSV réel ; fictifs supprimés ; affectation/journal réels conservés | 4 Jest service + entrée rbac.spec ; prod vérifiée : **104 endpoints protégés, 14 rôles**, `POST /demandes/:id/approuver → [decideur, admin_si]`, contribuable → **403** ; spec TC-ADMIN-01 3/3 headless + headed |
+| **D — Dictionnaire O2** | 2 boutons morts | Export CSV réel (attributs + entités + référentiels) ; « Valider une version » supprimé (contenu normatif MRD de référence, assumé statique) | couvert par TC-ADMIN-01 (téléchargement vérifié) |
+
+### 7.2 Vues admin vérifiées DÉJÀ réelles (rien à corriger)
+
+`ReglesView` (blocages réels par dossier), `MonitoringView` (health/jobs/audit réels), `GouvernanceDonneesView` (anomalies réelles), `GedView` (demandes/pièces/audit réels), `ParametresView` (config + INSEED GET/PUT réels ; 2 boutons `disabled` assumés pour SI externes hors périmètre), `FormulairesView` (états vides honnêtes, KPIs « Non instrumenté » explicites — module formulaires dynamiques prévu vague B, documenté comme tel).
+
+### 7.3 Run final global (2026-07-30, prod)
+
+- **Jest backend : 474/474 — 33 suites** (incluant la matrice RBAC et le périmètre RBAC étendu)
+- **E2E headless : 69/69 PASS** — lots : auth+P1 8/8 ; P2+P3+P4 10/10 ; P5+P7 13/13 ; extractif+notifications+rôles secondaires 18/18 ; accords-siege+dashboards+rapprochements+simulation+admin 14/14 ; specs isolées MFA/reset 6/6
+- **E2E headed : 15/15 PASS** sur les specs nouvelles/modifiées de la session (admin-completude 3, p7-administration 6, rapprochements 2, p7-permissions 4)
+- **p6-opendata non rejouée** : Open Data volontairement hors périmètre (décision utilisateur)
+- **Type-check frontend (vue-tsc) : 0 erreur**
+- **MFA global `enabled:false`** après les tests (réactivable depuis Admin → Paramètres)
+
+### 7.4 Bugs et incidents de la session (détails dans BUGS.md)
+
+- **BUG #16** : crash API (502) par cycle d'imports `RbacMatriceService ↔ RbacMatriceController` → `forwardRef`. Détecté par smoke curl post-déploiement.
+- **BUG #17** : slash terminal fantôme (`@Post()` sans argument enregistre `/` chez NestJS) → normalisation dans le service matrice.
+- Fragilités de tests corrigées : assertion figée `kpis.total=30` sur données de prod évolutives ; `@click:row` Vuetify peu fiable → bouton d'action explicite ; timing skeleton de la table utilisateurs.
+
+---
+
+*v4 : 7 modules/vues rendus réels et prouvés en 3 modes. Run final : Jest 474/474, E2E headless 69/69, headed 15/15. Toute ligne de ce rapport est traçable vers une exécution.*
