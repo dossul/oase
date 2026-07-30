@@ -32,6 +32,7 @@ import { RegistreCentralModule } from './registre-central/registre-central.modul
 import { MissionsModule } from './missions/missions.module';
 import { ContribuablesModule } from './contribuables/contribuables.module';
 import { PermisMiniersModule } from './permis-miniers/permis-miniers.module';
+import { AccordsSiegeModule } from './accords-siege/accords-siege.module';
 import { FluxExtractifsModule } from './flux-extractifs/flux-extractifs.module';
 import { ItieModule } from './itie/itie.module';
 
@@ -81,6 +82,7 @@ import { ItieModule } from './itie/itie.module';
     MissionsModule,
     ContribuablesModule,
     PermisMiniersModule,
+    AccordsSiegeModule,
     FluxExtractifsModule,
     ItieModule,
   ],

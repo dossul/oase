@@ -13,6 +13,7 @@ import { NotificationsController } from './notifications/notifications.controlle
 import { JobsController } from './jobs/jobs.controller';
 import { DashboardsController } from './dashboards/dashboards.controller';
 import { ConventionsController } from './conventions/conventions.controller';
+import { AccordsSiegeController } from './accords-siege/accords-siege.controller';
 import { PermisMiniersController } from './permis-miniers/permis-miniers.controller';
 import { FluxExtractifsController } from './flux-extractifs/flux-extractifs.controller';
 import { ItieController } from './itie/itie.controller';
@@ -144,6 +145,12 @@ const endpoints: EndpointSpec[] = [
   { controller: ConventionsController, methodName: 'creer', allowedRoles: [Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.ADMIN_SI], label: 'POST /conventions' },
   { controller: ConventionsController, methodName: 'renouveler', allowedRoles: [Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.ADMIN_SI], label: 'PATCH /conventions/:id/renouveler' },
   { controller: ConventionsController, methodName: 'verifierAlertesEcheance', allowedRoles: [Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.ADMIN_SI], label: 'POST /conventions/alertes/echeance' },
+
+  // Accords de siège (sous-registre MAE — données diplomatiques sensibles : pas de CONTRIBUABLE)
+  { controller: AccordsSiegeController, methodName: 'lister', allowedRoles: [Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /accords-siege' },
+  { controller: AccordsSiegeController, methodName: 'trouverParId', allowedRoles: [Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /accords-siege/:id' },
+  { controller: AccordsSiegeController, methodName: 'creer', allowedRoles: [Role.AGENT_MAE, Role.ADMIN_SI], label: 'POST /accords-siege' },
+  { controller: AccordsSiegeController, methodName: 'modifier', allowedRoles: [Role.AGENT_MAE, Role.ADMIN_SI], label: 'PATCH /accords-siege/:id' },
 
   // Permis miniers (répertoire extractif)
   { controller: PermisMiniersController, methodName: 'lister', allowedRoles: [Role.CONTRIBUABLE, Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /permis-miniers' },
