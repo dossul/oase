@@ -140,7 +140,7 @@ const endpoints: EndpointSpec[] = [
   { controller: DashboardsController, methodName: 'p5', allowedRoles: [Role.ADMIN_SI, Role.AGENT_MINISTERE, Role.AGENT_DGBF, Role.DECIDEUR, Role.AUDITEUR], label: 'GET /dashboards/p5' },
 
   // Conventions
-  { controller: ConventionsController, methodName: 'lister', allowedRoles: [Role.CONTRIBUABLE, Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /conventions' },
+  { controller: ConventionsController, methodName: 'lister', allowedRoles: [Role.CONTRIBUABLE, Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.AGENT_MINISTERE, Role.AGENT_CONEDEF, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /conventions' },
   { controller: ConventionsController, methodName: 'trouverParId', allowedRoles: [Role.CONTRIBUABLE, Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /conventions/:id' },
   { controller: ConventionsController, methodName: 'creer', allowedRoles: [Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.ADMIN_SI], label: 'POST /conventions' },
   { controller: ConventionsController, methodName: 'renouveler', allowedRoles: [Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.DECIDEUR, Role.ADMIN_SI], label: 'PATCH /conventions/:id/renouveler' },
@@ -205,8 +205,8 @@ const endpoints: EndpointSpec[] = [
   // Vague B — annuaire, templates, connecteurs, registre central, missions, admin
   { controller: UtilisateursController, methodName: 'annuaire', allowedRoles: [Role.AGENT_CI, Role.AGENT_CDDI, Role.AGENT_DGBF, Role.AGENT_DGTCP, Role.AGENT_AGENCE, Role.AGENT_MAE, Role.AGENT_DGMG, Role.AGENT_MINISTERE, Role.DECIDEUR, Role.AGENT_CONEDEF, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /utilisateurs/annuaire' },
   { controller: NotificationsController, methodName: 'templates', allowedRoles: [Role.ADMIN_SI], label: 'GET /notifications/templates' },
-  { controller: ConnecteursController, methodName: 'lister', allowedRoles: [Role.ADMIN_SI, Role.AUDITEUR], label: 'GET /connecteurs' },
-  { controller: ConnecteursController, methodName: 'status', allowedRoles: [Role.ADMIN_SI, Role.AUDITEUR], label: 'GET /connecteurs/status' },
+  { controller: ConnecteursController, methodName: 'lister', allowedRoles: [Role.ADMIN_SI, Role.AUDITEUR, Role.AGENT_DSI_MEF], label: 'GET /connecteurs' },
+  { controller: ConnecteursController, methodName: 'status', allowedRoles: [Role.ADMIN_SI, Role.AUDITEUR, Role.AGENT_DSI_MEF], label: 'GET /connecteurs/status' },
   { controller: ConnecteursController, methodName: 'logs', allowedRoles: [Role.ADMIN_SI, Role.AUDITEUR], label: 'GET /connecteurs/:id/logs' },
   { controller: RegistreCentralController, methodName: 'mesures', allowedRoles: [Role.DECIDEUR, Role.AUDITEUR, Role.ADMIN_SI], label: 'GET /registre-central/mesures' },
   { controller: MissionsController, methodName: 'lister', allowedRoles: [Role.AUDITEUR, Role.ADMIN_SI, Role.AGENT_CI], label: 'GET /missions' },

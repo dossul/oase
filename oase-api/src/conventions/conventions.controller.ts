@@ -21,6 +21,8 @@ export class ConventionsController {
     Role.AGENT_AGENCE,
     Role.AGENT_MAE,
     Role.AGENT_DGMG,
+    Role.AGENT_MINISTERE,
+    Role.AGENT_CONEDEF,
     Role.DECIDEUR,
     Role.AUDITEUR,
     Role.ADMIN_SI,

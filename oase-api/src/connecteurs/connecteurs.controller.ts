@@ -11,14 +11,14 @@ export class ConnecteursController {
   constructor(private service: ConnecteursService) {}
 
   @Get()
-  @Roles(Role.ADMIN_SI, Role.AUDITEUR)
+  @Roles(Role.ADMIN_SI, Role.AUDITEUR, Role.AGENT_DSI_MEF)
   lister() {
     return this.service.lister();
   }
 
   // NB : déclaré AVANT ':id/logs' pour éviter la capture par la route paramétrée.
   @Get('status')
-  @Roles(Role.ADMIN_SI, Role.AUDITEUR)
+  @Roles(Role.ADMIN_SI, Role.AUDITEUR, Role.AGENT_DSI_MEF)
   status() {
     return this.service.status();
   }
