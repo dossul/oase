@@ -20,6 +20,8 @@ import { EmailAdapter } from './mfa/adapters/email.adapter';
 import { WhatsAppAdapter } from './mfa/adapters/whatsapp.adapter';
 import { MFA_CHANNEL_ADAPTERS } from './mfa/mfa-channel.interface';
 import { MfaConfigController } from './mfa/mfa-config.controller';
+import { PasswordResetController } from './password-reset/password-reset.controller';
+import { PasswordResetService } from './password-reset/password-reset.service';
 
 @Module({
   imports: [
@@ -36,7 +38,7 @@ import { MfaConfigController } from './mfa/mfa-config.controller';
       }),
     }),
   ],
-  controllers: [AuthController, SignupController, MfaConfigController],
+  controllers: [AuthController, SignupController, MfaConfigController, PasswordResetController],
   providers: [
     AuthService,
     ProfileService,
@@ -45,6 +47,7 @@ import { MfaConfigController } from './mfa/mfa-config.controller';
     JwtStrategy,
     PinGuard,
     SignupService,
+    PasswordResetService,
     MfaPolicyService,
     TotpAdapter,
     EmailAdapter,
