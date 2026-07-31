@@ -669,3 +669,13 @@ Objectif utilisateur : **tous les workflows de P1 fonctionnels, 0 erreur** (cons
 - **Cause aggravante UX** : l'email était envoyé tel quel — un copier-coller entouré d'espaces échouait sans que l'utilisateur comprenne pourquoi.
 - **Correctif livré et prouvé** : trim de l'email à la soumission dans `LoginView` (le mot de passe n'est PAS trimmé, un espace peut y être intentionnel). Nouveau test `TC-AUTH-UI-03` (email avec espaces → login réussi) : 3/3 headless + 3/3 headed contre la prod. Commit maquette, déployé.
 - **Leçon** : avant une démo, rejouer `auth-login-ui.spec.ts` contre la prod (3 tests, ~15 s) et préparer la session avec un compte vérifié dans la minute.
+
+### Incident démo 2 (2026-07-31 ~9h47) — 401 malgré mot de passe affiché correct
+
+- **Faits (audit prod)** : `LOGIN_ECHEC` à 09:47:16 (navigateur de l'utilisateur) puis `LOGIN_SUCCES` à 09:50:25 avec le même couple `kossiwa.amele@texlome.tg` / `Oase@2026!`. La capture montrait le mot de passe en clair apparemment exact → la valeur réellement envoyée contenait un caractère invisible (espace de copier-coller en fin, indétectable même en mode « afficher le mot de passe »). Le « 2/5 » affiché provenait du compteur de page conservé depuis les essais de la veille (un seul échec serveur réel à 09:47).
+- **Correctifs livrés et prouvés (4/4 headless + 4/4 headed)** :
+  1. **Retry transparent** : si le premier essai échoue en 401 et que le mot de passe a des espaces en bord, nouvelle tentative avec la version trimmée avant de compter l'échec (`TC-AUTH-UI-04`).
+  2. **Avertissement visible** dès la saisie si le mot de passe contient des espaces en début/fin.
+  3. **Détection Verr Maj** (`getModifierState('CapsLock')`) avec avertissement visible.
+  4. Email trimmé (fix de la veille, `TC-AUTH-UI-03`).
+- **Leçon démo** : recharger la page /login (compteur remis à zéro), coller l'identifiant sans espaces, vérifier l'avertissement éventuel avant de soumettre.
